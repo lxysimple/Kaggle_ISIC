@@ -459,8 +459,8 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         images = data['image'].to(device, dtype=torch.float)
         targets = data['target'].to(device, dtype=torch.float)
         
-
-        random_number = random.random() # 生成一个0到1之间的随机数
+        random_number = 0.5
+        # random_number = random.random() # 生成一个0到1之间的随机数
         input = images
         tmp = targets
         target = targets
@@ -627,7 +627,7 @@ def prepare_loaders(df, fold):
 
     concat_dataset = ConcatDataset([train_dataset, train_dataset2020])
 
-    train_loader = DataLoader(train_dataset2020, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
                               num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
     valid_loader = DataLoader(valid_dataset, batch_size=CONFIG['valid_batch_size'], 
                               num_workers=16, shuffle=False, pin_memory=True)
