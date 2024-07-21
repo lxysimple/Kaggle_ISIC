@@ -172,11 +172,9 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         try:
             img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
             target = targets[index]
-        except: # 作者提供的.jpg部分缺失，因此如果缺失，返回None
-            return {
-                'image': np.array([1,2]),
-                'target': -1
-            }
+        except: # 作者提供的.jpg部分缺失，因此如果缺失，随便加载一张图片，令target = -1
+            img = np.array( Image.open(f"/home/xyli/kaggle/data2018/train-image/image/ISIC_0034524.jpg") )
+            target = -1
 
         
         
