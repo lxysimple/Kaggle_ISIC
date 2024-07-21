@@ -264,7 +264,8 @@ data_transforms = {
             A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, border_mode=0, p=0.85),
 
             A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-            A.Cutout(max_h_size=int(CONFIG['img_size'] * 0.375), max_w_size=int(CONFIG['img_size'] * 0.375), num_holes=1, p=0.7), 
+            # A.Cutout(max_h_size=int(CONFIG['img_size'] * 0.375), max_w_size=int(CONFIG['img_size'] * 0.375), num_holes=1, p=0.7), 
+            A.CoarseDropout(p=0.7), # == Cutout
             A.Normalize(
                     mean=[0.4815, 0.4578, 0.4082], 
                     std=[0.2686, 0.2613, 0.2758], 
