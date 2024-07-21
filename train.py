@@ -23,7 +23,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.optim import lr_scheduler
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, ConcatDataset
 from torch.cuda import amp
 import torchvision
 from torcheval.metrics.functional import binary_auroc
@@ -131,6 +131,55 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 # from IPython import embed
 # embed()
 # ============================== Dataset Class ==============================
+
+class ISICDataset_for_Train_fromjpg(Dataset):
+    def __init__(self, path, transforms=None):
+        self.path = path
+        df = pd.read_csv(f"{path}/train-metadata.csv")
+
+        self.df_positive = df[df["target"] == 1].reset_index()
+        self.df_negative = df[df["target"] == 0].reset_index()
+
+        self.isic_ids_positive = self.df_positive['isic_id'].values
+        self.isic_ids_negative = self.df_negative['isic_id'].values
+        self.targets_positive = self.df_positive['target'].values
+        self.targets_negative = self.df_negative['target'].values
+        self.transforms = transforms
+
+
+
+        
+    def __len__(self):
+        return len(self.df_positive) * 2
+    
+    def __getitem__(self, index):
+
+        # 虽然0是1的20倍，但取1和0的概率相等，1多次重复取，0有些可能1次都取不到
+        # 一共取2*len(df_positive)次数
+        if random.random() >= 0.5:
+            df = self.df_positive
+            isic_ids = self.isic_ids_positive
+            targets = self.targets_positive
+        else:
+            df = self.df_negative
+            isic_ids = self.isic_ids_negative
+            targets = self.targets_negative
+        
+        # 确保index小于df的行数
+        index = index % df.shape[0]
+        
+        isic_id = isic_ids[index]
+        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        target = targets[index]
+        
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
+            
+        return {
+            'image': img,
+            'target': target
+        }
+
 
 class ISICDataset_for_Train(Dataset):
     def __init__(self, df, file_hdf, transforms=None):
@@ -564,7 +613,11 @@ def prepare_loaders(df, fold):
     train_dataset = ISICDataset_for_Train(df_train, HDF_FILE, transforms=data_transforms["train"])
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
-    train_loader = DataLoader(train_dataset, batch_size=CONFIG['train_batch_size'], 
+    train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+
+    concat_dataset = ConcatDataset([train_dataset, train_dataset2018])
+
+    train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
                               num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
     valid_loader = DataLoader(valid_dataset, batch_size=CONFIG['valid_batch_size'], 
                               num_workers=16, shuffle=False, pin_memory=True)
