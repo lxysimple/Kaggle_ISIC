@@ -173,7 +173,10 @@ class ISICDataset_for_Train_fromjpg(Dataset):
             img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
             target = targets[index]
         except: # 作者提供的.jpg部分缺失，因此如果缺失，返回None
-            return None
+            return {
+                'image': None,
+                'target': -1
+            }
 
         
         
@@ -449,7 +452,7 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
     
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:
-        if data is None:
+        if data['target'] == -1:
             continue
 
         images = data['image'].to(device, dtype=torch.float)
