@@ -432,8 +432,8 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         targets = tmp
 
         # loss = criterion(outputs, targets)
-
-
+ 
+ 
         loss = loss / CONFIG['n_accumulate']
         loss.backward()
     
