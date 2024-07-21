@@ -403,9 +403,9 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
     train_loader = DataLoader(train_dataset, batch_size=CONFIG['train_batch_size'], 
-                              num_workers=2, shuffle=True, pin_memory=True, drop_last=True)
+                              num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
     valid_loader = DataLoader(valid_dataset, batch_size=CONFIG['valid_batch_size'], 
-                              num_workers=2, shuffle=False, pin_memory=True)
+                              num_workers=16, shuffle=False, pin_memory=True)
     
     return train_loader, valid_loader
 # ============================== Main ==============================
