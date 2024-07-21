@@ -54,7 +54,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # For descriptive error messages
-os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+# os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 from torch.nn.parallel import DataParallel
 
