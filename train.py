@@ -147,6 +147,9 @@ class ISICDataset_for_Train(Dataset):
         return len(self.df_positive) * 2
     
     def __getitem__(self, index):
+
+        # 虽然0是1的20倍，但取1和0的概率相等，1多次重复取，0有些可能1次都取不到
+        # 一共取2*len(df_positive)次数
         if random.random() >= 0.5:
             df = self.df_positive
             isic_ids = self.isic_ids_positive
@@ -155,7 +158,7 @@ class ISICDataset_for_Train(Dataset):
             df = self.df_negative
             isic_ids = self.isic_ids_negative
             targets = self.targets_negative
-            
+        
         # 确保index小于df的行数
         index = index % df.shape[0]
         
