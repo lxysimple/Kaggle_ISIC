@@ -236,7 +236,7 @@ data_transforms = {
             A.Transpose(p=0.5),
             A.VerticalFlip(p=0.5),
             A.HorizontalFlip(p=0.5),
-            A.RandomBrightness(limit=0.2, p=0.75),
+            # A.RandomBrightness(limit=0.2, p=0.75),
             A.RandomContrast(limit=0.2, p=0.75),
             A.OneOf([
                 A.MotionBlur(blur_limit=5),
