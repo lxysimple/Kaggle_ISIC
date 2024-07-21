@@ -118,7 +118,7 @@ df = df.reset_index(drop=True)
 
 print(df.shape[0], df.target.sum())
 
-
+# 用于计算一个学习率调整器的一个参数
 CONFIG['T_max'] = df.shape[0] * (CONFIG["n_fold"]-1) * CONFIG['epochs'] // CONFIG['train_batch_size'] // CONFIG["n_fold"]
 print(CONFIG['T_max'])
 
