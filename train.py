@@ -174,7 +174,7 @@ class ISICDataset_for_Train_fromjpg(Dataset):
             target = targets[index]
         except: # 作者提供的.jpg部分缺失，因此如果缺失，返回None
             return {
-                'image': None,
+                'image': np.array([1,2]),
                 'target': -1
             }
 
