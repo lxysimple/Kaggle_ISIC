@@ -56,7 +56,7 @@ warnings.filterwarnings("ignore")
 # For descriptive error messages
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
-
+from torch.nn.parallel import DataParallel
 
 
 # ============================== Training Configuration ==============================
@@ -211,7 +211,7 @@ class ISICModel(nn.Module):
 model = ISICModel(CONFIG['model_name'], pretrained=True)
 model.to(CONFIG['device'])
 
-
+model = DataParallel(model) 
 
 # ============================== Augmentations ==============================
 data_transforms = {
