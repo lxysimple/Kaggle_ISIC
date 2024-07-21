@@ -127,8 +127,8 @@ sgkf = StratifiedGroupKFold(n_splits=CONFIG['n_fold'])
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
-from IPython import embed
-embed()
+# from IPython import embed
+# embed()
 # ============================== Dataset Class ==============================
 
 class ISICDataset_for_Train(Dataset):
@@ -154,6 +154,8 @@ class ISICDataset_for_Train(Dataset):
             df = self.df_negative
             isic_ids = self.isic_ids_negative
             targets = self.targets_negative
+            
+        # 确保index小于df的行数
         index = index % df.shape[0]
         
         isic_id = isic_ids[index]
@@ -207,7 +209,7 @@ class ISICModel(nn.Module):
         return self.sigmoid(self.model(images))
     
 model = ISICModel(CONFIG['model_name'], pretrained=True)
-model.to(CONFIG['device']);
+model.to(CONFIG['device'])
 
 
 
