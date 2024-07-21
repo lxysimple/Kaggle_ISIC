@@ -219,61 +219,61 @@ model = DataParallel(model)
 
 # ============================== Augmentations ==============================
 data_transforms = {
-    # "train": A.Compose([
-    #     A.RandomRotate90(p=0.5),
-    #     A.Flip(p=0.5),
-    #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-    #     A.Normalize(
-    #             mean=[0.4815, 0.4578, 0.4082], 
-    #             std=[0.2686, 0.2613, 0.2758], 
-    #             max_pixel_value=255.0,
-    #             p=1.0
-    #         ),
-    #     ToTensorV2()
-    # ], p=1.),
-
-    "train":A.Compose([
-        
-            A.Transpose(p=0.5),
-            A.VerticalFlip(p=0.5),
-            A.HorizontalFlip(p=0.5),
-            A.ColorJitter(brightness=0.2, p=0.75), # A.RandomBrightness(limit=0.2, p=0.75),
-            A.ColorJitter(contrast=0.2, p=0.75), # A.RandomContrast(limit=0.2, p=0.75),
-            # A.OneOf([
-            #     A.MotionBlur(blur_limit=5),
-            #     A.MedianBlur(blur_limit=5),
-            #     A.GaussianBlur(blur_limit=5),
-            #     A.GaussNoise(var_limit=(5.0, 30.0)),
-            # ], p=0.7),
-            A.MotionBlur(blur_limit=5, p=0.7),
-            A.MedianBlur(blur_limit=5, p=0.7),
-            A.GaussianBlur(blur_limit=5, p=0.7),
-            A.GaussNoise(var_limit=(5.0, 30.0), p=0.7),
-
-            # A.OneOf([
-            #     A.OpticalDistortion(distort_limit=1.0),
-            #     A.GridDistortion(num_steps=5, distort_limit=1.),
-            #     A.ElasticTransform(alpha=3),
-            # ], p=0.7),
-            A.OpticalDistortion(distort_limit=1.0, p=0.7),
-            A.GridDistortion(num_steps=5, distort_limit=1.0, p=0.7),
-            A.ElasticTransform(alpha=3, p=0.7),
-
-            A.CLAHE(clip_limit=4.0, p=0.7),
-            A.HueSaturationValue(hue_shift_limit=10, sat_shift_limit=20, val_shift_limit=10, p=0.5),
-            A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, border_mode=0, p=0.85),
-
-            A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-            # A.Cutout(max_h_size=int(CONFIG['img_size'] * 0.375), max_w_size=int(CONFIG['img_size'] * 0.375), num_holes=1, p=0.7), 
-            A.CoarseDropout(p=0.7), # == Cutout
-            A.Normalize(
-                    mean=[0.4815, 0.4578, 0.4082], 
-                    std=[0.2686, 0.2613, 0.2758], 
-                    max_pixel_value=255.0,
-                    p=1.0
-                ),
-            ToTensorV2()
+    "train": A.Compose([
+        A.RandomRotate90(p=0.5),
+        A.Flip(p=0.5),
+        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
+        A.Normalize(
+                mean=[0.4815, 0.4578, 0.4082], 
+                std=[0.2686, 0.2613, 0.2758], 
+                max_pixel_value=255.0,
+                p=1.0
+            ),
+        ToTensorV2()
     ], p=1.),
+
+    # "train":A.Compose([
+        
+    #         A.Transpose(p=0.5),
+    #         A.VerticalFlip(p=0.5),
+    #         A.HorizontalFlip(p=0.5),
+    #         A.ColorJitter(brightness=0.2, p=0.75), # A.RandomBrightness(limit=0.2, p=0.75),
+    #         A.ColorJitter(contrast=0.2, p=0.75), # A.RandomContrast(limit=0.2, p=0.75),
+    #         # A.OneOf([
+    #         #     A.MotionBlur(blur_limit=5),
+    #         #     A.MedianBlur(blur_limit=5),
+    #         #     A.GaussianBlur(blur_limit=5),
+    #         #     A.GaussNoise(var_limit=(5.0, 30.0)),
+    #         # ], p=0.7),
+    #         A.MotionBlur(blur_limit=5, p=0.7),
+    #         A.MedianBlur(blur_limit=5, p=0.7),
+    #         A.GaussianBlur(blur_limit=5, p=0.7),
+    #         A.GaussNoise(var_limit=(5.0, 30.0), p=0.7),
+
+    #         # A.OneOf([
+    #         #     A.OpticalDistortion(distort_limit=1.0),
+    #         #     A.GridDistortion(num_steps=5, distort_limit=1.),
+    #         #     A.ElasticTransform(alpha=3),
+    #         # ], p=0.7),
+    #         A.OpticalDistortion(distort_limit=1.0, p=0.7),
+    #         A.GridDistortion(num_steps=5, distort_limit=1.0, p=0.7),
+    #         A.ElasticTransform(alpha=3, p=0.7),
+
+    #         A.CLAHE(clip_limit=4.0, p=0.7),
+    #         A.HueSaturationValue(hue_shift_limit=10, sat_shift_limit=20, val_shift_limit=10, p=0.5),
+    #         A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, border_mode=0, p=0.85),
+
+    #         A.Resize(CONFIG['img_size'], CONFIG['img_size']),
+    #         # A.Cutout(max_h_size=int(CONFIG['img_size'] * 0.375), max_w_size=int(CONFIG['img_size'] * 0.375), num_holes=1, p=0.7), 
+    #         A.CoarseDropout(p=0.7), # == Cutout
+    #         A.Normalize(
+    #                 mean=[0.4815, 0.4578, 0.4082], 
+    #                 std=[0.2686, 0.2613, 0.2758], 
+    #                 max_pixel_value=255.0,
+    #                 p=1.0
+    #             ),
+    #         ToTensorV2()
+    # ], p=1.),
     
     "valid": A.Compose([
         A.Resize(CONFIG['img_size'], CONFIG['img_size']),
@@ -286,6 +286,99 @@ data_transforms = {
         ToTensorV2(),
         ], p=1.)
 }
+
+# ============================== cutmix+mixup ==============================
+
+def rand_bbox(size, lam):
+    """
+    返回原图1-lam倍的区域
+    args:
+        size: 是图片的shape，即（b,c,w,h）
+        lam: 调整融合区域的大小，lam 越接近 1，融合框越小，融合程度越低
+    return:
+        bbx1, bby1, bbx2, bby2: 返回一个随机生成的矩形框，用于确定两张图像的融合区域
+    """
+    W = size[2]
+    H = size[3]
+
+    # sqrt是要保证 cut_w*cut_h = (1-lam)*W*H
+    cut_rat = np.sqrt(1. - lam)
+    
+    cut_w = int(W * cut_rat) # 裁剪总w长度
+    cut_h = int(H * cut_rat) # 裁剪总h长度
+
+    # 随便选裁剪的一个中心点
+    cx = np.random.randint(W)
+    cy = np.random.randint(H)
+    
+    # 因为限定0~w内，所以会导致误差，使得cut_w*cut_h < (1-lam)*W*H
+    bbx1 = np.clip(cx - cut_w // 2, 0, W) # bbx1限定在0~W内
+    bby1 = np.clip(cy - cut_h // 2, 0, H)
+    bbx2 = np.clip(cx + cut_w // 2, 0, W)
+    bby2 = np.clip(cy + cut_h // 2, 0, H)
+
+    return bbx1, bby1, bbx2, bby2
+
+
+def cutmix(data, targets1, alpha):
+    """
+    args:
+        data: 训练数据，data.shape=(b,c,w,h)  
+        targets1: 训练数据标签，targets1.shape=(b)
+        alpha: 生成一个什么样的数据分布，lam就是从这个分布中随机取值
+    return:
+        data: 经过cutmix改变后的训练数据
+        targets：[targets1, shuffled_targets1, lam]
+            targets1: 被cut图像的标签
+            shuffled_targets1: cut区域外来图的标签
+            lam: 由于np.clip导致误差，这个是消除误差调整后的lam           
+    """
+    
+    # 对b这个维度进行随机打乱,产生随机序列indices
+    indices = torch.randperm(data.size(0))
+    shuffled_data = data[indices] # 这是打乱b后的数据,shape=(b,c,w,h)
+    shuffled_targets1 = targets1[indices] # 打乱后的标签，shape=(b,)
+    
+    # 在alpha生成的分布中随机抽1个值lam，它控制了两个图像的融合区域大小
+    lam = np.random.beta(alpha, alpha)
+    
+    # 随机生成一个矩形框 (bbx1, bby1) 和 (bbx2, bby2)，用于融合两张图像的区域
+    bbx1, bby1, bbx2, bby2 = rand_bbox(data.size(), lam)
+    
+    # 使用另一张图像的相应区域替换第一张图像的相应区域，实现图像融合
+    data[:, :, bbx1:bbx2, bby1:bby2] = data[indices, :, bbx1:bbx2, bby1:bby2]
+    
+    # 在rand_bbox中的np.clip会产生误差，导致裁剪区域比理论上偏少，导致求loss时不准
+    # 现基于现实对已给的λ进行一个调整
+    # λ = 1 - (融合区域的像素数量 / 总图像像素数量)
+    lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (data.size()[-1] * data.size()[-2]))
+
+    targets = [targets1, shuffled_targets1, lam]
+    return data, targets
+
+def mixup(data, targets1, alpha):
+    indices = torch.randperm(data.size(0))
+    shuffled_data = data[indices]
+    shuffled_targets1 = targets1[indices]
+
+    lam = np.random.beta(alpha, alpha)
+    data = data * lam + shuffled_data * (1 - lam) # 对每个像素点都做融合
+    targets = [targets1, shuffled_targets1, lam]
+
+    return data, targets
+
+def cutmix_criterion(preds1, targets):
+    targets1, targets2, lam = targets[0], targets[1], targets[2]
+    # criterion = nn.CrossEntropyLoss(reduction='mean').cuda() # 可被替换成任意loss函数
+    # 对cut之外图求loss + cut内图求loss，而面积比 外:内 = lam:(1-lam)
+    return lam * criterion(preds1, targets1) + (1 - lam) * criterion(preds1, targets2)
+
+def mixup_criterion(preds1, targets):
+    targets1, targets2, lam = targets[0], targets[1], targets[2]
+    # criterion = nn.CrossEntropyLoss(reduction='mean')
+    return lam * criterion(preds1, targets1) + (1 - lam) * criterion(preds1, targets2) 
+
+
 # ============================== Function ==============================
 def criterion(outputs, targets):
     return nn.BCELoss()(outputs, targets)
@@ -299,15 +392,49 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
     
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:
+
+
         images = data['image'].to(device, dtype=torch.float)
         targets = data['target'].to(device, dtype=torch.float)
         
-        batch_size = images.size(0)
+
+        random_number = random.random() # 生成一个0到1之间的随机数
+        input = images
+        tmp = targets
+        target = targets
+        if random_number < 0.3:
+            input,targets=cutmix(input,target,2)
+            
+            targets[0]=torch.tensor(targets[0]).cuda()
+            targets[1]=torch.tensor(targets[1]).cuda()
+            targets[2]=torch.tensor(targets[2]).cuda()
+        elif random_number > 0.7:
+            input,targets=mixup(input,target,2)
+            
+            targets[0]=torch.tensor(targets[0]).cuda()
+            targets[1]=torch.tensor(targets[1]).cuda()
+            targets[2]=torch.tensor(targets[2]).cuda()
+        else:
+            None
+        
+        
         
         outputs = model(images).squeeze()
-        loss = criterion(outputs, targets)
+
+        loss=None
+        output = outputs
+        if random_number < 0.3:
+            loss = cutmix_criterion(output, targets) # 注意这是在CPU上运算的
+        elif random_number > 0.7:
+            loss = mixup_criterion(output, targets) # 注意这是在CPU上运算的
+        else:
+            loss = criterion(output, target)
+        targets = tmp
+
+        # loss = criterion(outputs, targets)
+
+
         loss = loss / CONFIG['n_accumulate']
-            
         loss.backward()
     
         if (step + 1) % CONFIG['n_accumulate'] == 0:
@@ -320,7 +447,8 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
                 scheduler.step()
                 
         auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
-        
+
+        batch_size = images.size(0)
         running_loss += (loss.item() * batch_size)
         running_auroc  += (auroc * batch_size)
         dataset_size += batch_size
