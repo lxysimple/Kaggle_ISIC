@@ -209,7 +209,10 @@ class ISICModel(nn.Module):
         return self.sigmoid(self.model(images))
     
 model = ISICModel(CONFIG['model_name'], pretrained=True)
-model.to(CONFIG['device'])
+
+
+model = model.cuda() 
+# model.to(CONFIG['device'])
 
 model = DataParallel(model) 
 
