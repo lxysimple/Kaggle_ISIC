@@ -402,13 +402,13 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         input = images
         tmp = targets
         target = targets
-        if random_number < 0.3:
+        if random_number < 0.5:
             input,targets=cutmix(input,target,2)
             
             targets[0]=torch.tensor(targets[0]).cuda()
             targets[1]=torch.tensor(targets[1]).cuda()
             targets[2]=torch.tensor(targets[2]).cuda()
-        elif random_number > 0.7:
+        elif random_number > 1.7:
             input,targets=mixup(input,target,2)
             
             targets[0]=torch.tensor(targets[0]).cuda()
@@ -423,9 +423,9 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
 
         loss=None
         output = outputs
-        if random_number < 0.3:
+        if random_number < 0.5:
             loss = cutmix_criterion(output, targets) # 注意这是在CPU上运算的
-        elif random_number > 0.7:
+        elif random_number > 1.7:
             loss = mixup_criterion(output, targets) # 注意这是在CPU上运算的
         else:
             loss = criterion(output, target)
