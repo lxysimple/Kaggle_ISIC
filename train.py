@@ -170,13 +170,15 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         
         isic_id = isic_ids[index]
 
-        target = -1
-        try:
-            img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-            target = targets[index]
-        except: # 作者提供的.jpg部分缺失，因此如果缺失，随便加载一张图片，令target = -1
-            img = np.array( Image.open(f"/home/xyli/kaggle/data2018/train-image/image/ISIC_0034524.jpg") )
-            
+        # target = -1
+        # try:
+        #     img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        #     target = targets[index]
+        # except: # 作者提供的.jpg部分缺失，因此如果缺失，随便加载一张图片，令target = -1
+        #     img = np.array( Image.open(f"/home/xyli/kaggle/data2018/train-image/image/ISIC_0034524.jpg") )
+        
+        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        target = targets[index]
 
         
         
@@ -626,9 +628,9 @@ def prepare_loaders(df, fold):
     train_dataset = ISICDataset_for_Train(df_train, HDF_FILE, transforms=data_transforms["train"])
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
-    train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+    train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
 
-    concat_dataset = ConcatDataset([train_dataset, train_dataset2018])
+    concat_dataset = ConcatDataset([train_dataset, train_dataset2019])
 
     train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
                               num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
