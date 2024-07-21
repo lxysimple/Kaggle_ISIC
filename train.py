@@ -95,7 +95,7 @@ def set_seed(seed=42):
 set_seed(CONFIG['seed'])
 
 
-ROOT_DIR = "/kaggle/input/isic-2024-challenge"
+ROOT_DIR = "/home/xyli/kaggle"
 HDF_FILE = f"{ROOT_DIR}/train-image.hdf5"
 
 
@@ -118,17 +118,16 @@ df = df.reset_index(drop=True)
 print(df.shape[0], df.target.sum())
 
 
-
 CONFIG['T_max'] = df.shape[0] * (CONFIG["n_fold"]-1) * CONFIG['epochs'] // CONFIG['train_batch_size'] // CONFIG["n_fold"]
 print(CONFIG['T_max'])
 
-sgkf = StratifiedGroupKFold(n_splits=CONFIG['n_fold'])
 
+sgkf = StratifiedGroupKFold(n_splits=CONFIG['n_fold'])
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
-
-
+from IPython import embed
+embed()
 # ============================== Dataset Class ==============================
 
 class ISICDataset_for_Train(Dataset):
