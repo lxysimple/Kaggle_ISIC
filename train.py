@@ -455,9 +455,6 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:
 
-        if int(data['target']) == -1:
-            continue
-
 
         images = data['image'].to(device, dtype=torch.float)
         targets = data['target'].to(device, dtype=torch.float)
