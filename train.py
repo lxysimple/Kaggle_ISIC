@@ -77,8 +77,8 @@ CONFIG = {
     "scheduler": 'CosineAnnealingLR',
     "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
     # 手动调节学习率
-    "learning_rate": 1e-6, # 1e-5
-    "min_lr": 1e-7, # 1e-6
+    "learning_rate": 1e-5, # 1e-5
+    "min_lr": 1e-6, # 1e-6
     "T_max": 10,
 
     "weight_decay": 1e-6,
@@ -594,11 +594,6 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
         val_epoch_loss, val_epoch_auroc = valid_one_epoch(model, valid_loader, device=CONFIG['device'], 
                                          epoch=epoch)
     
-        # history['Train Loss'].append(train_epoch_loss)
-        # history['Valid Loss'].append(val_epoch_loss)
-        # history['Train AUROC'].append(train_epoch_auroc)
-        # history['Valid AUROC'].append(val_epoch_auroc)
-        # history['lr'].append( scheduler.get_lr()[0] )
         
         # deep copy the model
         # 新增一个限制,保证val_loss不变大,模型会更稳定
