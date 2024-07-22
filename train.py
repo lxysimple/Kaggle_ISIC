@@ -72,7 +72,8 @@ CONFIG = {
     # "img_size": 384,
     # "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
 
-    "train_batch_size": 96, # 32
+    "train_batch_size": 164, # 96 32
+
     "valid_batch_size": 64, # 64
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
