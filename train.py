@@ -67,10 +67,10 @@ CONFIG = {
     "seed": 42,
     "epochs": 20,
 
-    # "img_size": 336,
-    # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
-    "img_size": 384,
-    "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
+    "img_size": 336,
+    "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
+    # "img_size": 384,
+    # "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
 
     "train_batch_size": 96, # 32
     "valid_batch_size": 128, # 64
@@ -279,15 +279,15 @@ class ISICModel(nn.Module):
     def forward(self, images):
         return self.sigmoid(self.model(images))
     
-# model = ISICModel(CONFIG['model_name'], pretrained=True)
-model = ISICModel(CONFIG['model_name'], pretrained=False)
+model = ISICModel(CONFIG['model_name'], pretrained=True)
+# model = ISICModel(CONFIG['model_name'], pretrained=False)
 
-checkpoint = torch.load(CONFIG['checkpoint'])
-# 去掉前面多余的'module.'
-new_state_dict = {}
-for k,v in checkpoint.items():
-    new_state_dict[k[7:]] = v
-model.load_state_dict( new_state_dict )
+# checkpoint = torch.load(CONFIG['checkpoint'])
+# # 去掉前面多余的'module.'
+# new_state_dict = {}
+# for k,v in checkpoint.items():
+#     new_state_dict[k[7:]] = v
+# model.load_state_dict( new_state_dict )
 
 model = model.cuda() 
 # model.to(CONFIG['device'])
@@ -653,8 +653,11 @@ def prepare_loaders(df, fold):
         train_dataset, train_dataset2020, train_dataset2019, train_dataset2018
     ])
 
-    train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
-                              num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train_dataset, batch_size=CONFIG['train_batch_size'], 
+                              num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
+    # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
+    #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
+
     valid_loader = DataLoader(valid_dataset, batch_size=CONFIG['valid_batch_size'], 
                               num_workers=16, shuffle=False, pin_memory=True)
     
