@@ -587,7 +587,8 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
         
         # deep copy the model
         # 新增一个限制,保证val_loss不变大,模型会更稳定
-        if best_epoch_auroc <= val_epoch_auroc and val_epoch_loss<=0.24300:
+        # if best_epoch_auroc <= val_epoch_auroc and val_epoch_loss<=0.24300:
+        if best_epoch_auroc <= val_epoch_auroc:
             print(f"{b_}Validation AUROC Improved ({best_epoch_auroc} ---> {val_epoch_auroc})")
             best_epoch_auroc = val_epoch_auroc
 
