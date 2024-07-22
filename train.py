@@ -540,7 +540,9 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:
 
-
+        from IPython import embed
+        embed()
+        
         images = data['image'].to(device, dtype=torch.float)
         targets = data['target'].to(device, dtype=torch.float)
         
@@ -729,8 +731,7 @@ def prepare_loaders(df, fold):
     return train_loader, valid_loader
 # ============================== Main ==============================
 
-from IPython import embed
-embed()
+
 train_loader, valid_loader = prepare_loaders(df, fold=CONFIG["fold"])
 
 
