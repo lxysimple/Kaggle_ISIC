@@ -141,6 +141,67 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 # from IPython import embed
 # embed()
 # ============================== Dataset Class ==============================
+class ISICDataset_for_Train_github(Dataset):
+    def __init__(self, transforms=None):
+        self.path = path
+        df = pd.read_csv(f"/home/xyli/kaggle/isicdir/metadata.csv")
+
+        self.df_positive = df[df["benign_malignant"] == 'malignant'].reset_index()
+        self.df_negative = df[df["benign_malignant"] == 'benign'].reset_index()
+        # 保持一定的正负比例，不能让其失衡
+        self.df_negative = self.df_negative[:len(self.df_positive)*20]
+
+        self.isic_ids_positive = self.df_positive['isic_id'].values
+        self.isic_ids_negative = self.df_negative['isic_id'].values
+        self.targets_positive = self.df_positive['benign_malignant'].values
+        self.targets_negative = self.df_negative['benign_malignant'].values
+        self.transforms = transforms
+
+        print(path)
+        print(len(self.df_positive), ' ', len(self.df_negative))
+
+        
+    def __len__(self):
+        return len(self.df_positive) * 2
+    
+    def __getitem__(self, index):
+
+        # 虽然0是1的20倍，但取1和0的概率相等，1多次重复取，0有些可能1次都取不到
+        # 一共取2*len(df_positive)次数
+        if random.random() >= 0.5:
+            df = self.df_positive
+            isic_ids = self.isic_ids_positive
+            targets = self.targets_positive
+        else:
+            df = self.df_negative
+            isic_ids = self.isic_ids_negative
+            targets = self.targets_negative
+        
+        # 确保index小于df的行数
+        index = index % df.shape[0]
+        
+        isic_id = isic_ids[index]
+
+        # target = -1
+        # try:
+        #     img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        #     target = targets[index]
+        # except: # 作者提供的.jpg部分缺失，因此如果缺失，随便加载一张图片，令target = -1
+        #     img = np.array( Image.open(f"/home/xyli/kaggle/data2018/train-image/image/ISIC_0034524.jpg") )
+        
+        img = np.array( Image.open(f"/home/xyli/kaggle/isicdir/images/{isic_id}.jpg") )
+        target = targets[index]
+
+        
+        
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
+            
+        return {
+            'image': img,
+            'target': target
+        }
+
 
 class ISICDataset_for_Train_fromjpg(Dataset):
     def __init__(self, path, transforms=None):
@@ -652,12 +713,12 @@ def prepare_loaders(df, fold):
     train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
     train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
     # train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-
+    train_dataset_github = ISICDataset_for_Train_github(transforms=data_transforms["train"])
     concat_dataset = ConcatDataset([
         train_dataset, train_dataset2020
     ])
 
-    train_loader = DataLoader(train_dataset2019, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(train_dataset_github, batch_size=CONFIG['train_batch_size'], 
                               num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
