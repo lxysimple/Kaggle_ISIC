@@ -729,8 +729,12 @@ def prepare_loaders(df, fold):
     return train_loader, valid_loader
 # ============================== Main ==============================
 
-
+from IPython import embed
+embed()
 train_loader, valid_loader = prepare_loaders(df, fold=CONFIG["fold"])
+
+
+
 
 optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
                        weight_decay=CONFIG['weight_decay'])
