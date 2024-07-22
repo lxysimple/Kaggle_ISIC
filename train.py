@@ -568,6 +568,7 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
     start = time.time()
     best_model_wts = copy.deepcopy(model.state_dict())
     best_epoch_auroc = -np.inf
+    best_epoch_loss = +np.inf
     history = defaultdict(list)
     
     for epoch in range(1, num_epochs + 1): 
@@ -586,7 +587,7 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
         history['lr'].append( scheduler.get_lr()[0] )
         
         # deep copy the model
-        if best_epoch_auroc <= val_epoch_auroc:
+        if best_epoch_auroc <= val_epoch_auroc and best_epoch_loss >= val_epoch_loss:
             print(f"{b_}Validation AUROC Improved ({best_epoch_auroc} ---> {val_epoch_auroc})")
             best_epoch_auroc = val_epoch_auroc
             best_model_wts = copy.deepcopy(model.state_dict())
