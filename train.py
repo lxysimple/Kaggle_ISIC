@@ -124,7 +124,8 @@ df = df.reset_index(drop=True)
 print(df.shape[0], df.target.sum())
 
 # 用于计算一个学习率调整器的一个参数
-CONFIG['T_max'] = df.shape[0] * (CONFIG["n_fold"]-1) * CONFIG['epochs'] // CONFIG['train_batch_size'] // CONFIG["n_fold"]
+# 因为之后要合并数据集,算了一下合并后大约是合并前2.4倍,合并前是8k,合并后是20k左右
+CONFIG['T_max'] = 2.4*df.shape[0] * (CONFIG["n_fold"]-1) * CONFIG['epochs'] // CONFIG['train_batch_size'] // CONFIG["n_fold"]
 print(CONFIG['T_max'])
 
 
