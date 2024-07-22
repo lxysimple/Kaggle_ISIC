@@ -153,6 +153,8 @@ class ISICDataset_for_Train_github(Dataset):
 
         self.isic_ids_positive = self.df_positive['isic_id'].values
         self.isic_ids_negative = self.df_negative['isic_id'].values
+        self.df_positive['benign_malignant'] = 1
+        self.df_negative['benign_malignant'] = 0
         self.targets_positive = self.df_positive['benign_malignant'].values
         self.targets_negative = self.df_negative['benign_malignant'].values
         self.transforms = transforms
