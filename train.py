@@ -67,17 +67,17 @@ CONFIG = {
     "seed": 42,
     "epochs": 20,
 
-    "img_size": 336,
-    "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
-    # "img_size": 384,
-    # "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
+    # "img_size": 336,
+    # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
+    "img_size": 384,
+    "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
 
     "train_batch_size": 96, # 32
     "valid_batch_size": 64, # 64
     "scheduler": 'CosineAnnealingLR',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5296_Loss0.1826_epoch1.bin',
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
     # 手动调节学习率
-    "learning_rate": 1e-5,
+    "learning_rate": 1e-9,
     "min_lr": 1e-6,
     "T_max": 10,
 
