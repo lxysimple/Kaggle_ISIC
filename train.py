@@ -149,6 +149,7 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
+        # 保持一定的正负比例，不能让其失衡
         self.df_negative = self.df_negative[:len(self.df_positive)*20]
 
         self.isic_ids_positive = self.df_positive['isic_id'].values
