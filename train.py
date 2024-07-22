@@ -115,7 +115,7 @@ print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
 df_positive = df[df["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
 df_negative = df[df["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
 
-# 从2个数据集中各自以 positive:negative = 1:20 进行采样，组成一个新数据集
+# 从2个数据集中各自以 positive:negative = 1:20 进行采样，确保验证集中正负样本比例为1:20
 df = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*20, :]])  
 print("filtered>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
 
