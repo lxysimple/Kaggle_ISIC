@@ -587,18 +587,18 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
     
     for epoch in range(1, num_epochs + 1): 
         gc.collect()
-        train_epoch_loss, train_epoch_auroc = train_one_epoch(model, optimizer, scheduler, 
-                                           dataloader=train_loader, 
-                                           device=CONFIG['device'], epoch=epoch)
+        # train_epoch_loss, train_epoch_auroc = train_one_epoch(model, optimizer, scheduler, 
+        #                                    dataloader=train_loader, 
+        #                                    device=CONFIG['device'], epoch=epoch)
         
         val_epoch_loss, val_epoch_auroc = valid_one_epoch(model, valid_loader, device=CONFIG['device'], 
                                          epoch=epoch)
     
-        history['Train Loss'].append(train_epoch_loss)
-        history['Valid Loss'].append(val_epoch_loss)
-        history['Train AUROC'].append(train_epoch_auroc)
-        history['Valid AUROC'].append(val_epoch_auroc)
-        history['lr'].append( scheduler.get_lr()[0] )
+        # history['Train Loss'].append(train_epoch_loss)
+        # history['Valid Loss'].append(val_epoch_loss)
+        # history['Train AUROC'].append(train_epoch_auroc)
+        # history['Valid AUROC'].append(val_epoch_auroc)
+        # history['lr'].append( scheduler.get_lr()[0] )
         
         # deep copy the model
         # 新增一个限制,保证val_loss不变大,模型会更稳定
