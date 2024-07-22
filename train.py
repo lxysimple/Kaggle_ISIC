@@ -279,8 +279,9 @@ class ISICModel(nn.Module):
     def forward(self, images):
         return self.sigmoid(self.model(images))
     
-model = ISICModel(CONFIG['model_name'], pretrained=False, checkpoint_path=CONFIG['checkpoint'])
+model = ISICModel(CONFIG['model_name'], pretrained=True)
 
+model.load_state_dict( torch.load(CONFIG['checkpoint']) )
 
 model = model.cuda() 
 # model.to(CONFIG['device'])
