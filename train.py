@@ -591,6 +591,7 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
         if best_epoch_auroc <= val_epoch_auroc and best_epoch_loss >= val_epoch_loss:
             print(f"{b_}Validation AUROC Improved ({best_epoch_auroc} ---> {val_epoch_auroc})")
             best_epoch_auroc = val_epoch_auroc
+            best_epoch_loss = val_epoch_loss
             best_model_wts = copy.deepcopy(model.state_dict())
             PATH = "AUROC{:.4f}_Loss{:.4f}_epoch{:.0f}.bin".format(val_epoch_auroc, val_epoch_loss, epoch)
             torch.save(model.state_dict(), PATH)
