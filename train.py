@@ -1,6 +1,6 @@
 # ============================== Import Required Libraries ==============================
 
-import os
+import os  
 import gc
 import cv2
 import math
@@ -74,10 +74,13 @@ CONFIG = {
 
     "train_batch_size": 96, # 32
     "valid_batch_size": 128, # 64
-    "learning_rate": 1e-5,
     "scheduler": 'CosineAnnealingLR',
+
+    # 手动调节学习率
+    "learning_rate": 1e-5,
     "min_lr": 1e-6,
-    "T_max": 500,
+    "T_max": 10,
+
     "weight_decay": 1e-6,
     "fold" : 0,
     "n_fold": 5,
@@ -125,8 +128,8 @@ print(df.shape[0], df.target.sum())
 
 # 用于计算一个学习率调整器的一个参数
 # 因为之后要合并数据集,算了一下合并后大约是合并前2.4倍,合并前是8k,合并后是20k左右
-CONFIG['T_max'] = 2.4*df.shape[0] * (CONFIG["n_fold"]-1) * CONFIG['epochs'] // CONFIG['train_batch_size'] // CONFIG["n_fold"]
-print(CONFIG['T_max'])
+# CONFIG['T_max'] = 2.4*df.shape[0] * (CONFIG["n_fold"]-1) * CONFIG['epochs'] // CONFIG['train_batch_size'] // CONFIG["n_fold"]
+# print(CONFIG['T_max'])
 
 
 sgkf = StratifiedGroupKFold(n_splits=CONFIG['n_fold'])
