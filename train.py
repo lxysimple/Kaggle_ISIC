@@ -587,9 +587,9 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
     
     for epoch in range(1, num_epochs + 1): 
         gc.collect()
-        # train_epoch_loss, train_epoch_auroc = train_one_epoch(model, optimizer, scheduler, 
-        #                                    dataloader=train_loader, 
-        #                                    device=CONFIG['device'], epoch=epoch)
+        train_epoch_loss, train_epoch_auroc = train_one_epoch(model, optimizer, scheduler, 
+                                           dataloader=train_loader, 
+                                           device=CONFIG['device'], epoch=epoch)
         
         val_epoch_loss, val_epoch_auroc = valid_one_epoch(model, valid_loader, device=CONFIG['device'], 
                                          epoch=epoch)
