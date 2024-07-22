@@ -72,8 +72,8 @@ CONFIG = {
     "img_size": 384,
     "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
 
-    "train_batch_size": 32,
-    "valid_batch_size": 64,
+    "train_batch_size": 128, # 32
+    "valid_batch_size": 256, # 64
     "learning_rate": 1e-5,
     "scheduler": 'CosineAnnealingLR',
     "min_lr": 1e-6,
