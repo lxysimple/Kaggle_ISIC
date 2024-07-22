@@ -537,12 +537,14 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
     running_loss = 0.0
     running_auroc  = 0.0
     
+    from IPython import embed
+    embed()
+
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:
 
-        from IPython import embed
-        embed()
-        
+
+
         images = data['image'].to(device, dtype=torch.float)
         targets = data['target'].to(device, dtype=torch.float)
         
