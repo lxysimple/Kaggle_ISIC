@@ -157,7 +157,7 @@ class ISICDataset_for_Train_github(Dataset):
         self.targets_negative = self.df_negative['benign_malignant'].values
         self.transforms = transforms
 
-        print(path)
+        print('github:')
         print(len(self.df_positive), ' ', len(self.df_negative))
 
         
