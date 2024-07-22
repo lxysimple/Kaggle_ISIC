@@ -520,8 +520,8 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
             # zero the parameter gradients
             optimizer.zero_grad()
 
-            if scheduler is not None:
-                scheduler.step()
+            # if scheduler is not None:
+            #     scheduler.step()
                 
         auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
 
@@ -535,6 +535,10 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         
         bar.set_postfix(Epoch=epoch, Train_Loss=epoch_loss, Train_Auroc=epoch_auroc,
                         LR=optimizer.param_groups[0]['lr'])
+    
+    # 修改一下原本代码
+    if scheduler is not None:
+        scheduler.step()
     gc.collect()
     
     return epoch_loss, epoch_auroc
