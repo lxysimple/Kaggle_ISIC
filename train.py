@@ -281,7 +281,13 @@ class ISICModel(nn.Module):
     
 # model = ISICModel(CONFIG['model_name'], pretrained=True)
 model = ISICModel(CONFIG['model_name'], pretrained=False)
-model.load_state_dict( torch.load(CONFIG['checkpoint']) )
+
+checkpoint = torch.load(CONFIG['checkpoint'])
+# 去掉前面多余的'module.'
+new_state_dict = {}
+for k,v in checkpoint.items():
+    new_state_dict[k[7:]] = v
+model.load_state_dict( new_state_dict )
 
 model = model.cuda() 
 # model.to(CONFIG['device'])
