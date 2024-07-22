@@ -73,7 +73,7 @@ CONFIG = {
     # "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
 
     "train_batch_size": 96, # 32
-    "valid_batch_size": 128, # 64
+    "valid_batch_size": 64, # 64
     "scheduler": 'CosineAnnealingLR',
     "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5296_Loss0.1826_epoch1.bin',
     # 手动调节学习率
@@ -653,10 +653,10 @@ def prepare_loaders(df, fold):
         train_dataset, train_dataset2020, train_dataset2019, train_dataset2018
     ])
 
-    # train_loader = DataLoader(train_dataset, batch_size=CONFIG['train_batch_size'], 
-    #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
-    train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
-                              num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train_dataset, batch_size=CONFIG['train_batch_size'], 
+                              num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
+    # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
+    #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
 
     valid_loader = DataLoader(valid_dataset, batch_size=CONFIG['valid_batch_size'], 
                               num_workers=16, shuffle=False, pin_memory=True)
