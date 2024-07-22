@@ -648,13 +648,13 @@ def prepare_loaders(df, fold):
 
     train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
     train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+    # train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
 
     concat_dataset = ConcatDataset([
         train_dataset, train_dataset2020, train_dataset2019, train_dataset2018
     ])
 
-    train_loader = DataLoader(train_dataset2018, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(train_dataset2020, batch_size=CONFIG['train_batch_size'], 
                               num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
