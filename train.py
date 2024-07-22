@@ -537,14 +537,9 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
     running_loss = 0.0
     running_auroc  = 0.0
     
-    from IPython import embed
-    embed()
 
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:
-
-
-
         images = data['image'].to(device, dtype=torch.float)
         targets = data['target'].to(device, dtype=torch.float)
         
@@ -723,7 +718,7 @@ def prepare_loaders(df, fold):
     ])
 
     train_loader = DataLoader(train_dataset_github, batch_size=CONFIG['train_batch_size'], 
-                              num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
+                              num_workers=16, shuffle=True, pin_memory=False, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
 
