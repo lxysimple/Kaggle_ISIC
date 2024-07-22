@@ -149,6 +149,7 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
+        self.df_negative = self.df_negative[:len(self.df_positive)*20]
 
         self.isic_ids_positive = self.df_positive['isic_id'].values
         self.isic_ids_negative = self.df_negative['isic_id'].values
@@ -156,7 +157,8 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.targets_negative = self.df_negative['target'].values
         self.transforms = transforms
 
-
+        print(path)
+        print(len(self.df_positive), ' ', len(self.df_negative))
 
         
     def __len__(self):
