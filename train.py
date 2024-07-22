@@ -77,8 +77,8 @@ CONFIG = {
     "scheduler": 'CosineAnnealingLR',
     "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
     # 手动调节学习率
-    "learning_rate": 1e-9,
-    "min_lr": 1e-6,
+    "learning_rate": 1e-6, # 1e-5
+    "min_lr": 1e-7, # 1e-6
     "T_max": 10,
 
     "weight_decay": 1e-6,
