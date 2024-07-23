@@ -145,7 +145,8 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 class ISICDataset_for_Train_github(Dataset):
     def __init__(self, transforms=None):
 
-        df = pd.read_csv(f"/home/xyli/kaggle/isicdir/others.csv")
+        # df = pd.read_csv(f"/home/xyli/kaggle/isicdir/others.csv")
+        df = pd.read_csv(f"/home/xyli/kaggle/data2018/train-metadata.csv")
 
         self.df_positive = df[df["benign_malignant"] == 'malignant'].reset_index()
         self.df_negative = df[df["benign_malignant"] == 'benign'].reset_index()
