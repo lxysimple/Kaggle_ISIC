@@ -146,10 +146,15 @@ class ISICDataset_for_Train_github(Dataset):
     def __init__(self, transforms=None):
 
         # df = pd.read_csv(f"/home/xyli/kaggle/isicdir/others.csv")
-        df = pd.read_csv(f"/home/xyli/kaggle/data2018/train-metadata.csv")
+        # self.df_positive = df[df["benign_malignant"] == 'malignant'].reset_index()
+        # self.df_negative = df[df["benign_malignant"] == 'benign'].reset_index()
 
-        self.df_positive = df[df["benign_malignant"] == 'malignant'].reset_index()
-        self.df_negative = df[df["benign_malignant"] == 'benign'].reset_index()
+        df = pd.read_csv(f"/home/xyli/kaggle/data2018/train-metadata.csv")
+        self.df_positive = df[df["target"] == 1].reset_index()
+        self.df_negative = df[df["target"] == 0].reset_index()
+        self.df_positive["benign_malignant"] = df["target"]
+        self.df_negative["benign_malignant"] = df["target"]
+
         # 保持一定的正负比例，不能让其失衡
         self.df_negative = self.df_negative[:len(self.df_positive)*20]
 
