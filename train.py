@@ -149,7 +149,7 @@ class ISICDataset_for_Train_github(Dataset):
         # self.df_positive = df[df["benign_malignant"] == 'malignant'].reset_index()
         # self.df_negative = df[df["benign_malignant"] == 'benign'].reset_index()
 
-        df = pd.read_csv(f"/home/xyli/kaggle/data2019/train-metadata.csv")
+        df = pd.read_csv(f"/home/xyli/kaggle/data2020/train-metadata.csv")
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
         self.df_positive["benign_malignant"] = df["target"]
