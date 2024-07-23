@@ -218,9 +218,13 @@ class ISICDataset_for_Train_fromjpg(Dataset):
     def __init__(self, path, transforms=None):
         self.path = path
         df = pd.read_csv(f"{path}/train-metadata.csv")
+        
+        df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
+        self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
+        self.pic_2024 = h5py.File(HDF_FILE, mode="r")
 
         self.df_positive = df[df["target"] == 1].reset_index()
-        self.df_negative = df[df["target"] == 0].reset_index()
+        # self.df_negative = df[df["target"] == 0].reset_index()
         # 保持一定的正负比例，不能让其失衡
         self.df_negative = self.df_negative[:len(self.df_positive)*20]
 
@@ -241,7 +245,8 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
         # 虽然0是1的20倍，但取1和0的概率相等，1多次重复取，0有些可能1次都取不到
         # 一共取2*len(df_positive)次数
-        if random.random() >= 0.5:
+        flag = random.random()
+        if flag >= 0.5:
             df = self.df_positive
             isic_ids = self.isic_ids_positive
             targets = self.targets_positive
@@ -262,7 +267,11 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         # except: # 作者提供的.jpg部分缺失，因此如果缺失，随便加载一张图片，令target = -1
         #     img = np.array( Image.open(f"/home/xyli/kaggle/data2018/train-image/image/ISIC_0034524.jpg") )
         
-        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        if flag >=0.5:
+            img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        else:
+            img = np.array( Image.open(BytesIO(self.pic_2024[isic_id][()])) )
+        
         target = targets[index]
 
         
