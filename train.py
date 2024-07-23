@@ -67,17 +67,17 @@ CONFIG = {
     "seed": 42,
     "epochs": 20,
 
-    "img_size": 336,
-    "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
-    # "img_size": 384,
-    # "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
+    # "img_size": 336,
+    # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
+    "img_size": 384,
+    "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
 
     "train_batch_size": 164, # 96 32
 
     "valid_batch_size": 64, # 64
     "scheduler": 'CosineAnnealingLR',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
-    "checkpoint": None,
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
+    # "checkpoint": None,
 
     # 手动调节学习率
     "learning_rate": 1e-5, # 1e-5
@@ -145,15 +145,15 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 class ISICDataset_for_Train_github(Dataset):
     def __init__(self, transforms=None):
 
-        # df = pd.read_csv(f"/home/xyli/kaggle/isicdir/others.csv")
-        # self.df_positive = df[df["benign_malignant"] == 'malignant'].reset_index()
-        # self.df_negative = df[df["benign_malignant"] == 'benign'].reset_index()
+        df = pd.read_csv(f"/home/xyli/kaggle/isicdir/others.csv")
+        self.df_positive = df[df["benign_malignant"] == 'malignant'].reset_index()
+        self.df_negative = df[df["benign_malignant"] == 'benign'].reset_index()
 
-        df = pd.read_csv(f"/home/xyli/kaggle/data2020/train-metadata.csv")
-        self.df_positive = df[df["target"] == 1].reset_index()
-        self.df_negative = df[df["target"] == 0].reset_index()
-        self.df_positive["benign_malignant"] = df["target"]
-        self.df_negative["benign_malignant"] = df["target"]
+        # df = pd.read_csv(f"/home/xyli/kaggle/data2020/train-metadata.csv")
+        # self.df_positive = df[df["target"] == 1].reset_index()
+        # self.df_negative = df[df["target"] == 0].reset_index()
+        # self.df_positive["benign_malignant"] = df["target"]
+        # self.df_negative["benign_malignant"] = df["target"]
 
         # 保持一定的正负比例，不能让其失衡
         self.df_negative = self.df_negative[:len(self.df_positive)*20]
@@ -719,15 +719,15 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
     train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
+    # train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
     # train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
     train_dataset_github = ISICDataset_for_Train_github(transforms=data_transforms["train"])
     concat_dataset = ConcatDataset([
-        train_dataset, train_dataset2020
+        train_dataset, train_dataset2020, train_dataset_github
     ])
 
     # 用github数据时, num_workers=2
-    train_loader = DataLoader(train_dataset_github, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
                               num_workers=2, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
