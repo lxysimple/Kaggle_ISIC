@@ -730,6 +730,7 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
     train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
+    train_dataset2020_224 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020_224', transforms=data_transforms["train"])
     # train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
     train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
     train_dataset_github = ISICDataset_for_Train_github(transforms=data_transforms["train"])
@@ -738,7 +739,7 @@ def prepare_loaders(df, fold):
     ])
 
     # 用github数据时, num_workers=2
-    train_loader = DataLoader(train_dataset2020, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(train_dataset2020_224, batch_size=CONFIG['train_batch_size'], 
                               num_workers=2, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
