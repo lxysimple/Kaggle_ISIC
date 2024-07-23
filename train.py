@@ -67,10 +67,10 @@ CONFIG = {
     "seed": 42,
     "epochs": 20,
 
-    # "img_size": 336,
-    # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
-    "img_size": 384,
-    "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
+    "img_size": 336,
+    "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
+    # "img_size": 384,
+    # "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
 
     # 164:only github_data
     # 96:only kaggle_data
@@ -78,8 +78,8 @@ CONFIG = {
 
     "valid_batch_size": 64, # 64
     "scheduler": 'CosineAnnealingLR',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
-    # "checkpoint": None,
+    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
+    "checkpoint": None,
 
     # 手动调节学习率
     "learning_rate": 1e-5, # 1e-5
