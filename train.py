@@ -219,12 +219,12 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.path = path
         df = pd.read_csv(f"{path}/train-metadata.csv")
         
-        df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
-        self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
-        self.pic_2024 = h5py.File(HDF_FILE, mode="r")
+        # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
+        # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
+        # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
 
         self.df_positive = df[df["target"] == 1].reset_index()
-        # self.df_negative = df[df["target"] == 0].reset_index()
+        self.df_negative = df[df["target"] == 0].reset_index()
         # 保持一定的正负比例，不能让其失衡
         self.df_negative = self.df_negative[:len(self.df_positive)*20]
 
