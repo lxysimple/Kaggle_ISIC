@@ -366,23 +366,6 @@ class ISICDataset(Dataset):
         self.targets = df['target'].values
         self.transforms = transforms
 
-        df_2018 = pd.read_csv('/home/xyli/kaggle/data2018/train-metadata.csv') 
-        df_2019 = pd.read_csv('/home/xyli/kaggle/data2019/train-metadata.csv') 
-        df_2020 = pd.read_csv('/home/xyli/kaggle/data2020/train-metadata.csv') 
-        df_others = pd.read_csv('/home/xyli/kaggle/data_others/train-metadata.csv') 
-        self.df_2018 = df_2018[df_2018['kfold']==0.0] 
-        self.df_2019 = df_2019[df_2019['kfold']==0.0]
-        self.df_2020 = df_2020[df_2020['kfold']==0.0]
-        self.df_others = df_others[df_others['kfold']==0.0]
-        self.isic_ids.append(df_2018['isic_id'].values)
-        self.isic_ids.append(df_2019['isic_id'].values)
-        self.isic_ids.append(df_2020['isic_id'].values)
-        self.isic_ids.append(df_others['isic_id'].values)
-        self.targets.append(df_2018['isic_id'].values)
-        self.targets.append(df_2019['isic_id'].values)
-        self.targets.append(df_2020['isic_id'].values)
-        self.targets.append(df_others['isic_id'].values)
-
     def __len__(self):
         return len(self.df) + len(self.df_2018) + len(self.df_2019) + len(self.df_2020)
         + len(self.df_others)
