@@ -786,7 +786,7 @@ def run_test(model, dataloader, device):
 
         outputs = model(images).squeeze()
 
-        # 这里要取回到内存，如果不，列表appendGPU中变量的引用，导致变量不会销毁，最后撑爆GPU
+        # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
         outputs_list.append(outputs.detach().cpu().numpy())
         gc.collect()
     
