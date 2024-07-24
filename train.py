@@ -787,6 +787,7 @@ def run_test(model, dataloader, device):
         outputs = model(images).squeeze()
 
         outputs_list.append(outputs)
+        gc.collect()
     
     gc.collect()
     
