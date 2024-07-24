@@ -776,7 +776,7 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
 def run_test(model, dataloader, device):
     model.eval()
     
-    outputs_list = None
+    outputs_list = torch.empty()
     
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:        
