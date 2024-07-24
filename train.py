@@ -394,7 +394,7 @@ class InferenceDataset(Dataset):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
         self.df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
 
-        self.isic_ids = df['isic_id'].values
+        self.isic_ids = self.df['isic_id'].values
         # self.targets = df['target'].values
         self.transforms = transforms
 
