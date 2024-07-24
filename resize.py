@@ -40,11 +40,11 @@ def get_paths():
 
     paths = []
     for i in isic_ids_positive:
-        path = f"/home/xyli/kaggle/isicdir/images/{isic_id}.jpg"
+        path = f"/home/xyli/kaggle/isicdir/images/{i}.jpg"
         paths.append(path)
 
     for i in isic_ids_negative:
-        path = f"/home/xyli/kaggle/isicdir/images/{isic_id}.jpg"
+        path = f"/home/xyli/kaggle/isicdir/images/{i}.jpg"
         paths.append(path)
     
     return paths
