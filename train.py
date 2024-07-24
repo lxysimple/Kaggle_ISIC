@@ -869,7 +869,7 @@ res = run_test(model, test_loader, device=CONFIG['device'])
 df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
 df = df[['isic_id', 'target']]
 
-# df = df[0:10000]
+df = df[0:10000]
 df['eva'] = res
 df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 
