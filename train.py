@@ -776,7 +776,7 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
 def run_test(model, dataloader, device):
     model.eval()
     
-    outputs_list = torch.empty()
+    outputs_list = []
     
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:        
@@ -786,7 +786,7 @@ def run_test(model, dataloader, device):
 
         outputs = model(images).squeeze()
 
-        outputs_list = torch.cat((outputs_list, outputs), dim=0)
+        outputs_list.append(outputs)
         
 
 
