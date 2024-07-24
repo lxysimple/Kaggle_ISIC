@@ -34,9 +34,9 @@ def get_paths():
     df_positive = df[df["benign_malignant"] == 'malignant'].reset_index()
     df_negative = df[df["benign_malignant"] == 'benign'].reset_index()
     # 保持一定的正负比例，不能让其失衡
-    df_negative = self.df_negative[:len(self.df_positive)*20]
-    isic_ids_positive = self.df_positive['isic_id'].values
-    isic_ids_negative = self.df_negative['isic_id'].values
+    df_negative = df_negative[:len(df_positive)*20]
+    isic_ids_positive = df_positive['isic_id'].values
+    isic_ids_negative = df_negative['isic_id'].values
 
     paths = []
     for i in isic_ids_positive:
