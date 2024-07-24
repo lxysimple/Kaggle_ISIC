@@ -1,5 +1,6 @@
 import os
 from PIL import Image
+import pandas as pd
 
 def resize_and_save_images(file_paths, output_folder, size=(256, 256)):
     """
