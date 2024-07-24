@@ -737,7 +737,7 @@ def prepare_loaders(df, fold):
     train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
     train_dataset_github = ISICDataset_for_Train_github(transforms=data_transforms["train"])
     concat_dataset = ConcatDataset([
-        train_dataset
+        train_dataset_others, train_dataset2020
     ])
 
     # 用github数据时, num_workers=2
