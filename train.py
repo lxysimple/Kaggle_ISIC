@@ -117,6 +117,10 @@ HDF_FILE = f"{ROOT_DIR}/train-image.hdf5"
 
 
 df = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
+# df_2018 = 
+# df_2019
+# df_2020
+# df_others
 
 print("        df.shape, # of positive cases, # of patients")
 print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
@@ -741,7 +745,7 @@ def prepare_loaders(df, fold):
     ])
 
     # 用github数据时, num_workers=2
-    train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(train_dataset, batch_size=CONFIG['train_batch_size'], 
                               num_workers=2, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
