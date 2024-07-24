@@ -783,9 +783,9 @@ def prepare_loaders(df, fold):
 
     # 用github数据时, num_workers=2
     train_loader = DataLoader(concat_dataset_train, batch_size=CONFIG['train_batch_size'], 
-                              num_workers=2, shuffle=True, pin_memory=True, drop_last=True)    
+                              num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
-    #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
+    #                           num_workers=2, shuffle=True, pin_memory=True, drop_last=True)
 
     # from IPython import embed
     # embed()
