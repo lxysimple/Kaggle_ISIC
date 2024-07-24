@@ -393,7 +393,7 @@ class InferenceDataset(Dataset):
     def __init__(self, file_hdf, transforms=None):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
         self.df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-        self.df = self.df[0:10000]
+        # self.df = self.df[0:10000]
         self.isic_ids = self.df['isic_id'].values
         # self.targets = df['target'].values
         self.transforms = transforms
@@ -869,7 +869,7 @@ res = run_test(model, test_loader, device=CONFIG['device'])
 df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
 df = df[['isic_id', 'target']]
 
-df = df[0:10000]
+# df = df[0:10000]
 df['eva'] = res
 df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 
