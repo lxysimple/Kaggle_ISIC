@@ -117,10 +117,6 @@ HDF_FILE = f"{ROOT_DIR}/train-image.hdf5"
 
 
 df = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
-# df_2018 = 
-# df_2019
-# df_2020
-# df_others
 
 print("        df.shape, # of positive cases, # of patients")
 print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
@@ -145,6 +141,8 @@ print(df.shape[0], df.target.sum())
 sgkf = StratifiedGroupKFold(n_splits=CONFIG['n_fold'])
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
+
+
 
 # from IPython import embed
 # embed()
@@ -224,6 +222,8 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.path = path
         df = pd.read_csv(f"{path}/train-metadata.csv")
         
+        df = df[df['kfold']!=0.0]
+
         # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
         # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
         # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
@@ -331,7 +331,33 @@ class ISICDataset_for_Train(Dataset):
             'image': img,
             'target': target
         }
+
+class ISICDataset_jpg(Dataset):
+    def __init__(self, path, transforms=None):
+        self.path = path
+        df = pd.read_csv(f"{path}/train-metadata.csv")
+        self.df = df[df['kfold']==0.0] 
+        self.isic_ids = self.df['isic_id'].values
+        self.targets = self.df['target'].values
+        self.transforms = transforms
+        
+
+    def __len__(self):
+        return len(self.df)
     
+    def __getitem__(self, index):
+        isic_id = self.isic_ids[index]
+        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        target = self.targets[index]
+        
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
+            
+        return {
+            'image': img,
+            'target': target
+        }
+       
 class ISICDataset(Dataset):
     def __init__(self, df, file_hdf, transforms=None):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
@@ -339,9 +365,27 @@ class ISICDataset(Dataset):
         self.isic_ids = df['isic_id'].values
         self.targets = df['target'].values
         self.transforms = transforms
-        
+
+        df_2018 = pd.read_csv('/home/xyli/kaggle/data2018/train-metadata.csv') 
+        df_2019 = pd.read_csv('/home/xyli/kaggle/data2019/train-metadata.csv') 
+        df_2020 = pd.read_csv('/home/xyli/kaggle/data2020/train-metadata.csv') 
+        df_others = pd.read_csv('/home/xyli/kaggle/data_others/train-metadata.csv') 
+        self.df_2018 = df_2018[df_2018['kfold']==0.0] 
+        self.df_2019 = df_2019[df_2019['kfold']==0.0]
+        self.df_2020 = df_2020[df_2020['kfold']==0.0]
+        self.df_others = df_others[df_others['kfold']==0.0]
+        self.isic_ids.append(df_2018['isic_id'].values)
+        self.isic_ids.append(df_2019['isic_id'].values)
+        self.isic_ids.append(df_2020['isic_id'].values)
+        self.isic_ids.append(df_others['isic_id'].values)
+        self.targets.append(df_2018['isic_id'].values)
+        self.targets.append(df_2019['isic_id'].values)
+        self.targets.append(df_2020['isic_id'].values)
+        self.targets.append(df_others['isic_id'].values)
+
     def __len__(self):
-        return len(self.df)
+        return len(self.df) + len(self.df_2018) + len(self.df_2019) + len(self.df_2020)
+        + len(self.df_others)
     
     def __getitem__(self, index):
         isic_id = self.isic_ids[index]
@@ -733,21 +777,30 @@ def prepare_loaders(df, fold):
     df_valid = df[df.kfold == fold].reset_index(drop=True)
     
     train_dataset = ISICDataset_for_Train(df_train, HDF_FILE, transforms=data_transforms["train"])
-    valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
-
     train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
     train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
     train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
     train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
     # train_dataset_github = ISICDataset_for_Train_github(transforms=data_transforms["train"])
-    concat_dataset = ConcatDataset([
+    concat_dataset_train = ConcatDataset([
         train_dataset, train_dataset2020,
         train_dataset2019, train_dataset2018,
         train_dataset_others
     ])
 
+    valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
+    valid_dataset2020 = ISICDataset_jpg('/home/xyli/kaggle/data2020', transforms=data_transforms["valid"])
+    valid_dataset2019 = ISICDataset_jpg('/home/xyli/kaggle/data2019', transforms=data_transforms["valid"])
+    valid_dataset2018 = ISICDataset_jpg('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
+    valid_dataset_others = ISICDataset_jpg('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
+    concat_dataset_valid = ConcatDataset([
+        valid_dataset, valid_dataset2020,
+        valid_dataset2019, valid_dataset2018,
+        valid_dataset_others
+    ])
+
     # 用github数据时, num_workers=2
-    train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(concat_dataset_train, batch_size=CONFIG['train_batch_size'], 
                               num_workers=2, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
@@ -755,7 +808,7 @@ def prepare_loaders(df, fold):
     # from IPython import embed
     # embed()
 
-    valid_loader = DataLoader(valid_dataset, batch_size=CONFIG['valid_batch_size'], 
+    valid_loader = DataLoader(concat_dataset_valid, batch_size=CONFIG['valid_batch_size'], 
                               num_workers=16, shuffle=False, pin_memory=True)
     
     return train_loader, valid_loader
