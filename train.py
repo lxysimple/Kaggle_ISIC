@@ -79,8 +79,8 @@ CONFIG = {
     "valid_batch_size": 164, # 64
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5070_Loss0.4115_epoch4.bin',
-    "checkpoint": None,
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.8170_Loss0.7140_epoch12.bin',
+    # "checkpoint": None,
 
     # 手动调节学习率
     "learning_rate": 1e-5, # 1e-5
@@ -389,6 +389,29 @@ class ISICDataset(Dataset):
             'target': target
         }
 
+class InferenceDataset(Dataset):
+    def __init__(self, file_hdf, transforms=None):
+        self.fp_hdf = h5py.File(file_hdf, mode="r")
+        self.df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+
+        self.isic_ids = df['isic_id'].values
+        # self.targets = df['target'].values
+        self.transforms = transforms
+
+    def __len__(self):
+        return len(self.df) 
+    
+    def __getitem__(self, index):
+        isic_id = self.isic_ids[index]
+        img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
+        # target = self.targets[index]
+        
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
+            
+        return {
+            'image': img
+        }
 # ============================== Create Model ==============================
 
 class ISICModel(nn.Module):
@@ -749,6 +772,30 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
     
     return model, history
 
+
+def run_test(model, dataloader, device):
+    model.eval()
+    
+    outputs_list = None
+    
+    bar = tqdm(enumerate(dataloader), total=len(dataloader))
+    for step, data in bar:        
+        images = data['image'].to(device, dtype=torch.float)
+
+        batch_size = images.size(0)
+
+        outputs = model(images).squeeze()
+
+        outputs_list = torch.cat((outputs_list, outputs), dim=0)
+        
+
+
+    
+    gc.collect()
+    
+    return outputs_list
+
+
 def fetch_scheduler(optimizer):
     if CONFIG['scheduler'] == 'CosineAnnealingLR':
         scheduler = lr_scheduler.CosineAnnealingLR(optimizer,T_max=CONFIG['T_max'], 
@@ -804,17 +851,20 @@ def prepare_loaders(df, fold):
 # ============================== Main ==============================
 
 
-train_loader, valid_loader = prepare_loaders(df, fold=CONFIG["fold"])
+# train_loader, valid_loader = prepare_loaders(df, fold=CONFIG["fold"])
+
+# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+#                        weight_decay=CONFIG['weight_decay'])
+# scheduler = fetch_scheduler(optimizer)
+# model, history = run_training(model, optimizer, scheduler,
+#                               device=CONFIG['device'],
+#                               num_epochs=CONFIG['epochs'])
 
 
+# 进行推理
+infer_dataset = InferenceDataset( HDF_FILE, transforms=data_transforms["valid"])
+test_loader = DataLoader(infer_dataset, batch_size=CONFIG['valid_batch_size'], 
+                            num_workers=16, shuffle=False, pin_memory=True)
 
-
-optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-                       weight_decay=CONFIG['weight_decay'])
-scheduler = fetch_scheduler(optimizer)
-model, history = run_training(model, optimizer, scheduler,
-                              device=CONFIG['device'],
-                              num_epochs=CONFIG['epochs'])
-
-
+run_test(model, test_loader, device=CONFIG['device'])
 
