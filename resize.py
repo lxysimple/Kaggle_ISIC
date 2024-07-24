@@ -17,7 +17,7 @@ def resize_and_save_images(file_paths, output_folder, size=(256, 256)):
     for file_path in file_paths:
         try:
             with Image.open(file_path) as img:
-                img_resized = img.resize(size, Image.ANTIALIAS)
+                img_resized = img.resize(size, Image.LANCZOS)
                 # 获取原始文件名
                 file_name = os.path.basename(file_path)
                 # 构建输出文件路径
