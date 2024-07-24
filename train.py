@@ -787,13 +787,10 @@ def run_test(model, dataloader, device):
         outputs = model(images).squeeze()
 
         outputs_list.append(outputs)
-        
-
-
     
     gc.collect()
     
-    return outputs_list
+    return torch.cat(outputs_list, dim=0)
 
 
 def fetch_scheduler(optimizer):
