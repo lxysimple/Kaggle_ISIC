@@ -367,8 +367,7 @@ class ISICDataset(Dataset):
         self.transforms = transforms
 
     def __len__(self):
-        return len(self.df) + len(self.df_2018) + len(self.df_2019) + len(self.df_2020)
-        + len(self.df_others)
+        return len(self.df) 
     
     def __getitem__(self, index):
         isic_id = self.isic_ids[index]
