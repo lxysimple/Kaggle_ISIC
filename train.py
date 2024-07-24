@@ -863,7 +863,7 @@ def prepare_loaders(df, fold):
 
 # 进行推理
 infer_dataset = InferenceDataset( HDF_FILE, transforms=data_transforms["valid"])
-test_loader = DataLoader(infer_dataset, 256, num_workers=16, shuffle=False, pin_memory=False)
+test_loader = DataLoader(infer_dataset, 164, num_workers=16, shuffle=False, pin_memory=False)
 res = run_test(model, test_loader, device=CONFIG['device']) 
 
 from IPython import embed
