@@ -792,7 +792,7 @@ def run_test(model, dataloader, device):
     
     gc.collect()
     
-    return torch.cat(outputs_list, dim=0)
+    return np.concatenate(outputs_list, axis=0)
 
 
 def fetch_scheduler(optimizer):
