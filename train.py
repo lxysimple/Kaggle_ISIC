@@ -786,6 +786,7 @@ def run_test(model, dataloader, device):
 
         outputs = model(images).squeeze()
 
+        # 这里要取回到内存，如果不，列表appendGPU中变量的引用，导致变量不会销毁，最后撑爆GPU
         outputs_list.append(outputs.detach().cpu().numpy())
         gc.collect()
     
@@ -862,7 +863,7 @@ def prepare_loaders(df, fold):
 
 # 进行推理
 infer_dataset = InferenceDataset( HDF_FILE, transforms=data_transforms["valid"])
-test_loader = DataLoader(infer_dataset, 2, num_workers=16, shuffle=False, pin_memory=False)
+test_loader = DataLoader(infer_dataset, 256, num_workers=16, shuffle=False, pin_memory=False)
 res = run_test(model, test_loader, device=CONFIG['device']) 
 
 from IPython import embed
