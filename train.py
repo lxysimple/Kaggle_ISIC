@@ -734,13 +734,14 @@ def prepare_loaders(df, fold):
     train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
     # train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
     train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+    train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
     train_dataset_github = ISICDataset_for_Train_github(transforms=data_transforms["train"])
     concat_dataset = ConcatDataset([
         train_dataset
     ])
 
     # 用github数据时, num_workers=2
-    train_loader = DataLoader(train_dataset, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(train_dataset_others, batch_size=CONFIG['train_batch_size'], 
                               num_workers=2, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=16, shuffle=True, pin_memory=True, drop_last=True)
