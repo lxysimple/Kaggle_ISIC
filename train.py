@@ -336,12 +336,13 @@ class ISICDataset_jpg(Dataset):
     def __init__(self, path, transforms=None):
         self.path = path
         df = pd.read_csv(f"{path}/train-metadata.csv")
-        df = df[df['kfold']==0.0] 
+        # df = df[df['kfold']==0.0] 
+        self.df = df[df['kfold']==0.0] 
 
-        self.df_positive = df[df["target"] == 1].reset_index()
-        self.df_negative = df[df["target"] == 0].reset_index()
-        self.df_negative = self.df_negative[:len(self.df_positive)]
-        self.df = pd.concat([self.df_positive, self.df_negative])
+        # self.df_positive = df[df["target"] == 1].reset_index()
+        # self.df_negative = df[df["target"] == 0].reset_index()
+        # self.df_negative = self.df_negative[:len(self.df_positive)]
+        # self.df = pd.concat([self.df_positive, self.df_negative])
 
         self.isic_ids = self.df['isic_id'].values
         self.targets = self.df['target'].values
