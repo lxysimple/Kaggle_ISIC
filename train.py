@@ -862,7 +862,6 @@ embed()
 
 # 进行推理
 infer_dataset = InferenceDataset( HDF_FILE, transforms=data_transforms["valid"])
-test_loader = DataLoader(infer_dataset, batch_size=CONFIG['valid_batch_size'], 
-                            num_workers=16, shuffle=False, pin_memory=True)
+test_loader = DataLoader(infer_dataset, 32, num_workers=16, shuffle=False, pin_memory=False)
 res = run_test(model, test_loader, device=CONFIG['device'])
 
