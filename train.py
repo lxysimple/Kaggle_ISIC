@@ -372,6 +372,7 @@ if CONFIG['checkpoint'] is not None:
     model = ISICModel(CONFIG['model_name'], pretrained=False)
 
     checkpoint = torch.load(CONFIG['checkpoint'])
+    print(f'load checkpoint: {CONFIG['checkpoint']}') 
     # 去掉前面多余的'module.'
     new_state_dict = {}
     for k,v in checkpoint.items():
