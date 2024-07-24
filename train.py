@@ -866,5 +866,12 @@ infer_dataset = InferenceDataset( HDF_FILE, transforms=data_transforms["valid"])
 test_loader = DataLoader(infer_dataset, 96, num_workers=16, shuffle=False, pin_memory=False)
 res = run_test(model, test_loader, device=CONFIG['device']) 
 
-from IPython import embed
-embed()
+df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+df = df[['isic_id', 'target']]
+
+# df = df[0:10000]
+df['eva'] = res
+df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+
+# from IPython import embed
+# embed()
