@@ -336,7 +336,7 @@ class ISICDataset_jpg(Dataset):
     def __init__(self, path, transforms=None):
         self.path = path
         df = pd.read_csv(f"{path}/train-metadata.csv")
-        self.df = df[df['kfold']==0.0] 
+        df = df[df['kfold']==0.0] 
 
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
