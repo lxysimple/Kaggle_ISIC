@@ -1,3 +1,8 @@
+"""
+
+"""
+
+
 # ============================== Import Required Libraries ==============================
 
 import os  
@@ -152,7 +157,7 @@ for idx, (train_idx, val_idx) in enumerate(gkf.split(df, df["target"], groups=df
 
 # 统计一下各折的信息
 # Add summary
-fold_summary = df.groupby("fold")["patient_id"].nunique().to_dict()
+fold_summary = df.groupby("kfold")["patient_id"].nunique().to_dict()
 total_patients = df["patient_id"].nunique()
 print(f"Fold Summary (patients per fold):")
 for fold, count in fold_summary.items():
