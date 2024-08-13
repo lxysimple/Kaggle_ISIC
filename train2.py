@@ -222,8 +222,8 @@ print(f"Number of negative cases: {total_cases - positive_cases}")
 print(f"New ratio of negative to positive cases: {(total_cases - positive_cases) / positive_cases:.2f}:1")
 
 
-from IPython import embed
-embed()
+# from IPython import embed
+# embed()
 # ============================== Dataset Class ==============================
 
 class ISICDataset(Dataset):
@@ -249,29 +249,6 @@ class ISICDataset(Dataset):
             
         return img, target
 
-class InferenceDataset(Dataset):
-    def __init__(self, file_hdf, transforms=None):
-        self.fp_hdf = h5py.File(file_hdf, mode="r")
-        self.df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-        # self.df = self.df[0:10000]
-        self.isic_ids = self.df['isic_id'].values
-        # self.targets = df['target'].values
-        self.transforms = transforms
-
-    def __len__(self):
-        return len(self.df) 
-    
-    def __getitem__(self, index):
-        isic_id = self.isic_ids[index]
-        img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
-        # target = self.targets[index]
-        
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
-            
-        return {
-            'image': img
-        }
 # ============================== Create Model ==============================
 
 class ISICModel(nn.Module):
@@ -306,75 +283,93 @@ model = model.cuda()
 
 model = DataParallel(model) 
 
+
 # ============================== Augmentations ==============================
-data_transforms = {
-    "train": A.Compose([
-        A.RandomRotate90(p=0.5),
-        A.Flip(p=0.5),
-        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-        A.Normalize(
-                mean=[0.4815, 0.4578, 0.4082], 
-                std=[0.2686, 0.2613, 0.2758], 
-                max_pixel_value=255.0,
-                p=1.0
-            ),
-        ToTensorV2()
-    ], p=1.),
+# Prepare augmentation
+aug_transform = A.Compose([
+    A.RandomRotate90(),
+    A.Flip(),
+    A.RandomBrightnessContrast(brightness_limit=0.15, contrast_limit=0.1, p=0.5),
+    A.Resize(224, 224),
+    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ToTensorV2(),
+])
 
-    # "train":A.Compose([
-        
-    #         A.Transpose(p=0.5),
-    #         A.VerticalFlip(p=0.5),
-    #         A.HorizontalFlip(p=0.5),
-    #         A.ColorJitter(brightness=0.2, p=0.75), # A.RandomBrightness(limit=0.2, p=0.75),
-    #         A.ColorJitter(contrast=0.2, p=0.75), # A.RandomContrast(limit=0.2, p=0.75),
-    #         # A.OneOf([
-    #         #     A.MotionBlur(blur_limit=5),
-    #         #     A.MedianBlur(blur_limit=5),
-    #         #     A.GaussianBlur(blur_limit=5),
-    #         #     A.GaussNoise(var_limit=(5.0, 30.0)),
-    #         # ], p=0.7),
-    #         A.MotionBlur(blur_limit=5, p=0.7),
-    #         A.MedianBlur(blur_limit=5, p=0.7),
-    #         A.GaussianBlur(blur_limit=5, p=0.7),
-    #         A.GaussNoise(var_limit=(5.0, 30.0), p=0.7),
+base_transform = A.Compose([
+    A.Resize(224, 224),
+    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ToTensorV2(),
+])
 
-    #         # A.OneOf([
-    #         #     A.OpticalDistortion(distort_limit=1.0),
-    #         #     A.GridDistortion(num_steps=5, distort_limit=1.),
-    #         #     A.ElasticTransform(alpha=3),
-    #         # ], p=0.7),
-    #         A.OpticalDistortion(distort_limit=1.0, p=0.7),
-    #         A.GridDistortion(num_steps=5, distort_limit=1.0, p=0.7),
-    #         A.ElasticTransform(alpha=3, p=0.7),
 
-    #         A.CLAHE(clip_limit=4.0, p=0.7),
-    #         A.HueSaturationValue(hue_shift_limit=10, sat_shift_limit=20, val_shift_limit=10, p=0.5),
-    #         A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, border_mode=0, p=0.85),
+#--------------------------------------------------------------------------测试一下数据增强效果
+import matplotlib.pyplot as plt
+from torchvision.utils import make_grid
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+import cv2
 
-    #         A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-    #         # A.Cutout(max_h_size=int(CONFIG['img_size'] * 0.375), max_w_size=int(CONFIG['img_size'] * 0.375), num_holes=1, p=0.7), 
-    #         A.CoarseDropout(p=0.7), # == Cutout
-    #         A.Normalize(
-    #                 mean=[0.4815, 0.4578, 0.4082], 
-    #                 std=[0.2686, 0.2613, 0.2758], 
-    #                 max_pixel_value=255.0,
-    #                 p=1.0
-    #             ),
-    #         ToTensorV2()
-    # ], p=1.),
+def visualize_augmentations_positive(dataset, num_samples=3, num_augmentations=5, figsize=(20, 10)):
+    # Find positive samples
+    positive_samples = []
+    for i in range(len(dataset)):
+        _, label = dataset[i]
+        if label == 1:  # Assuming 1 is the positive class
+            positive_samples.append(i)
+
+        if len(positive_samples) == num_samples:
+            break
     
-    "valid": A.Compose([
-        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-        A.Normalize(
-                mean=[0.4815, 0.4578, 0.4082], 
-                std=[0.2686, 0.2613, 0.2758], 
-                max_pixel_value=255.0,
-                p=1.0
-            ),
-        ToTensorV2(),
-        ], p=1.)
-}
+    if len(positive_samples) < num_samples:
+        print(f"Warning: Only found {len(positive_samples)} positive samples.")
+    
+    fig, axes = plt.subplots(num_samples, num_augmentations + 1, figsize=figsize)
+    fig.suptitle("Original and Augmented Versions of Positive Samples", fontsize=16)
+
+    for sample_num, sample_idx in enumerate(positive_samples):
+        # Get a single sample
+        original_image, label = dataset[sample_idx]
+        
+        # If the image is already a tensor (due to ToTensorV2 in the transform), convert it back to numpy
+        if isinstance(original_image, torch.Tensor):
+            original_image = original_image.permute(1, 2, 0).numpy()
+            
+        # Reverse the normalization
+        mean = np.array([0.485, 0.456, 0.406])
+        std = np.array([0.229, 0.224, 0.225])
+        original_image = (original_image * std + mean) * 255
+        original_image = original_image.astype(np.uint8)
+
+        # Display original image
+        axes[sample_num, 0].imshow(original_image)
+        axes[sample_num, 0].axis('off')
+        axes[sample_num, 0].set_title("Original", fontsize=10)
+
+        # Apply and display augmentations
+        for aug_num in range(num_augmentations):
+            augmented = dataset.transform(image=original_image)['image']
+            # If the result is a tensor, convert it back to numpy
+            if isinstance(augmented, torch.Tensor):
+                augmented = augmented.permute(1, 2, 0).numpy()
+            # Reverse the normalization
+            augmented = (augmented * std + mean) * 255
+            augmented = augmented.astype(np.uint8)
+            
+            axes[sample_num, aug_num + 1].imshow(augmented)
+            axes[sample_num, aug_num + 1].axis('off')
+            axes[sample_num, aug_num + 1].set_title(f"Augmented {aug_num + 1}", fontsize=10)
+
+    plt.tight_layout()
+    plt.show()
+    
+augtest_dataset = ISICDataset(
+    hdf5_file=HDF_FILE,
+    isic_ids=df_train['isic_id'].values,
+    targets=df_train['target'].values,
+    transform=aug_transform,
+)
+
+visualize_augmentations_positive(augtest_dataset)
 
 # ============================== cutmix+mixup ==============================
 
