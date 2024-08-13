@@ -239,7 +239,7 @@ class ISICDataset(Dataset):
         with h5py.File(self.hdf5_file, 'r') as f:
             img_bytes = f[self.isic_ids[idx]][()]
         
-        img = Image.open(io.BytesIO(img_bytes))
+        img = Image.open(BytesIO(img_bytes))
         img = np.array(img)  # Convert PIL Image to numpy array
         
         if self.transform:
