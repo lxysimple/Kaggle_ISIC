@@ -210,6 +210,7 @@ df_target_1 = df_train[df_train['target'] == 1]
 df_target_0 = df_train[df_train['target'] == 0].sample(frac=0.01, random_state=42)
 df_train_balanced = pd.concat([df_target_1, df_target_0]).reset_index(drop=True)
 # Print balanced dataset summary
+print("")
 print("Balanced Dataset Summary:")
 print(f"Total number of samples: {len(df_train)}")
 print(f"Number of unique patients: {df_train['patient_id'].nunique()}")
