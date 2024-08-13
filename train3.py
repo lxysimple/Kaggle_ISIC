@@ -143,8 +143,18 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 统计一下各折的信息 
 
 Fold 0.0: 521 patients
+Original Dataset Summary:
+Total number of samples: 200532
+Number of positive cases: 199
+Number of negative cases: 200333
+Ratio of negative to positive cases: 1006.70:1
+
 Fold 1.0: 521 patients
-Total patients: 1042
+Original Dataset Summary:
+Total number of samples: 200527
+Number of positive cases: 194
+Number of negative cases: 200333
+Ratio of negative to positive cases: 1032.64:1
 """
 fold_summary = df.groupby("kfold")["patient_id"].nunique().to_dict()
 total_patients = df["patient_id"].nunique()
