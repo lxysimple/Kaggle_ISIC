@@ -254,7 +254,7 @@ class ISICDataset(Dataset):
         return img, target
 
 # ============================== Create Model ==============================
-def setup_model(num_classes=2, freeze_base_model=freeze_base_model):
+def setup_model(num_classes=2, freeze_base_model=False):
     model = timm.create_model('tf_efficientnetv2_b1', 
                             checkpoint_path='/kaggle/input/effnetv2-m-b1-pth/tf_efficientnetv2_b1-be6e41b0.pth',
                             pretrained=False)
