@@ -157,7 +157,16 @@ df["kfold"] = -1
 for idx, (train_idx, val_idx) in enumerate(gkf.split(df, df["target"], groups=df["patient_id"])):
     df.loc[val_idx, "kfold"] = idx
 
-# 统计一下各折的信息
+""" 
+统计一下各折的信息 
+
+Fold 0: 206 patients
+Fold 1: 209 patients
+Fold 2: 208 patients
+Fold 3: 209 patients
+Fold 4: 210 patients
+Total patients: 1042
+"""
 # Add summary
 fold_summary = df.groupby("kfold")["patient_id"].nunique().to_dict()
 total_patients = df["patient_id"].nunique()
@@ -167,14 +176,7 @@ for fold, count in fold_summary.items():
         print(f"Fold {fold}: {count} patients")
 print(f"Total patients: {total_patients}")
 
-"""
-Fold 0: 206 patients
-Fold 1: 209 patients
-Fold 2: 208 patients
-Fold 3: 209 patients
-Fold 4: 210 patients
-Total patients: 1042
-"""
+
 
 
 """ 统计一下数据集总体信息 """
@@ -187,6 +189,37 @@ original_positive_ratio = original_positive_cases / original_total_cases
 print(f"Number of positive cases: {original_positive_cases}")
 print(f"Number of negative cases: {original_total_cases - original_positive_cases}")
 print(f"Ratio of negative to positive cases: {(original_total_cases - original_positive_cases) / original_positive_cases:.2f}:1")
+
+
+
+"""  
+Downsample 
+Keeping just 1% of negatives!
+
+Balanced Dataset Summary:
+Total number of samples: 401059
+Number of unique patients: 1042
+Number of positive cases: 393
+Number of negative cases: 4007
+New ratio of negative to positive cases: 10.20:1
+"""
+df_train = df
+#keep all positives
+df_target_1 = df_train[df_train['target'] == 1]
+#just use 1% of negatives
+df_target_0 = df_train[df_train['target'] == 0].sample(frac=0.01, random_state=42)
+df_train_balanced = pd.concat([df_target_1, df_target_0]).reset_index(drop=True)
+# Print balanced dataset summary
+print("Balanced Dataset Summary:")
+print(f"Total number of samples: {len(df_train)}")
+print(f"Number of unique patients: {df_train['patient_id'].nunique()}")
+positive_cases = df_train_balanced['target'].sum()
+total_cases = len(df_train_balanced)
+positive_ratio = positive_cases / total_cases
+print(f"Number of positive cases: {positive_cases}")
+print(f"Number of negative cases: {total_cases - positive_cases}")
+print(f"New ratio of negative to positive cases: {(total_cases - positive_cases) / positive_cases:.2f}:1")
+
 
 from IPython import embed
 embed()
