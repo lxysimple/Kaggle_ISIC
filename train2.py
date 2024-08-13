@@ -162,8 +162,8 @@ print(f"Total patients: {total_patients}")
 
 
 
-# from IPython import embed
-# embed()
+from IPython import embed
+embed()
 # ============================== Dataset Class ==============================
 class ISICDataset_for_Train_github(Dataset):
     def __init__(self, transforms=None):
