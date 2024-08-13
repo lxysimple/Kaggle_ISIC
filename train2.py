@@ -1,5 +1,7 @@
 """
 
+https://www.kaggle.com/code/richolson/isic-2024-imagenet-train-oof-preds-public
+
 """
 
 
@@ -165,10 +167,29 @@ for fold, count in fold_summary.items():
         print(f"Fold {fold}: {count} patients")
 print(f"Total patients: {total_patients}")
 
+"""
+Fold 0: 206 patients
+Fold 1: 209 patients
+Fold 2: 208 patients
+Fold 3: 209 patients
+Fold 4: 210 patients
+Total patients: 1042
+"""
 
 
-from IPython import embed
-embed()
+""" 统计一下数据集总体信息 """
+print("\nOriginal Dataset Summary:")
+print(f"Total number of samples: {len(df)}")
+print(f"Number of unique patients: {df['patient_id'].nunique()}")
+original_positive_cases = df['target'].sum()
+original_total_cases = len(df)
+original_positive_ratio = original_positive_cases / original_total_cases
+print(f"Number of positive cases: {original_positive_cases}")
+print(f"Number of negative cases: {original_total_cases - original_positive_cases}")
+print(f"Ratio of negative to positive cases: {(original_total_cases - original_positive_cases) / original_positive_cases:.2f}:1")
+
+# from IPython import embed
+# embed()
 # ============================== Dataset Class ==============================
 class ISICDataset_for_Train_github(Dataset):
     def __init__(self, transforms=None):
