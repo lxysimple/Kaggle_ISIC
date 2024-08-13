@@ -461,8 +461,8 @@ def cross_validation_train(df_train, num_folds, num_epochs, hdf5_file_path, aug_
             print(f"\nFold {fold + 1}/{num_folds}")
             
             # Split data for current fold
-            train_df = df_train[df_train['fold'] != fold]
-            val_df = df_train[df_train['fold'] == fold]
+            train_df = df_train[df_train['kfold'] != fold]
+            val_df = df_train[df_train['kfold'] == fold]
             
             # Create datasets and data loaders
             train_dataset = ISICDataset(hdf5_file_path, train_df['isic_id'].values, train_df['target'].values, aug_transform)
