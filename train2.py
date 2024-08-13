@@ -188,8 +188,8 @@ print(f"Number of positive cases: {original_positive_cases}")
 print(f"Number of negative cases: {original_total_cases - original_positive_cases}")
 print(f"Ratio of negative to positive cases: {(original_total_cases - original_positive_cases) / original_positive_cases:.2f}:1")
 
-# from IPython import embed
-# embed()
+from IPython import embed
+embed()
 # ============================== Dataset Class ==============================
 class ISICDataset_for_Train_github(Dataset):
     def __init__(self, transforms=None):
