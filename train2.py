@@ -68,6 +68,7 @@ warnings.filterwarnings("ignore")
 
 from torch.nn.parallel import DataParallel
 
+from sklearn.metrics import hamming_loss, f1_score, roc_curve, auc, classification_report
 
 # ============================== Training Configuration ==============================
 
