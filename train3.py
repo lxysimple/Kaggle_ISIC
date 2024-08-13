@@ -151,11 +151,10 @@ total_patients = df["patient_id"].nunique()
 print(f"Fold Summary (patients per fold):")
 for fold, count in fold_summary.items():
     if fold != -1:  # Exclude the initialization value
-        print(f"Fold {fold}: {count} patients")
-
         """ 统计一下数据集总体信息 """
+        print(f"Fold {fold}: {count} patients")
         df_flod = df[df['kfold'] == fold]
-        print("\nOriginal Dataset Summary:")
+        print("Original Dataset Summary:")
         print(f"Total number of samples: {len(df_flod)}")
         original_positive_cases = df_flod['target'].sum()
         original_total_cases = len(df_flod)
@@ -163,6 +162,7 @@ for fold, count in fold_summary.items():
         print(f"Number of positive cases: {original_positive_cases}")
         print(f"Number of negative cases: {original_total_cases - original_positive_cases}")
         print(f"Ratio of negative to positive cases: {(original_total_cases - original_positive_cases) / original_positive_cases:.2f}:1")
+        print('\n')
 
 print(f"Total patients: {total_patients}")
 
