@@ -120,19 +120,19 @@ HDF_FILE = f"{ROOT_DIR}/train-image.hdf5"
 
 df = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
 
-print("        df.shape, # of positive cases, # of patients")
-print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
+# print("        df.shape, # of positive cases, # of patients")
+# print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
 
-df_positive = df[df["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
-df_negative = df[df["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
+# df_positive = df[df["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
+# df_negative = df[df["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
 
-# 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:20
-df = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*20, :]])  
-print("filtered>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
+# # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:20
+# df = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*20, :]])  
+# print("filtered>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
 
-df = df.reset_index(drop=True)
+# df = df.reset_index(drop=True)
 
-print(df.shape[0], df.target.sum())
+# print(df.shape[0], df.target.sum())
 
 # 用于计算一个学习率调整器的一个参数
 # 因为之后要合并数据集,算了一下合并后大约是合并前2.4倍,合并前是8k,合并后是20k左右
