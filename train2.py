@@ -225,25 +225,29 @@ print(f"New ratio of negative to positive cases: {(total_cases - positive_cases)
 # from IPython import embed
 # embed()
 # ============================== Dataset Class ==============================
-
 class ISICDataset(Dataset):
-    def __init__(self, df, file_hdf, transforms=None):
-        self.fp_hdf = h5py.File(file_hdf, mode="r")
-        self.df = df
-        self.isic_ids = df['isic_id'].values
-        self.targets = df['target'].values
-        self.transforms = transforms
+    def __init__(self, hdf5_file, isic_ids, targets=None, transform=None):
+        self.hdf5_file = hdf5_file
+        self.isic_ids = isic_ids
+        self.targets = targets
+        self.transform = transform
 
     def __len__(self):
-        return len(self.df) 
-    
-    def __getitem__(self, index):
-        isic_id = self.isic_ids[index]
-        img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
-        target = self.targets[index]
+        return len(self.isic_ids)
+
+    def __getitem__(self, idx):
+        with h5py.File(self.hdf5_file, 'r') as f:
+            img_bytes = f[self.isic_ids[idx]][()]
         
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
+        img = Image.open(io.BytesIO(img_bytes))
+        img = np.array(img)  # Convert PIL Image to numpy array
+        
+        if self.transform:
+            transformed = self.transform(image=img)
+            img = transformed['image']
+        
+        if self.targets is not None:
+            target = self.targets[idx]
         else:
             target = torch.tensor(-1)  # Dummy target for test set
             
