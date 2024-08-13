@@ -254,39 +254,17 @@ class ISICDataset(Dataset):
         return img, target
 
 # ============================== Create Model ==============================
+def setup_model(num_classes=2, freeze_base_model=freeze_base_model):
+    model = timm.create_model('tf_efficientnetv2_b1', 
+                            checkpoint_path='/kaggle/input/effnetv2-m-b1-pth/tf_efficientnetv2_b1-be6e41b0.pth',
+                            pretrained=False)
 
-class ISICModel(nn.Module):
-    def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
-        super(ISICModel, self).__init__()
-        self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
+    if freeze_base_model:
+        for param in model.parameters():
+            param.requires_grad = False
 
-        in_features = self.model.head.in_features
-        self.model.head = nn.Linear(in_features, num_classes)
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, images):
-        return self.sigmoid(self.model(images))
-    
-
-
-if CONFIG['checkpoint'] is not None:
-    model = ISICModel(CONFIG['model_name'], pretrained=False)
-
-    checkpoint = torch.load(CONFIG['checkpoint'])
-    print(f"load checkpoint: {CONFIG['checkpoint']}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
-else:
-    model = ISICModel(CONFIG['model_name'], pretrained=True)
-
-model = model.cuda() 
-# model.to(CONFIG['device'])
-
-model = DataParallel(model) 
-
+    model.classifier = nn.Linear(model.classifier.in_features, out_features=num_classes)
+    return model.to(device)    
 
 # ============================== Augmentations ==============================
 # Prepare augmentation
@@ -306,77 +284,9 @@ base_transform = A.Compose([
 ])
 
 
-#--------------------------------------------测试一下数据增强效果
-import matplotlib.pyplot as plt
-from torchvision.utils import make_grid
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
-import cv2
 
-def visualize_augmentations_positive(dataset, num_samples=3, num_augmentations=5, figsize=(20, 10)):
-    # Find positive samples
-    positive_samples = []
-    for i in range(len(dataset)):
-        _, label = dataset[i]
-        if label == 1:  # Assuming 1 is the positive class
-            positive_samples.append(i)
-
-        if len(positive_samples) == num_samples:
-            break
-    
-    if len(positive_samples) < num_samples:
-        print(f"Warning: Only found {len(positive_samples)} positive samples.")
-    
-    fig, axes = plt.subplots(num_samples, num_augmentations + 1, figsize=figsize)
-    fig.suptitle("Original and Augmented Versions of Positive Samples", fontsize=16)
-
-    for sample_num, sample_idx in enumerate(positive_samples):
-        # Get a single sample
-        original_image, label = dataset[sample_idx]
-        
-        # If the image is already a tensor (due to ToTensorV2 in the transform), convert it back to numpy
-        if isinstance(original_image, torch.Tensor):
-            original_image = original_image.permute(1, 2, 0).numpy()
-            
-        # Reverse the normalization
-        mean = np.array([0.485, 0.456, 0.406])
-        std = np.array([0.229, 0.224, 0.225])
-        original_image = (original_image * std + mean) * 255
-        original_image = original_image.astype(np.uint8)
-
-        # Display original image
-        axes[sample_num, 0].imshow(original_image)
-        axes[sample_num, 0].axis('off')
-        axes[sample_num, 0].set_title("Original", fontsize=10)
-
-        # Apply and display augmentations
-        for aug_num in range(num_augmentations):
-            augmented = dataset.transform(image=original_image)['image']
-            # If the result is a tensor, convert it back to numpy
-            if isinstance(augmented, torch.Tensor):
-                augmented = augmented.permute(1, 2, 0).numpy()
-            # Reverse the normalization
-            augmented = (augmented * std + mean) * 255
-            augmented = augmented.astype(np.uint8)
-            
-            axes[sample_num, aug_num + 1].imshow(augmented)
-            axes[sample_num, aug_num + 1].axis('off')
-            axes[sample_num, aug_num + 1].set_title(f"Augmented {aug_num + 1}", fontsize=10)
-
-    plt.tight_layout()
-    plt.show()
-    
-augtest_dataset = ISICDataset(
-    hdf5_file=HDF_FILE,
-    isic_ids=df_train['isic_id'].values,
-    targets=df_train['target'].values,
-    transform=aug_transform,
-)
-
-visualize_augmentations_positive(augtest_dataset)
-
-from IPython import embed
-embed()
+# from IPython import embed
+# embed()
 # ============================== cutmix+mixup ==============================
 
 def rand_bbox(size, lam):
@@ -470,269 +380,139 @@ def mixup_criterion(preds1, targets):
 
 
 # ============================== Function ==============================
-def criterion(outputs, targets):
-    return nn.BCELoss()(outputs, targets)
+def score(solution: pd.DataFrame, submission: pd.DataFrame, row_id_column_name: str, min_tpr: float=0.80) -> float:
 
-def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
+    del solution[row_id_column_name]
+    del submission[row_id_column_name]
+
+    # rescale the target. set 0s to 1s and 1s to 0s (since sklearn only has max_fpr)
+    v_gt = abs(np.asarray(solution.values)-1)
+    
+    # flip the submissions to their compliments
+    v_pred = -1.0*np.asarray(submission.values)
+
+    max_fpr = abs(1-min_tpr)
+
+    # using sklearn.metric functions: (1) roc_curve and (2) auc
+    fpr, tpr, _ = roc_curve(v_gt, v_pred, sample_weight=None)
+    if max_fpr is None or max_fpr == 1:
+        return auc(fpr, tpr)
+    if max_fpr <= 0 or max_fpr > 1:
+        raise ValueError("Expected min_tpr in range [0, 1), got: %r" % min_tpr)
+        
+    # Add a single point at max_fpr by linear interpolation
+    stop = np.searchsorted(fpr, max_fpr, "right")
+    x_interp = [fpr[stop - 1], fpr[stop]]
+    y_interp = [tpr[stop - 1], tpr[stop]]
+    tpr = np.append(tpr[:stop], np.interp(max_fpr, x_interp, y_interp))
+    fpr = np.append(fpr[:stop], max_fpr)
+    partial_auc = auc(fpr, tpr)
+
+    return(partial_auc)
+
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+import pandas as pd
+from tqdm import tqdm
+from torch.cuda.amp import autocast, GradScaler
+import numpy as np
+
+def train_evaluate(model, train_loader, val_loader, criterion, optimizer, scheduler, fold, epoch, device):
+    scaler = GradScaler()
+    
+    # Training phase
     model.train()
+    for inputs, targets in tqdm(train_loader, desc=f"Epoch {epoch+1}, Fold {fold+1} Training"):
+        inputs, targets = inputs.to(device), targets.to(device)
+        optimizer.zero_grad(set_to_none=True)
+        
+        with autocast():
+            outputs = model(inputs)
+            loss = criterion(outputs, targets)
+        
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
     
-    dataset_size = 0
-    running_loss = 0.0
-    running_auroc  = 0.0
-    
-
-    bar = tqdm(enumerate(dataloader), total=len(dataloader))
-    for step, data in bar:
-        images = data['image'].to(device, dtype=torch.float)
-        targets = data['target'].to(device, dtype=torch.float)
-        
-        random_number = 0.5
-        # random_number = random.random() # 生成一个0到1之间的随机数
-        input = images
-        tmp = targets
-        target = targets
-        if random_number < 0.3:
-            input,targets=cutmix(input,target,2)
-            
-            targets[0]=torch.tensor(targets[0]).cuda()
-            targets[1]=torch.tensor(targets[1]).cuda()
-            targets[2]=torch.tensor(targets[2]).cuda()
-        elif random_number > 0.7:
-            input,targets=mixup(input,target,2)
-            
-            targets[0]=torch.tensor(targets[0]).cuda()
-            targets[1]=torch.tensor(targets[1]).cuda()
-            targets[2]=torch.tensor(targets[2]).cuda()
-        else:
-            None
-        
-        
-        
-        outputs = model(images).squeeze()
-
-        loss=None
-        output = outputs
-        if random_number < 0.3:
-            loss = cutmix_criterion(output, targets) # 注意这是在CPU上运算的
-        elif random_number > 0.7:
-            loss = mixup_criterion(output, targets) # 注意这是在CPU上运算的
-        else:
-            loss = criterion(output, target)
-        targets = tmp
-
-        # loss = criterion(outputs, targets)
- 
- 
-        loss = loss / CONFIG['n_accumulate']
-        loss.backward()
-    
-        if (step + 1) % CONFIG['n_accumulate'] == 0:
-            optimizer.step()
-
-            # zero the parameter gradients
-            optimizer.zero_grad()
-
-            # if scheduler is not None:
-            #     scheduler.step()
-                
-        auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
-
-        batch_size = images.size(0)
-        running_loss += (loss.item() * batch_size)
-        running_auroc  += (auroc * batch_size)
-        dataset_size += batch_size
-        
-        epoch_loss = running_loss / dataset_size
-        epoch_auroc = running_auroc / dataset_size
-        
-        bar.set_postfix(Epoch=epoch, Train_Loss=epoch_loss, Train_Auroc=epoch_auroc,
-                        LR=optimizer.param_groups[0]['lr'])
-    
-    # 修改一下原本代码
-    if scheduler is not None:
-        scheduler.step()
-    gc.collect()
-    
-    return epoch_loss, epoch_auroc
-
-@torch.inference_mode()
-def valid_one_epoch(model, dataloader, device, epoch):
+    # Evaluation phase
     model.eval()
+    val_targets, val_outputs = [], []
+    with torch.no_grad(), autocast():
+        for inputs, targets in tqdm(val_loader, desc=f"Epoch {epoch+1}, Fold {fold+1} Evaluating"):
+            inputs, targets = inputs.to(device), targets.to(device)
+            outputs = model(inputs)
+            val_targets.append(targets.cpu())
+            val_outputs.append(outputs.softmax(dim=1)[:, 1].cpu())
     
-    dataset_size = 0
-    running_loss = 0.0
-    running_auroc = 0.0
-    
-    bar = tqdm(enumerate(dataloader), total=len(dataloader))
-    for step, data in bar:        
-        images = data['image'].to(device, dtype=torch.float)
-        targets = data['target'].to(device, dtype=torch.float)
-        
-        batch_size = images.size(0)
+    scheduler.step()
+    return torch.cat(val_targets).numpy(), torch.cat(val_outputs).numpy()
 
-        outputs = model(images).squeeze()
-        loss = criterion(outputs, targets)
 
-        auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
-        running_loss += (loss.item() * batch_size)
-        running_auroc  += (auroc * batch_size)
-        dataset_size += batch_size
-        
-        epoch_loss = running_loss / dataset_size
-        epoch_auroc = running_auroc / dataset_size
-        
-        bar.set_postfix(Epoch=epoch, Valid_Loss=epoch_loss, Valid_Auroc=epoch_auroc,
-                        LR=optimizer.param_groups[0]['lr'])   
-    
-    gc.collect()
-    
-    return epoch_loss, epoch_auroc
+def cross_validation_train(df_train, num_folds, num_epochs, hdf5_file_path, aug_transform, base_transform, device):
+    criterion = nn.CrossEntropyLoss()
+    all_val_targets, all_val_outputs = [], []
 
-def run_training(model, optimizer, scheduler, device, num_epochs):
-    if torch.cuda.is_available():
-        print("[INFO] Using GPU: {}\n".format(torch.cuda.get_device_name()))
-    
-    start = time.time()
-    best_model_wts = copy.deepcopy(model.state_dict())
-    best_epoch_auroc = -np.inf
-    history = defaultdict(list)
-    
-    for epoch in range(1, num_epochs + 1): 
-        gc.collect()
-        train_epoch_loss, train_epoch_auroc = train_one_epoch(model, optimizer, scheduler, 
-                                           dataloader=train_loader, 
-                                           device=CONFIG['device'], epoch=epoch)
-        
-        val_epoch_loss, val_epoch_auroc = valid_one_epoch(model, valid_loader, device=CONFIG['device'], 
-                                         epoch=epoch)
-    
-        
-        # deep copy the model
-        # 新增一个限制,保证val_loss不变大,模型会更稳定
-        # if best_epoch_auroc <= val_epoch_auroc and val_epoch_loss<=0.24300:
-        if best_epoch_auroc <= val_epoch_auroc:
-            print(f"{b_}Validation AUROC Improved ({best_epoch_auroc} ---> {val_epoch_auroc})")
-            best_epoch_auroc = val_epoch_auroc
+    for epoch in range(num_epochs):
+        print(f"\nEpoch {epoch + 1}/{num_epochs}")
+        epoch_val_targets, epoch_val_outputs = [], []
 
-            best_model_wts = copy.deepcopy(model.state_dict())
-            PATH = "AUROC{:.4f}_Loss{:.4f}_epoch{:.0f}.bin".format(val_epoch_auroc, val_epoch_loss, epoch)
-            torch.save(model.state_dict(), PATH)
-            # Save a model file from the current directory
-            print(f"Model Saved{sr_}")
+        for fold in range(num_folds):
+            print(f"\nFold {fold + 1}/{num_folds}")
             
-        print()
-    
-    end = time.time()
-    time_elapsed = end - start
-    print('Training complete in {:.0f}h {:.0f}m {:.0f}s'.format(
-        time_elapsed // 3600, (time_elapsed % 3600) // 60, (time_elapsed % 3600) % 60))
-    print("Best AUROC: {:.4f}".format(best_epoch_auroc))
-    
-    # load best model weights
-    model.load_state_dict(best_model_wts)
-    
-    return model, history
-
-
-def run_test(model, dataloader, device):
-    model.eval()
-    
-    outputs_list = []
-    
-    bar = tqdm(enumerate(dataloader), total=len(dataloader))
-    for step, data in bar:        
-        images = data['image'].to(device, dtype=torch.float)
-
-        batch_size = images.size(0)
-
-        outputs = model(images).squeeze()
-
-        # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
-        outputs_list.append(outputs.detach().cpu().numpy())
-
-    
-    gc.collect()
-    
-    return np.concatenate(outputs_list, axis=0)
-
-
-def fetch_scheduler(optimizer):
-    if CONFIG['scheduler'] == 'CosineAnnealingLR':
-        scheduler = lr_scheduler.CosineAnnealingLR(optimizer,T_max=CONFIG['T_max'], 
-                                                   eta_min=CONFIG['min_lr'])
-    elif CONFIG['scheduler'] == 'CosineAnnealingWarmRestarts':
-        scheduler = lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_0=CONFIG['T_0'], 
-                                                             eta_min=CONFIG['min_lr'])
-    elif CONFIG['scheduler'] == None:
-        return None
+            # Split data for current fold
+            train_df = df_train[df_train['fold'] != fold]
+            val_df = df_train[df_train['fold'] == fold]
+            
+            # Create datasets and data loaders
+            train_dataset = ISICDataset(hdf5_file_path, train_df['isic_id'].values, train_df['target'].values, aug_transform)
+            val_dataset = ISICDataset(hdf5_file_path, val_df['isic_id'].values, val_df['target'].values, base_transform)
+            
+            train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=4, pin_memory=True)
+            val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=4, pin_memory=True)
+            
+            # Initialize model, optimizer, and scheduler
+            model = setup_model().to(device)
+            optimizer = torch.optim.AdamW(model.parameters(), lr=0.002)
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
+            
+            print(f"Train: {len(train_dataset)}, Val: {len(val_dataset)}, "
+                  f"Train Pos Ratio: {train_df['target'].mean():.2%}, Val Pos Ratio: {val_df['target'].mean():.2%}")
+            
+            # Train and evaluate
+            val_targets, val_outputs = train_evaluate(model, train_loader, val_loader, criterion, optimizer, scheduler, fold, epoch, device)
+            epoch_val_targets.extend(val_targets)
+            epoch_val_outputs.extend(val_outputs)
+            
+            torch.save(model.state_dict(), f'model_fold_{fold}_epoch_{epoch + 1}.pth')
+            
+            # Create DataFrames with row_id for scoring
+            solution_df = pd.DataFrame({'target': val_targets, 'row_id': range(len(val_targets))})
+            submission_df = pd.DataFrame({'prediction': val_outputs, 'row_id': range(len(val_outputs))})
+            fold_score = score(solution_df, submission_df, 'row_id')
+            print(f'Fold {fold + 1} pAUC Score: {fold_score:.4f}')
         
-    return scheduler
+        all_val_targets.extend(epoch_val_targets)
+        all_val_outputs.extend(epoch_val_outputs)
+        
+        # Create DataFrames with row_id for scoring
+        solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
+        submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
+        cv_score = score(solution_df, submission_df, 'row_id')
+        print(f'Epoch {epoch + 1}/{num_epochs} CV pAUC Score: {cv_score:.4f}')
 
-def prepare_loaders(df, fold):
-    df_train = df[df.kfold != fold].reset_index(drop=True)
-    df_valid = df[df.kfold == fold].reset_index(drop=True)
-    
-    train_dataset = ISICDataset_for_Train(df_train, HDF_FILE, transforms=data_transforms["train"])
-    train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-    train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
-    # train_dataset_github = ISICDataset_for_Train_github(transforms=data_transforms["train"])
-    concat_dataset_train = ConcatDataset([
-        train_dataset, train_dataset2020,
-        train_dataset2019, train_dataset2018,
-        train_dataset_others
-    ])
-
-    valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
-    valid_dataset2020 = ISICDataset_jpg('/home/xyli/kaggle/data2020', transforms=data_transforms["valid"])
-    valid_dataset2019 = ISICDataset_jpg('/home/xyli/kaggle/data2019', transforms=data_transforms["valid"])
-    valid_dataset2018 = ISICDataset_jpg('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
-    valid_dataset_others = ISICDataset_jpg('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
-    concat_dataset_valid = ConcatDataset([
-        valid_dataset, valid_dataset2020,
-        valid_dataset2019, valid_dataset2018,
-        valid_dataset_others
-    ])
-
-    # 用github数据时, num_workers=2
-    train_loader = DataLoader(concat_dataset_train, batch_size=CONFIG['train_batch_size'], 
-                              num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
-    # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
-    #                           num_workers=2, shuffle=True, pin_memory=True, drop_last=True)
-
-    # from IPython import embed
-    # embed()
-
-    valid_loader = DataLoader(concat_dataset_valid, batch_size=CONFIG['valid_batch_size'], 
-                              num_workers=16, shuffle=False, pin_memory=True)
-    
-    return train_loader, valid_loader
+    return np.array(all_val_targets), np.array(all_val_outputs)
 # ============================== Main ==============================
 
+# Set up CUDA if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 
-# train_loader, valid_loader = prepare_loaders(df, fold=CONFIG["fold"])
-
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+# Perform cross-validation training
+all_val_targets, all_val_outputs = cross_validation_train(df_train_balanced, 5, 20, HDF_FILE, aug_transform, base_transform, device)
 
 
 
-# 进行推理
-infer_dataset = InferenceDataset( HDF_FILE, transforms=data_transforms["valid"])
-test_loader = DataLoader(infer_dataset, 96, num_workers=16, shuffle=False, pin_memory=False)
-res = run_test(model, test_loader, device=CONFIG['device']) 
 
-df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-df = df[['isic_id', 'target']]
 
-# df = df[0:10000]
-df['eva'] = res
-df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 
-# from IPython import embed
-# embed()
