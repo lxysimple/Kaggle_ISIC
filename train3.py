@@ -154,7 +154,7 @@ for fold, count in fold_summary.items():
         print(f"Fold {fold}: {count} patients")
 
         """ 统计一下数据集总体信息 """
-        df_flod = df[df['fold'] == fold]
+        df_flod = df[df['kfold'] == fold]
         print("\nOriginal Dataset Summary:")
         print(f"Total number of samples: {len(df_flod)}")
         original_positive_cases = df_flod['target'].sum()
