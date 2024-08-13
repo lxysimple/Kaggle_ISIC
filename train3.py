@@ -191,10 +191,28 @@ for i in range(2):
     tmp_sum = pd.concat([tmp_sum, tmp])
 df = tmp_sum
 
+"""
+Total patients: 1042
+Fold Summary (patients per fold):
+Fold 0.0: 428 patients
+Original Dataset Summary:
+Total number of samples: 2189
+Number of positive cases: 199
+Number of negative cases: 1990
+Ratio of negative to positive cases: 10.00:1
+
+
+Fold 1.0: 432 patients
+Original Dataset Summary:
+Total number of samples: 2134
+Number of positive cases: 194
+Number of negative cases: 1940
+Ratio of negative to positive cases: 10.00:1
+"""
 show_info(df)
 
-from IPython import embed
-embed()
+# from IPython import embed
+# embed()
 # ============================== Dataset Class ==============================
 class ISICDataset_for_Train_github(Dataset):
     def __init__(self, transforms=None):
