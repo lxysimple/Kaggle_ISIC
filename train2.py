@@ -302,7 +302,7 @@ base_transform = A.Compose([
 ])
 
 
-#--------------------------------------------------------------------------测试一下数据增强效果
+#--------------------------------------------测试一下数据增强效果
 import matplotlib.pyplot as plt
 from torchvision.utils import make_grid
 import albumentations as A
@@ -371,6 +371,8 @@ augtest_dataset = ISICDataset(
 
 visualize_augmentations_positive(augtest_dataset)
 
+from IPython import embed
+embed()
 # ============================== cutmix+mixup ==============================
 
 def rand_bbox(size, lam):
