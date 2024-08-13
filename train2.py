@@ -255,9 +255,11 @@ class ISICDataset(Dataset):
 
 # ============================== Create Model ==============================
 def setup_model(num_classes=2, freeze_base_model=False):
-    model = timm.create_model('tf_efficientnetv2_b1', 
-                            checkpoint_path='/kaggle/input/effnetv2-m-b1-pth/tf_efficientnetv2_b1-be6e41b0.pth',
-                            pretrained=False)
+    # model = timm.create_model('tf_efficientnetv2_b1', 
+    #                         checkpoint_path='/kaggle/input/effnetv2-m-b1-pth/tf_efficientnetv2_b1-be6e41b0.pth',
+    #                         pretrained=False)
+    
+    model = timm.create_model('tf_efficientnetv2_b1', pretrained=True)
 
     if freeze_base_model:
         for param in model.parameters():
