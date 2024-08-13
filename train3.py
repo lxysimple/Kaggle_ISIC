@@ -142,11 +142,8 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 """ 
 统计一下各折的信息 
 
-Fold 0: 206 patients
-Fold 1: 209 patients
-Fold 2: 208 patients
-Fold 3: 209 patients
-Fold 4: 210 patients
+Fold 0.0: 521 patients
+Fold 1.0: 521 patients
 Total patients: 1042
 """
 fold_summary = df.groupby("kfold")["patient_id"].nunique().to_dict()
@@ -155,6 +152,18 @@ print(f"Fold Summary (patients per fold):")
 for fold, count in fold_summary.items():
     if fold != -1:  # Exclude the initialization value
         print(f"Fold {fold}: {count} patients")
+
+        """ 统计一下数据集总体信息 """
+        df_flod = df[fold]
+        print("\nOriginal Dataset Summary:")
+        print(f"Total number of samples: {len(df_flod)}")
+        original_positive_cases = df_flod['target'].sum()
+        original_total_cases = len(df_flod)
+        original_positive_ratio = original_positive_cases / original_total_cases
+        print(f"Number of positive cases: {original_positive_cases}")
+        print(f"Number of negative cases: {original_total_cases - original_positive_cases}")
+        print(f"Ratio of negative to positive cases: {(original_total_cases - original_positive_cases) / original_positive_cases:.2f}:1")
+
 print(f"Total patients: {total_patients}")
 
 from IPython import embed
