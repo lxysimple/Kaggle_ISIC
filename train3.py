@@ -139,9 +139,31 @@ sgkf = StratifiedGroupKFold(n_splits=2)
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
-""" 
-统计一下各折的信息 
 
+
+def show_info(df): 
+    """ 统计一下各折的信息  """
+    fold_summary = df.groupby("kfold")["patient_id"].nunique().to_dict()
+    total_patients = df["patient_id"].nunique()
+    print(f"Fold Summary (patients per fold):")
+    for fold, count in fold_summary.items():
+        if fold != -1:  # Exclude the initialization value
+            """ 统计一下数据集总体信息 """
+            print(f"Fold {fold}: {count} patients")
+            df_flod = df[df['kfold'] == fold]
+            print("Original Dataset Summary:")
+            print(f"Total number of samples: {len(df_flod)}")
+            original_positive_cases = df_flod['target'].sum()
+            original_total_cases = len(df_flod)
+            original_positive_ratio = original_positive_cases / original_total_cases
+            print(f"Number of positive cases: {original_positive_cases}")
+            print(f"Number of negative cases: {original_total_cases - original_positive_cases}")
+            print(f"Ratio of negative to positive cases: {(original_total_cases - original_positive_cases) / original_positive_cases:.2f}:1")
+            print('\n')
+
+    print(f"Total patients: {total_patients}")
+
+""" 
 Fold 0.0: 521 patients
 Original Dataset Summary:
 Total number of samples: 200532
@@ -156,25 +178,20 @@ Number of positive cases: 194
 Number of negative cases: 200333
 Ratio of negative to positive cases: 1032.64:1
 """
-fold_summary = df.groupby("kfold")["patient_id"].nunique().to_dict()
-total_patients = df["patient_id"].nunique()
-print(f"Fold Summary (patients per fold):")
-for fold, count in fold_summary.items():
-    if fold != -1:  # Exclude the initialization value
-        """ 统计一下数据集总体信息 """
-        print(f"Fold {fold}: {count} patients")
-        df_flod = df[df['kfold'] == fold]
-        print("Original Dataset Summary:")
-        print(f"Total number of samples: {len(df_flod)}")
-        original_positive_cases = df_flod['target'].sum()
-        original_total_cases = len(df_flod)
-        original_positive_ratio = original_positive_cases / original_total_cases
-        print(f"Number of positive cases: {original_positive_cases}")
-        print(f"Number of negative cases: {original_total_cases - original_positive_cases}")
-        print(f"Ratio of negative to positive cases: {(original_total_cases - original_positive_cases) / original_positive_cases:.2f}:1")
-        print('\n')
+show_info(df)
 
-print(f"Total patients: {total_patients}")
+
+tmp_sum = pd.DataFrame()
+for i in range(2):
+    df_fold = df[df['kfold'] == i]
+    df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
+    df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
+    # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
+    tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+    tmp_sum = pd.concat([tmp_sum, tmp])
+df = tmp_sum
+
+show_info(df)
 
 from IPython import embed
 embed()
