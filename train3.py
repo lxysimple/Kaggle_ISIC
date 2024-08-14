@@ -88,7 +88,7 @@ CONFIG = {
     "T_max": 20,
 
     "weight_decay": 1e-6,
-    "fold" : 0,
+    "fold" : 1,
     "n_fold": 5,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -609,8 +609,8 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
             best_pauc = epoch_score
 
             best_model_wts = copy.deepcopy(model.state_dict())
-            PATH = "AUROC{:.4f}_Loss{:.4f}_pAUC{:.4f}_epoch{:.0f}.bin".\
-                format(val_epoch_auroc, val_epoch_loss, best_pauc, epoch)
+            PATH = "AUROC{:.4f}_Loss{:.4f}_pAUC{:.4f}_fold{:.0f}.bin".\
+                format(val_epoch_auroc, val_epoch_loss, best_pauc, CONFIG['fold'])
 
             torch.save(model.state_dict(), PATH)
             # Save a model file from the current directory
@@ -689,7 +689,7 @@ def prepare_loaders(df, fold):
 # ============================== Main ==============================
 
 
-train_loader, valid_loader = prepare_loaders(df, 0)
+train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
 optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
                        weight_decay=CONFIG['weight_decay'])
