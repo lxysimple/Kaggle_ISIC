@@ -582,6 +582,7 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
     start = time.time()
     best_model_wts = copy.deepcopy(model.state_dict())
     best_epoch_auroc = -np.inf
+    best_pauc = 0
     history = defaultdict(list)
     
     for epoch in range(1, num_epochs + 1): 
@@ -603,12 +604,14 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
         # deep copy the model
         # 新增一个限制,保证val_loss不变大,模型会更稳定
         # if best_epoch_auroc <= val_epoch_auroc and val_epoch_loss<=0.24300:
-        if best_epoch_auroc <= val_epoch_auroc:
-            print(f"{b_}Validation AUROC Improved ({best_epoch_auroc} ---> {val_epoch_auroc})")
-            best_epoch_auroc = val_epoch_auroc
+        if best_pauc <= epoch_score:
+            print(f"{b_}pAUROC Improved ({best_pauc} ---> {epoch_score})")
+            best_pauc = epoch_score
 
             best_model_wts = copy.deepcopy(model.state_dict())
-            PATH = "AUROC{:.4f}_Loss{:.4f}_epoch{:.0f}.bin".format(val_epoch_auroc, val_epoch_loss, epoch)
+            PATH = "AUROC{:.4f}_Loss{:.4f}_pAUC{:.4f}_epoch{:.0f}.bin".\
+                format(val_epoch_auroc, val_epoch_loss, best_pauc, epoch)
+
             torch.save(model.state_dict(), PATH)
             # Save a model file from the current directory
             print(f"Model Saved{sr_}")
