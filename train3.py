@@ -214,224 +214,7 @@ show_info(df)
 # from IPython import embed
 # embed()
 # ============================== Dataset Class ==============================
-class ISICDataset_for_Train_github(Dataset):
-    def __init__(self, transforms=None):
 
-        df = pd.read_csv(f"/home/xyli/kaggle/isicdir/others.csv")
-        self.df_positive = df[df["benign_malignant"] == 'malignant'].reset_index()
-        self.df_negative = df[df["benign_malignant"] == 'benign'].reset_index()
-
-        # df = pd.read_csv(f"/home/xyli/kaggle/data2020/train-metadata.csv")
-        # self.df_positive = df[df["target"] == 1].reset_index()
-        # self.df_negative = df[df["target"] == 0].reset_index()
-        # self.df_positive["benign_malignant"] = df["target"]
-        # self.df_negative["benign_malignant"] = df["target"]
-
-        # 保持一定的正负比例，不能让其失衡
-        self.df_negative = self.df_negative[:len(self.df_positive)*20]
-
-        self.isic_ids_positive = self.df_positive['isic_id'].values
-        self.isic_ids_negative = self.df_negative['isic_id'].values
-        self.df_positive['benign_malignant'] = 1
-        self.df_negative['benign_malignant'] = 0
-        self.targets_positive = self.df_positive['benign_malignant'].values
-        self.targets_negative = self.df_negative['benign_malignant'].values
-        self.transforms = transforms
-
-        print('github:')
-        print(len(self.df_positive), ' ', len(self.df_negative))
-
-        
-    def __len__(self):
-        return len(self.df_positive) * 2
-    
-    def __getitem__(self, index):
-
-        # 虽然0是1的20倍，但取1和0的概率相等，1多次重复取，0有些可能1次都取不到
-        # 一共取2*len(df_positive)次数
-        if random.random() >= 0.5:
-            df = self.df_positive
-            isic_ids = self.isic_ids_positive
-            targets = self.targets_positive
-        else:
-            df = self.df_negative
-            isic_ids = self.isic_ids_negative
-            targets = self.targets_negative
-        
-        # 确保index小于df的行数
-        index = index % df.shape[0]
-        
-        isic_id = isic_ids[index]
-
-        # target = -1
-        # try:
-        #     img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-        #     target = targets[index]
-        # except: # 作者提供的.jpg部分缺失，因此如果缺失，随便加载一张图片，令target = -1
-        #     img = np.array( Image.open(f"/home/xyli/kaggle/data2018/train-image/image/ISIC_0034524.jpg") )
-        
-        img = np.array( Image.open(f"/home/xyli/kaggle/isicdir/images/{isic_id}.jpg") )
-        target = targets[index]
-
-        
-        
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
-            
-        return {
-            'image': img,
-            'target': target
-        }
-
-
-class ISICDataset_for_Train_fromjpg(Dataset):
-    def __init__(self, path, transforms=None):
-        self.path = path
-        df = pd.read_csv(f"{path}/train-metadata.csv")
-        
-        df = df[df['kfold']!=0.0]
-
-        # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
-        # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
-        # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
-
-        self.df_positive = df[df["target"] == 1].reset_index()
-        self.df_negative = df[df["target"] == 0].reset_index()
-        # 保持一定的正负比例，不能让其失衡
-        self.df_negative = self.df_negative[:len(self.df_positive)*20]
-
-        self.isic_ids_positive = self.df_positive['isic_id'].values
-        self.isic_ids_negative = self.df_negative['isic_id'].values
-        self.targets_positive = self.df_positive['target'].values
-        self.targets_negative = self.df_negative['target'].values
-        self.transforms = transforms
-
-        print(path)
-        print(len(self.df_positive), ' ', len(self.df_negative))
-
-        
-    def __len__(self):
-        return len(self.df_positive) * 2
-    
-    def __getitem__(self, index):
-
-        # 虽然0是1的20倍，但取1和0的概率相等，1多次重复取，0有些可能1次都取不到
-        # 一共取2*len(df_positive)次数
-        flag = random.random()
-        if flag >= 0.5:
-            df = self.df_positive
-            isic_ids = self.isic_ids_positive
-            targets = self.targets_positive
-        else:
-            df = self.df_negative
-            isic_ids = self.isic_ids_negative
-            targets = self.targets_negative
-        
-        # 确保index小于df的行数
-        index = index % df.shape[0]
-        
-        isic_id = isic_ids[index]
-
-        # target = -1
-        # try:
-        #     img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-        #     target = targets[index]
-        # except: # 作者提供的.jpg部分缺失，因此如果缺失，随便加载一张图片，令target = -1
-        #     img = np.array( Image.open(f"/home/xyli/kaggle/data2018/train-image/image/ISIC_0034524.jpg") )
-        
-        if 1:
-            img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-        else:
-            img = np.array( Image.open(BytesIO(self.pic_2024[isic_id][()])) )
-        
-        target = targets[index]
-
-        
-        
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
-            
-        return {
-            'image': img,
-            'target': target
-        }
-
-
-class ISICDataset_for_Train(Dataset):
-    def __init__(self, df, file_hdf, transforms=None):
-        self.fp_hdf = h5py.File(file_hdf, mode="r")
-        self.df_positive = df[df["target"] == 1].reset_index()
-        self.df_negative = df[df["target"] == 0].reset_index()
-        self.isic_ids_positive = self.df_positive['isic_id'].values
-        self.isic_ids_negative = self.df_negative['isic_id'].values
-        self.targets_positive = self.df_positive['target'].values
-        self.targets_negative = self.df_negative['target'].values
-        self.transforms = transforms
-        
-    def __len__(self):
-        return len(self.df_positive) * 2
-    
-    def __getitem__(self, index):
-
-        # 虽然0是1的20倍，但取1和0的概率相等，1多次重复取，0有些可能1次都取不到
-        # 一共取2*len(df_positive)次数
-        if random.random() >= 0.5:
-            df = self.df_positive
-            isic_ids = self.isic_ids_positive
-            targets = self.targets_positive
-        else:
-            df = self.df_negative
-            isic_ids = self.isic_ids_negative
-            targets = self.targets_negative
-        
-        # 确保index小于df的行数
-        index = index % df.shape[0]
-        
-        isic_id = isic_ids[index]
-        img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
-        target = targets[index]
-        
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
-            
-        return {
-            'image': img,
-            'target': target
-        }
-
-class ISICDataset_jpg(Dataset):
-    def __init__(self, path, transforms=None):
-        self.path = path
-        df = pd.read_csv(f"{path}/train-metadata.csv")
-        # df = df[df['kfold']==0.0] 
-        self.df = df[df['kfold']==0.0] 
-
-        # self.df_positive = df[df["target"] == 1].reset_index()
-        # self.df_negative = df[df["target"] == 0].reset_index()
-        # self.df_negative = self.df_negative[:len(self.df_positive)]
-        # self.df = pd.concat([self.df_positive, self.df_negative])
-
-        self.isic_ids = self.df['isic_id'].values
-        self.targets = self.df['target'].values
-        self.transforms = transforms
-        
-
-    def __len__(self):
-        return len(self.df)
-    
-    def __getitem__(self, index):
-        isic_id = self.isic_ids[index]
-        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-        target = self.targets[index]
-        
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
-            
-        return {
-            'image': img,
-            'target': target
-        }
-       
 class ISICDataset(Dataset):
     def __init__(self, df, file_hdf, transforms=None):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
@@ -528,49 +311,6 @@ data_transforms = {
         ToTensorV2()
     ], p=1.),
 
-    # "train":A.Compose([
-        
-    #         A.Transpose(p=0.5),
-    #         A.VerticalFlip(p=0.5),
-    #         A.HorizontalFlip(p=0.5),
-    #         A.ColorJitter(brightness=0.2, p=0.75), # A.RandomBrightness(limit=0.2, p=0.75),
-    #         A.ColorJitter(contrast=0.2, p=0.75), # A.RandomContrast(limit=0.2, p=0.75),
-    #         # A.OneOf([
-    #         #     A.MotionBlur(blur_limit=5),
-    #         #     A.MedianBlur(blur_limit=5),
-    #         #     A.GaussianBlur(blur_limit=5),
-    #         #     A.GaussNoise(var_limit=(5.0, 30.0)),
-    #         # ], p=0.7),
-    #         A.MotionBlur(blur_limit=5, p=0.7),
-    #         A.MedianBlur(blur_limit=5, p=0.7),
-    #         A.GaussianBlur(blur_limit=5, p=0.7),
-    #         A.GaussNoise(var_limit=(5.0, 30.0), p=0.7),
-
-    #         # A.OneOf([
-    #         #     A.OpticalDistortion(distort_limit=1.0),
-    #         #     A.GridDistortion(num_steps=5, distort_limit=1.),
-    #         #     A.ElasticTransform(alpha=3),
-    #         # ], p=0.7),
-    #         A.OpticalDistortion(distort_limit=1.0, p=0.7),
-    #         A.GridDistortion(num_steps=5, distort_limit=1.0, p=0.7),
-    #         A.ElasticTransform(alpha=3, p=0.7),
-
-    #         A.CLAHE(clip_limit=4.0, p=0.7),
-    #         A.HueSaturationValue(hue_shift_limit=10, sat_shift_limit=20, val_shift_limit=10, p=0.5),
-    #         A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, border_mode=0, p=0.85),
-
-    #         A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-    #         # A.Cutout(max_h_size=int(CONFIG['img_size'] * 0.375), max_w_size=int(CONFIG['img_size'] * 0.375), num_holes=1, p=0.7), 
-    #         A.CoarseDropout(p=0.7), # == Cutout
-    #         A.Normalize(
-    #                 mean=[0.4815, 0.4578, 0.4082], 
-    #                 std=[0.2686, 0.2613, 0.2758], 
-    #                 max_pixel_value=255.0,
-    #                 p=1.0
-    #             ),
-    #         ToTensorV2()
-    # ], p=1.),
-    
     "valid": A.Compose([
         A.Resize(CONFIG['img_size'], CONFIG['img_size']),
         A.Normalize(
@@ -679,6 +419,37 @@ def mixup_criterion(preds1, targets):
 def criterion(outputs, targets):
     return nn.BCELoss()(outputs, targets)
 
+def score(solution: pd.DataFrame, submission: pd.DataFrame, row_id_column_name: str, min_tpr: float=0.80) -> float:
+
+    del solution[row_id_column_name]
+    del submission[row_id_column_name]
+
+    # rescale the target. set 0s to 1s and 1s to 0s (since sklearn only has max_fpr)
+    v_gt = abs(np.asarray(solution.values)-1)
+    
+    # flip the submissions to their compliments
+    v_pred = -1.0*np.asarray(submission.values)
+
+    max_fpr = abs(1-min_tpr)
+
+    # using sklearn.metric functions: (1) roc_curve and (2) auc
+    fpr, tpr, _ = roc_curve(v_gt, v_pred, sample_weight=None)
+    if max_fpr is None or max_fpr == 1:
+        return auc(fpr, tpr)
+    if max_fpr <= 0 or max_fpr > 1:
+        raise ValueError("Expected min_tpr in range [0, 1), got: %r" % min_tpr)
+        
+    # Add a single point at max_fpr by linear interpolation
+    stop = np.searchsorted(fpr, max_fpr, "right")
+    x_interp = [fpr[stop - 1], fpr[stop]]
+    y_interp = [tpr[stop - 1], tpr[stop]]
+    tpr = np.append(tpr[:stop], np.interp(max_fpr, x_interp, y_interp))
+    fpr = np.append(fpr[:stop], max_fpr)
+    partial_auc = auc(fpr, tpr)
+
+    return(partial_auc)
+
+
 def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
     model.train()
     
@@ -741,7 +512,8 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
             # if scheduler is not None:
             #     scheduler.step()
                 
-        auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
+        # auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
+
 
         batch_size = images.size(0)
         running_loss += (loss.item() * batch_size)
@@ -769,6 +541,7 @@ def valid_one_epoch(model, dataloader, device, epoch):
     running_loss = 0.0
     running_auroc = 0.0
     
+    val_targets, val_outputs = [], []
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:        
         images = data['image'].to(device, dtype=torch.float)
@@ -777,11 +550,19 @@ def valid_one_epoch(model, dataloader, device, epoch):
         batch_size = images.size(0)
 
         outputs = model(images).squeeze()
+
+        val_targets.append(targets.cpu())
+        val_outputs.append(outputs.softmax(dim=1)[:, 1].cpu())
+
         loss = criterion(outputs, targets)
+
+
 
         auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
         running_loss += (loss.item() * batch_size)
         running_auroc  += (auroc * batch_size)
+
+
         dataset_size += batch_size
         
         epoch_loss = running_loss / dataset_size
@@ -792,7 +573,7 @@ def valid_one_epoch(model, dataloader, device, epoch):
     
     gc.collect()
     
-    return epoch_loss, epoch_auroc
+    return epoch_loss, epoch_auroc, torch.cat(val_targets).numpy(), torch.cat(val_outputs).numpy()
 
 def run_training(model, optimizer, scheduler, device, num_epochs):
     if torch.cuda.is_available():
@@ -809,10 +590,16 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
                                            dataloader=train_loader, 
                                            device=CONFIG['device'], epoch=epoch)
         
-        val_epoch_loss, val_epoch_auroc = valid_one_epoch(model, valid_loader, device=CONFIG['device'], 
+        val_epoch_loss, val_epoch_auroc,\
+        epoch_val_targets, epoch_val_outputs = valid_one_epoch(model, valid_loader, device=CONFIG['device'], 
                                          epoch=epoch)
-    
         
+        # Create DataFrames with row_id for scoring
+        solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
+        submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
+        epoch_score = score(solution_df, submission_df, 'row_id')
+        print("epoch_score: {:.4f}".format(epoch_score))
+
         # deep copy the model
         # 新增一个限制,保证val_loss不变大,模型会更稳定
         # if best_epoch_auroc <= val_epoch_auroc and val_epoch_loss<=0.24300:
@@ -833,6 +620,7 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
     print('Training complete in {:.0f}h {:.0f}m {:.0f}s'.format(
         time_elapsed // 3600, (time_elapsed % 3600) // 60, (time_elapsed % 3600) % 60))
     print("Best AUROC: {:.4f}".format(best_epoch_auroc))
+    
     
     # load best model weights
     model.load_state_dict(best_model_wts)
@@ -917,28 +705,28 @@ def prepare_loaders(df, fold):
 # ============================== Main ==============================
 
 
-# train_loader, valid_loader = prepare_loaders(df, fold=CONFIG["fold"])
+train_loader, valid_loader = prepare_loaders(df, fold=CONFIG["fold"])
 
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+                       weight_decay=CONFIG['weight_decay'])
+scheduler = fetch_scheduler(optimizer)
+model, history = run_training(model, optimizer, scheduler,
+                              device=CONFIG['device'],
+                              num_epochs=CONFIG['epochs'])
 
 
 
 # 进行推理
-infer_dataset = InferenceDataset( HDF_FILE, transforms=data_transforms["valid"])
-test_loader = DataLoader(infer_dataset, 96, num_workers=16, shuffle=False, pin_memory=False)
-res = run_test(model, test_loader, device=CONFIG['device']) 
+# infer_dataset = InferenceDataset( HDF_FILE, transforms=data_transforms["valid"])
+# test_loader = DataLoader(infer_dataset, 96, num_workers=16, shuffle=False, pin_memory=False)
+# res = run_test(model, test_loader, device=CONFIG['device']) 
 
-df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-df = df[['isic_id', 'target']]
+# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+# df = df[['isic_id', 'target']]
 
-# df = df[0:10000]
-df['eva'] = res
-df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+# # df = df[0:10000]
+# df['eva'] = res
+# df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 
 # from IPython import embed
 # embed()
