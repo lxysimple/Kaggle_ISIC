@@ -552,7 +552,7 @@ def valid_one_epoch(model, dataloader, device, epoch):
         outputs = model(images).squeeze()
 
         val_targets.append(targets.cpu())
-        val_outputs.append(outputs.softmax(dim=1)[:, 1].cpu())
+        val_outputs.append(outputs.cpu())
 
         loss = criterion(outputs, targets)
 
