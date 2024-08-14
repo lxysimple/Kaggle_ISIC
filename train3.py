@@ -727,6 +727,7 @@ models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5360_Loss0.1392_p
 models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5370_Loss0.1330_pAUC0.1647_fold1.bin'))
 
 
+df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
 df_valids = pd.DataFrame()
 for i in range(CONFIG['n_fold']):
     _, valid_loader = prepare_loaders(df, i)
@@ -740,7 +741,7 @@ embed()
 
 df_valids = df_valids[["isic_id", "patient_id", "eva"]]
 
-df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+
 df = df[['isic_id', 'patient_id', 'target']]
 
 df = df.merge(df_valids, on=["isic_id", "patient_id"])
