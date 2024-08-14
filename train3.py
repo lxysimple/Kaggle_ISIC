@@ -512,7 +512,7 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
             # if scheduler is not None:
             #     scheduler.step()
                 
-        # auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
+        auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
 
 
         batch_size = images.size(0)
