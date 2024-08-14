@@ -76,7 +76,8 @@ CONFIG = {
     # 96:only github_data
     "train_batch_size": 164, # 96 32
 
-    "valid_batch_size": 164, # 64
+    # 训练时164，推理时96
+    "valid_batch_size": 96, 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
     "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.8170_Loss0.7140_epoch12.bin',
