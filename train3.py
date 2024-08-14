@@ -666,28 +666,9 @@ def prepare_loaders(df, fold):
     df_train = df[df.kfold != fold].reset_index(drop=True)
     df_valid = df[df.kfold == fold].reset_index(drop=True)
     
-    train_dataset = ISICDataset_for_Train(df_train, HDF_FILE, transforms=data_transforms["train"])
-    train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-    train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
-    # train_dataset_github = ISICDataset_for_Train_github(transforms=data_transforms["train"])
-    concat_dataset_train = ConcatDataset([
-        train_dataset, train_dataset2020,
-        train_dataset2019, train_dataset2018,
-        train_dataset_others
-    ])
-
+    train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
-    valid_dataset2020 = ISICDataset_jpg('/home/xyli/kaggle/data2020', transforms=data_transforms["valid"])
-    valid_dataset2019 = ISICDataset_jpg('/home/xyli/kaggle/data2019', transforms=data_transforms["valid"])
-    valid_dataset2018 = ISICDataset_jpg('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
-    valid_dataset_others = ISICDataset_jpg('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
-    concat_dataset_valid = ConcatDataset([
-        valid_dataset, valid_dataset2020,
-        valid_dataset2019, valid_dataset2018,
-        valid_dataset_others
-    ])
+
 
     # 用github数据时, num_workers=2
     train_loader = DataLoader(concat_dataset_train, batch_size=CONFIG['train_batch_size'], 
@@ -705,7 +686,7 @@ def prepare_loaders(df, fold):
 # ============================== Main ==============================
 
 
-train_loader, valid_loader = prepare_loaders(df, fold=CONFIG["fold"])
+train_loader, valid_loader = prepare_loaders(df, 0)
 
 optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
                        weight_decay=CONFIG['weight_decay'])
