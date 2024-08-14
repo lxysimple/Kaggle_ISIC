@@ -732,7 +732,7 @@ df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
 sgkf = StratifiedGroupKFold(n_splits=2)
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
-      
+
 df_valids = pd.DataFrame()
 for i in range(CONFIG['n_fold']):
     _, valid_loader = prepare_loaders(df, i)
@@ -748,8 +748,9 @@ df_valids = df_valids[["isic_id", "patient_id", "eva"]]
 
 
 df = df[['isic_id', 'patient_id', 'target']]
-
 df = df.merge(df_valids, on=["isic_id", "patient_id"])
+df = df[['isic_id', 'patient_id', 'target_x', "eva"]]
+df.rename(columns={'target_x': 'target'}, inplace=True)
 
 df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 
