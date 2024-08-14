@@ -706,7 +706,7 @@ def prepare_loaders(df, fold):
 
 
 
-# --------------------------------------------------------------进行推理
+# ------------------------------------------------------------------ 进行推理
 def load_model(path):
     model = ISICModel(CONFIG['model_name'], pretrained=False)
     checkpoint = torch.load(path)
@@ -753,4 +753,4 @@ df = df[['isic_id', 'patient_id', 'target_x', "eva"]]
 df.rename(columns={'target_x': 'target'}, inplace=True)
 
 df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
-
+# ===================================================================== 进行推理
