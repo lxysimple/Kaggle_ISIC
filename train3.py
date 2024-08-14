@@ -706,11 +706,31 @@ def prepare_loaders(df, fold):
 
 
 # 进行推理
+def load_model(path):
+    model = ISICModel(CONFIG['model_name'], pretrained=False)
+    checkpoint = torch.load(path)
+    print(f"load checkpoint: {path}") 
+    # 去掉前面多余的'module.'
+    new_state_dict = {}
+    for k,v in checkpoint.items():
+        new_state_dict[k[7:]] = v
+    model.load_state_dict( new_state_dict )
+
+    model = model.cuda() 
+    # model.to(CONFIG['device'])
+    model = DataParallel(model) 
+    return model
+
+models = []
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5360_Loss0.1392_pAUC0.1684_fold0.bin'))
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5370_Loss0.1330_pAUC0.1647_fold1.bin'))
+
+
 df_valids = pd.DataFrame()
 for i in range(CONFIG['fold']):
     train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
     test_loader = DataLoader(valid_loader, 96, num_workers=16, shuffle=False, pin_memory=False)
-    res = run_test(model, test_loader, device=CONFIG['device']) 
+    res = run_test(models[i], test_loader, device=CONFIG['device']) 
     df_valid = df[df.kfold == fold].reset_index()
     df_valid['eva'] = res
     df_valids = pd.concat([df_valids, df_valid])
