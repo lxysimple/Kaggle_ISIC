@@ -731,7 +731,7 @@ df_valids = pd.DataFrame()
 for i in range(CONFIG['n_fold']):
     train_loader, valid_loader = prepare_loaders(df, i)
     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
-    df_valid = df[df.kfold == fold].reset_index()
+    df_valid = df[df.kfold != fold].reset_index()
     df_valid['eva'] = res
     df_valids = pd.concat([df_valids, df_valid])
 
