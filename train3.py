@@ -90,7 +90,7 @@ CONFIG = {
 
     "weight_decay": 1e-6,
     "fold" : 1,
-    "n_fold": 5,
+    "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
 }
@@ -728,8 +728,8 @@ models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5370_Loss0.1330_p
 
 
 df_valids = pd.DataFrame()
-for i in range(CONFIG['fold']):
-    train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+for i in range(CONFIG['n_fold']):
+    train_loader, valid_loader = prepare_loaders(df, i)
     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
     df_valid = df[df.kfold == fold].reset_index()
     df_valid['eva'] = res
