@@ -229,11 +229,16 @@ class ISICDataset(Dataset):
     def __getitem__(self, index):
         isic_id = self.isic_ids[index]
         img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
-        target = self.targets[index]
+
+        if self.targets is not None:
+            target = self.targets[index]
+        else:
+            target = torch.tensor(-1)  # Dummy target for test set
         
         if self.transforms:
             img = self.transforms(image=img)["image"]
-            
+        
+        
         return {
             'image': img,
             'target': target
@@ -689,28 +694,36 @@ def prepare_loaders(df, fold):
 # ============================== Main ==============================
 
 
-train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-                       weight_decay=CONFIG['weight_decay'])
-scheduler = fetch_scheduler(optimizer)
-model, history = run_training(model, optimizer, scheduler,
-                              device=CONFIG['device'],
-                              num_epochs=CONFIG['epochs'])
+# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+#                        weight_decay=CONFIG['weight_decay'])
+# scheduler = fetch_scheduler(optimizer)
+# model, history = run_training(model, optimizer, scheduler,
+#                               device=CONFIG['device'],
+#                               num_epochs=CONFIG['epochs'])
 
 
 
 # 进行推理
-# infer_dataset = InferenceDataset( HDF_FILE, transforms=data_transforms["valid"])
-# test_loader = DataLoader(infer_dataset, 96, num_workers=16, shuffle=False, pin_memory=False)
-# res = run_test(model, test_loader, device=CONFIG['device']) 
+df_valids = pd.DataFrame()
+for i in range(CONFIG['fold']):
+    train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+    test_loader = DataLoader(valid_loader, 96, num_workers=16, shuffle=False, pin_memory=False)
+    res = run_test(model, test_loader, device=CONFIG['device']) 
+    df_valid = df[df.kfold == fold].reset_index()
+    df_valid['eva'] = res
+    df_valids = pd.concat([df_valids, df_valid])
 
-# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-# df = df[['isic_id', 'target']]
+from IPython import embed
+embed()
 
-# # df = df[0:10000]
-# df['eva'] = res
-# df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+df_valids = df_valids[["isic_id", "patient_id", "eva"]]
 
-# from IPython import embed
-# embed()
+df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+df = df[['isic_id', 'patient_id', 'target']]
+
+df = df.merge(df_valids, on=["isic_id", "patient_id"])
+
+df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+
