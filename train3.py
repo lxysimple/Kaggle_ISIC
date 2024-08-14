@@ -117,10 +117,26 @@ HDF_FILE = f"{ROOT_DIR}/train-image.hdf5"
 # ============================== Read the Data ==============================
 
 
+# ------------------------------------- 取比赛原csv
 df = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
-
 print("        df.shape, # of positive cases, # of patients")
 print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
+# ===================================== 取比赛原csv
+
+
+# ------------------------------------- 用聚合算法后的csv
+df2 = pd.read_csv(f"/home/xyli/kaggle/ISIC_2024_Challenge_SelfClean_Scores.csv")
+
+df = df.merge(df2, on=["isic_id", "patient_id"])
+
+index = (df['target'] == 1) & (df['irrelevant_ranking']<102_000)
+
+df[index]
+
+from IPython import embed
+embed()
+# ===================================== 用聚合算法后的csv
+
 
 # df_positive = df[df["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
 # df_negative = df[df["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
@@ -134,6 +150,9 @@ print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
 # 因为之后要合并数据集,算了一下合并后大约是合并前2.4倍,合并前是8k,合并后是20k左右
 # CONFIG['T_max'] = 2.4*df.shape[0] * (CONFIG["n_fold"]-1) * CONFIG['epochs'] // CONFIG['train_batch_size'] // CONFIG["n_fold"]
 # print(CONFIG['T_max'])
+
+
+
 
 
 sgkf = StratifiedGroupKFold(n_splits=2)
@@ -695,62 +714,62 @@ def prepare_loaders(df, fold):
 # ============================== Main ==============================
 
 
-# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+                       weight_decay=CONFIG['weight_decay'])
+scheduler = fetch_scheduler(optimizer)
+model, history = run_training(model, optimizer, scheduler,
+                              device=CONFIG['device'],
+                              num_epochs=CONFIG['epochs'])
 
 
 
 # ------------------------------------------------------------------ 进行推理
-def load_model(path):
-    model = ISICModel(CONFIG['model_name'], pretrained=False)
-    checkpoint = torch.load(path)
-    print(f"load checkpoint: {path}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
+# def load_model(path):
+#     model = ISICModel(CONFIG['model_name'], pretrained=False)
+#     checkpoint = torch.load(path)
+#     print(f"load checkpoint: {path}") 
+#     # 去掉前面多余的'module.'
+#     new_state_dict = {}
+#     for k,v in checkpoint.items():
+#         new_state_dict[k[7:]] = v
+#     model.load_state_dict( new_state_dict )
 
-    model = model.cuda() 
-    # model.to(CONFIG['device'])
-    model = DataParallel(model) 
-    return model
+#     model = model.cuda() 
+#     # model.to(CONFIG['device'])
+#     model = DataParallel(model) 
+#     return model
 
-models = []
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5360_Loss0.1392_pAUC0.1684_fold0.bin'))
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5370_Loss0.1330_pAUC0.1647_fold1.bin'))
-
-
-
-df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-sgkf = StratifiedGroupKFold(n_splits=2)
-for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-      df.loc[val_ , "kfold"] = int(fold)
-
-df_valids = pd.DataFrame()
-for i in range(CONFIG['n_fold']):
-    _, valid_loader = prepare_loaders(df, i)
-    res = run_test(models[i], valid_loader, device=CONFIG['device']) 
-    df_valid = df[df.kfold == i].reset_index()
-    df_valid['eva'] = res
-    df_valids = pd.concat([df_valids, df_valid])
-
-from IPython import embed
-embed()
-
-df_valids = df_valids[["isic_id", "patient_id", "eva"]]
+# models = []
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5360_Loss0.1392_pAUC0.1684_fold0.bin'))
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5370_Loss0.1330_pAUC0.1647_fold1.bin'))
 
 
-df = df[['isic_id', 'patient_id', 'target']]
-df = df.merge(df_valids, on=["isic_id", "patient_id"])
-df = df[['isic_id', 'patient_id', 'target_x', "eva"]]
-df.rename(columns={'target_x': 'target'}, inplace=True)
 
-df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+# sgkf = StratifiedGroupKFold(n_splits=2)
+# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+#       df.loc[val_ , "kfold"] = int(fold)
+
+# df_valids = pd.DataFrame()
+# for i in range(CONFIG['n_fold']):
+#     _, valid_loader = prepare_loaders(df, i)
+#     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
+#     df_valid = df[df.kfold == i].reset_index()
+#     df_valid['eva'] = res
+#     df_valids = pd.concat([df_valids, df_valid])
+
+# from IPython import embed
+# embed()
+
+# df_valids = df_valids[["isic_id", "patient_id", "eva"]]
+
+
+# df = df[['isic_id', 'patient_id', 'target']]
+# df = df.merge(df_valids, on=["isic_id", "patient_id"])
+# df = df[['isic_id', 'patient_id', 'target_x', "eva"]]
+# df.rename(columns={'target_x': 'target'}, inplace=True)
+
+# df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 # ===================================================================== 进行推理
