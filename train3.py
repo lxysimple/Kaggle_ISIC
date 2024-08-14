@@ -706,7 +706,7 @@ def prepare_loaders(df, fold):
 
 
 
-# 进行推理
+# --------------------------------------------------------------进行推理
 def load_model(path):
     model = ISICModel(CONFIG['model_name'], pretrained=False)
     checkpoint = torch.load(path)
@@ -727,7 +727,12 @@ models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5360_Loss0.1392_p
 models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5370_Loss0.1330_pAUC0.1647_fold1.bin'))
 
 
+
 df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+sgkf = StratifiedGroupKFold(n_splits=2)
+for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+      df.loc[val_ , "kfold"] = int(fold)
+      
 df_valids = pd.DataFrame()
 for i in range(CONFIG['n_fold']):
     _, valid_loader = prepare_loaders(df, i)
