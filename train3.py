@@ -729,8 +729,7 @@ models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5370_Loss0.1330_p
 df_valids = pd.DataFrame()
 for i in range(CONFIG['fold']):
     train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
-    test_loader = DataLoader(valid_loader, 96, num_workers=16, shuffle=False, pin_memory=False)
-    res = run_test(models[i], test_loader, device=CONFIG['device']) 
+    res = run_test(models[i], valid_loader, device=CONFIG['device']) 
     df_valid = df[df.kfold == fold].reset_index()
     df_valid['eva'] = res
     df_valids = pd.concat([df_valids, df_valid])
