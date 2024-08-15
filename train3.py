@@ -65,7 +65,7 @@ from sklearn.metrics import hamming_loss, f1_score, roc_curve, auc, classificati
 
 CONFIG = {
     "seed": 42,
-    "epochs": 10,
+    
 
     "img_size": 336,
     "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
@@ -87,6 +87,7 @@ CONFIG = {
     "learning_rate": 1e-5, # 1e-5
     "min_lr": 1e-6, # 1e-6
     "T_max": 20,
+    "epochs": 10,
 
     "weight_decay": 1e-6,
     "fold" : 1,
