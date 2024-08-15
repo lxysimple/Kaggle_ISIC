@@ -769,8 +769,8 @@ for i in range(CONFIG['n_fold']):
     df_valid['eva'] = res
     df_valids = pd.concat([df_valids, df_valid])
 
-# from IPython import embed
-# embed()
+from IPython import embed
+embed()
 
 df_valids = df_valids[["isic_id", "patient_id", "eva"]]
 
