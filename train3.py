@@ -751,8 +751,8 @@ def load_model(path):
     return model
 
 models = []
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5334_Loss0.1797_pAUC0.1483_fold0.bin'))
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5220_Loss0.1855_pAUC0.1474_fold1.bin'))
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5334_Loss0.1797_pAUC0.1483_fold0.bin'))
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5220_Loss0.1855_pAUC0.1474_fold1.bin'))
 
 
 
