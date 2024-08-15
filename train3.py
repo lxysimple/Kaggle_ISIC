@@ -125,16 +125,20 @@ print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
 
 
 # ------------------------------------- 用聚合算法后的csv
-df2 = pd.read_csv(f"/home/xyli/kaggle/ISIC_2024_Challenge_SelfClean_Scores.csv")
+# df2 = pd.read_csv(f"/home/xyli/kaggle/ISIC_2024_Challenge_SelfClean_Scores.csv")
 
-df = df.merge(df2, on=["isic_id", "patient_id"])
+# df = df.merge(df2, on=["isic_id", "patient_id"])
 
-index = (df['target'] == 1) & (df['irrelevant_ranking']<102_000)
+# """
+# <102K, 393
+# <100K, 393
+# """
+# index = (df['target'] == 1) & (df['irrelevant_ranking']<90_000)
 
-df[index]
+# df[index]
 
-from IPython import embed
-embed()
+# from IPython import embed
+# embed()
 # ===================================== 用聚合算法后的csv
 
 
@@ -201,35 +205,38 @@ Ratio of negative to positive cases: 1032.64:1
 show_info(df)
 
 
-tmp_sum = pd.DataFrame()
-for i in range(2):
-    df_fold = df[df['kfold'] == i]
-    df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
-    df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
-    # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-    tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
-    tmp_sum = pd.concat([tmp_sum, tmp])
-df = tmp_sum
+# ------------------------------------- 对各折下采样
+# tmp_sum = pd.DataFrame()
+# for i in range(2):
+#     df_fold = df[df['kfold'] == i]
+#     df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
+#     df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
+#     # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
+#     tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+#     tmp_sum = pd.concat([tmp_sum, tmp])
+# df = tmp_sum
 
-"""
-Total patients: 1042
-Fold Summary (patients per fold):
-Fold 0.0: 428 patients
-Original Dataset Summary:
-Total number of samples: 2189
-Number of positive cases: 199
-Number of negative cases: 1990
-Ratio of negative to positive cases: 10.00:1
+# """
+# Total patients: 1042
+# Fold Summary (patients per fold):
+# Fold 0.0: 428 patients
+# Original Dataset Summary:
+# Total number of samples: 2189
+# Number of positive cases: 199
+# Number of negative cases: 1990
+# Ratio of negative to positive cases: 10.00:1
 
 
-Fold 1.0: 432 patients
-Original Dataset Summary:
-Total number of samples: 2134
-Number of positive cases: 194
-Number of negative cases: 1940
-Ratio of negative to positive cases: 10.00:1
-"""
-show_info(df)
+# Fold 1.0: 432 patients
+# Original Dataset Summary:
+# Total number of samples: 2134
+# Number of positive cases: 194
+# Number of negative cases: 1940
+# Ratio of negative to positive cases: 10.00:1
+# """
+# show_info(df)
+# ========================================== 对各折下采样
+
 
 # from IPython import embed
 # embed()
