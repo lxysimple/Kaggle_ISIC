@@ -77,7 +77,7 @@ CONFIG = {
     "train_batch_size": 164, # 96 32
 
     # 训练时164，推理时96
-    "valid_batch_size": 96, 
+    "valid_batch_size": 164, 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.8170_Loss0.7140_epoch12.bin',
@@ -86,11 +86,11 @@ CONFIG = {
     # 手动调节学习率
     "learning_rate": 1e-5, # 1e-5
     "min_lr": 1e-6, # 1e-6
-    "T_max": 20,
+    "T_max": 10,
     "epochs": 10,
 
     "weight_decay": 1e-6,
-    "fold" : 1,
+    "fold" : 0,
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
