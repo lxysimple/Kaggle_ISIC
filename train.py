@@ -816,6 +816,7 @@ def prepare_loaders(df, fold):
     train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
     train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
     train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
+    
     # train_dataset_github = ISICDataset_for_Train_github(transforms=data_transforms["train"])
     concat_dataset_train = ConcatDataset([
         train_dataset, train_dataset2020,
@@ -828,6 +829,7 @@ def prepare_loaders(df, fold):
     valid_dataset2019 = ISICDataset_jpg('/home/xyli/kaggle/data2019', transforms=data_transforms["valid"])
     valid_dataset2018 = ISICDataset_jpg('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
     valid_dataset_others = ISICDataset_jpg('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
+    
     concat_dataset_valid = ConcatDataset([
         valid_dataset, valid_dataset2020,
         valid_dataset2019, valid_dataset2018,
