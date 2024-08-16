@@ -295,6 +295,51 @@ class InferenceDataset(Dataset):
         return {
             'image': img
         }
+
+
+class ISICDataset_for_Train_fromjpg(Dataset):
+    def __init__(self, path, transforms=None):
+        self.path = path
+        df = pd.read_csv(f"{path}/train-metadata.csv")
+        
+        df = df[df['kfold']!=0.0]
+
+        # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
+        # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
+        # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
+
+        self.df_positive = df[df["target"] == 1].reset_index()
+        self.df_negative = df[df["target"] == 0].reset_index()
+        # 保持一定的正负比例，不能让其失衡
+        self.df_negative = self.df_negative[:len(self.df_positive)*10]
+
+        self.df = pd.concat([self.df_positive, self.df_negative]) 
+        self.isic_ids = self.df['isic_id'].values
+        self.targets = self.df['target'].values
+
+        self.transforms = transforms
+
+        print(path)
+        print(len(self.df_positive), ' ', len(self.df_negative))
+
+        
+    def __len__(self):
+        return len(self.df)
+    
+    def __getitem__(self, index):
+
+        isic_id = self.isic_ids[index]
+        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        target = self.targets[index]
+
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
+            
+        return {
+            'image': img,
+            'target': target
+        }
+
 # ============================== Create Model ==============================
 
 class ISICModel(nn.Module):
@@ -703,17 +748,23 @@ def prepare_loaders(df, fold):
     df_valid = df[df.kfold == fold].reset_index(drop=True)
     
     train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
+    train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
+    
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
+    concat_dataset_train = ConcatDataset([
+        train_dataset, train_dataset2020,
+    ])
 
     # 用github数据时, num_workers=2
-    train_loader = DataLoader(train_dataset, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(concat_dataset_train, batch_size=CONFIG['train_batch_size'], 
                               num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=2, shuffle=True, pin_memory=True, drop_last=True)
 
-    # from IPython import embed
-    # embed()
+
+    from IPython import embed
+    embed()
 
     valid_loader = DataLoader(valid_dataset, batch_size=CONFIG['valid_batch_size'], 
                               num_workers=16, shuffle=False, pin_memory=True)
@@ -723,62 +774,62 @@ def prepare_loaders(df, fold):
 
 
 # ------------------------------------------------------------------ 模型训练
-# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+                       weight_decay=CONFIG['weight_decay'])
+scheduler = fetch_scheduler(optimizer)
+model, history = run_training(model, optimizer, scheduler,
+                              device=CONFIG['device'],
+                              num_epochs=CONFIG['epochs'])
 # ================================================================== 模型训练
 
 
 # ------------------------------------------------------------------ 进行推理
-def load_model(path):
-    model = ISICModel(CONFIG['model_name'], pretrained=False)
-    checkpoint = torch.load(path)
-    print(f"load checkpoint: {path}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
+# def load_model(path):
+#     model = ISICModel(CONFIG['model_name'], pretrained=False)
+#     checkpoint = torch.load(path)
+#     print(f"load checkpoint: {path}") 
+#     # 去掉前面多余的'module.'
+#     new_state_dict = {}
+#     for k,v in checkpoint.items():
+#         new_state_dict[k[7:]] = v
+#     model.load_state_dict( new_state_dict )
 
-    model = model.cuda() 
-    # model.to(CONFIG['device'])
-    model = DataParallel(model) 
-    return model
+#     model = model.cuda() 
+#     # model.to(CONFIG['device'])
+#     model = DataParallel(model) 
+#     return model
 
-models = []
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5334_Loss0.1797_pAUC0.1483_fold0.bin'))
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5220_Loss0.1855_pAUC0.1474_fold1.bin'))
-
-
-
-df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-sgkf = StratifiedGroupKFold(n_splits=2)
-for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-      df.loc[val_ , "kfold"] = int(fold)
-
-df_valids = pd.DataFrame()
-for i in range(CONFIG['n_fold']):
-    _, valid_loader = prepare_loaders(df, i)
-    res = run_test(models[i], valid_loader, device=CONFIG['device']) 
-    df_valid = df[df.kfold == i].reset_index()
-    df_valid['eva'] = res
-    df_valids = pd.concat([df_valids, df_valid])
-
-from IPython import embed
-embed()
-
-df_valids = df_valids[["isic_id", "patient_id", "eva"]]
+# models = []
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5334_Loss0.1797_pAUC0.1483_fold0.bin'))
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5220_Loss0.1855_pAUC0.1474_fold1.bin'))
 
 
-df = df[['isic_id', 'patient_id', 'target']]
-df = df.merge(df_valids, on=["isic_id", "patient_id"])
-df = df[['isic_id', 'patient_id', 'target', "eva"]]
-# df.rename(columns={'target_x': 'target'}, inplace=True)
 
-df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+# sgkf = StratifiedGroupKFold(n_splits=2)
+# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+#       df.loc[val_ , "kfold"] = int(fold)
+
+# df_valids = pd.DataFrame()
+# for i in range(CONFIG['n_fold']):
+#     _, valid_loader = prepare_loaders(df, i)
+#     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
+#     df_valid = df[df.kfold == i].reset_index()
+#     df_valid['eva'] = res
+#     df_valids = pd.concat([df_valids, df_valid])
+
+# from IPython import embed
+# embed()
+
+# df_valids = df_valids[["isic_id", "patient_id", "eva"]]
+
+
+# df = df[['isic_id', 'patient_id', 'target']]
+# df = df.merge(df_valids, on=["isic_id", "patient_id"])
+# df = df[['isic_id', 'patient_id', 'target', "eva"]]
+# # df.rename(columns={'target_x': 'target'}, inplace=True)
+
+# df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 # ===================================================================== 进行推理
