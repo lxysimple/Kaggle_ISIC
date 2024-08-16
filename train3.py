@@ -301,8 +301,6 @@ class ISICDataset_for_Train_fromjpg(Dataset):
     def __init__(self, path, transforms=None):
         self.path = path
         df = pd.read_csv(f"{path}/train-metadata.csv")
-        
-        df = df[df['kfold']!=0.0]
 
         # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
         # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
