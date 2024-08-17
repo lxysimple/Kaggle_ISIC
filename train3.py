@@ -86,7 +86,7 @@ CONFIG = {
     # 手动调节学习率
     "learning_rate": 1e-5, # 1e-5
     "min_lr": 1e-6, # 1e-6
-    "T_max": 10,
+    "T_max": 5,
     "epochs": 10,
 
     "weight_decay": 1e-6,
