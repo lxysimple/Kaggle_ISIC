@@ -835,5 +835,5 @@ df = df.merge(df_valids, on=["isic_id", "patient_id"])
 df = df[['isic_id', 'patient_id', 'target', "eva"]]
 # df.rename(columns={'target_x': 'target'}, inplace=True)
 
-df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train2.csv')
 # ===================================================================== 进行推理
