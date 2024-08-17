@@ -90,7 +90,7 @@ CONFIG = {
     "epochs": 10,
 
     "weight_decay": 1e-6,
-    "fold" : 0,
+    "fold" : 1,
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -755,7 +755,7 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
     concat_dataset_train = ConcatDataset([
-        train_dataset, train_dataset2020, train_dataset_others
+        train_dataset, train_dataset2020
     ])
 
     # 用github数据时, num_workers=2
