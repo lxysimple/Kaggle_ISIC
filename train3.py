@@ -213,8 +213,8 @@ for i in range(2):
     df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
     df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
     # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-    # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
-    tmp = pd.concat([df_positive, df_positive, df_negative.iloc[:df_positive.shape[0]*9, :]]) 
+    tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+    # tmp = pd.concat([df_positive, df_positive, df_positive, df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
     tmp_sum = pd.concat([tmp_sum, tmp])
 df = tmp_sum
 
@@ -594,13 +594,13 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         input = images
         tmp = targets
         target = targets
-        if random_number < 0.5:
+        if random_number < -1:
             input,targets=cutmix(input,target,2)
             
             targets[0]=torch.tensor(targets[0]).cuda()
             targets[1]=torch.tensor(targets[1]).cuda()
             targets[2]=torch.tensor(targets[2]).cuda()
-        elif random_number > 999:
+        elif random_number > 0.5:
             input,targets=mixup(input,target,2)
             
             targets[0]=torch.tensor(targets[0]).cuda()
@@ -615,9 +615,9 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
 
         loss=None
         output = outputs
-        if random_number < 0.5:
+        if random_number < -1:
             loss = cutmix_criterion(output, targets) # 注意这是在CPU上运算的
-        elif random_number > 999:
+        elif random_number > 0.5:
             loss = mixup_criterion(output, targets) # 注意这是在CPU上运算的
         else:
             loss = criterion(output, target)
