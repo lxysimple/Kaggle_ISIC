@@ -77,7 +77,7 @@ CONFIG = {
     "train_batch_size": 164, # 96 32
 
     # 训练时164，推理时96
-    "valid_batch_size": 96, 
+    "valid_batch_size": 164, 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.8170_Loss0.7140_epoch12.bin',
@@ -309,7 +309,8 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
         # 保持一定的正负比例，不能让其失衡
-        start = CONFIG['fold']*len(self.df_positive)*10
+        # start = CONFIG['fold']*len(self.df_positive)*10
+        start = 0
         self.df_negative = self.df_negative[start : start+len(self.df_positive)*10]
 
         self.df = pd.concat([self.df_positive, self.df_negative]) 
@@ -536,8 +537,33 @@ def mixup_criterion(preds1, targets):
 
 
 # ============================== Function ==============================
+class FocalLoss(nn.Module):
+    """
+    correct version of FocalLoss
+    """
+    def __init__(self, alpha=0.25, gamma=2,reduce='sum'):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha
+        self.gamma=gamma
+        self.reduction=reduce
+    def forward(self,inputs,targets):
+        BCE_loss=F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
+        probas=torch.sigmoid(inputs)
+        loss=targets*self.alpha*(1-probas)**self.gamma*BCE_loss+(1-targets)*(1-self.alpha)*probas**self.gamma*BCE_loss
+        if self.reduction=='mean':
+            return torch.mean(loss)
+        elif self.reduction=='sum':
+            return torch.sum(loss)
+        else:
+            return loss
+
+
 def criterion(outputs, targets):
-    return nn.BCELoss()(outputs, targets)
+    # return nn.BCELoss()(outputs, targets)
+    return FocalLoss(alpha=0.75, gamma=2.0)(outputs, targets)
+
+
+
 
 def score(solution: pd.DataFrame, submission: pd.DataFrame, row_id_column_name: str, min_tpr: float=0.80) -> float:
 
@@ -799,7 +825,8 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
     concat_dataset_train = ConcatDataset([
-        train_dataset, train_dataset2020
+        # train_dataset, train_dataset2020
+        train_dataset, 
     ])
 
     # 用github数据时, num_workers=2
@@ -820,66 +847,66 @@ def prepare_loaders(df, fold):
 
 
 # ------------------------------------------------------------------ 模型训练
-# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+                       weight_decay=CONFIG['weight_decay'])
+scheduler = fetch_scheduler(optimizer)
+model, history = run_training(model, optimizer, scheduler,
+                              device=CONFIG['device'],
+                              num_epochs=CONFIG['epochs'])
 # ================================================================== 模型训练
 
 
 # ------------------------------------------------------------------ 进行推理
-def load_model(path):
-    model = ISICModel(CONFIG['model_name'], pretrained=False)
-    checkpoint = torch.load(path)
-    print(f"load checkpoint: {path}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
+# def load_model(path):
+#     model = ISICModel(CONFIG['model_name'], pretrained=False)
+#     checkpoint = torch.load(path)
+#     print(f"load checkpoint: {path}") 
+#     # 去掉前面多余的'module.'
+#     new_state_dict = {}
+#     for k,v in checkpoint.items():
+#         new_state_dict[k[7:]] = v
+#     model.load_state_dict( new_state_dict )
 
-    model = model.cuda() 
-    # model.to(CONFIG['device'])
-    model = DataParallel(model) 
-    return model
+#     model = model.cuda() 
+#     # model.to(CONFIG['device'])
+#     model = DataParallel(model) 
+#     return model
 
-models = []
-# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5334_Loss0.1797_pAUC0.1483_fold0.bin'))
-# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5220_Loss0.1855_pAUC0.1474_fold1.bin'))
+# models = []
+# # models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5334_Loss0.1797_pAUC0.1483_fold0.bin'))
+# # models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5220_Loss0.1855_pAUC0.1474_fold1.bin'))
 
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5344_Loss0.1571_pAUC0.1495_fold0.bin'))
-# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5329_Loss0.1791_pAUC0.1421_fold1.bin'))
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5225_Loss0.1766_pAUC0.1400_fold1.bin'))
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5344_Loss0.1571_pAUC0.1495_fold0.bin'))
+# # models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5329_Loss0.1791_pAUC0.1421_fold1.bin'))
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5225_Loss0.1766_pAUC0.1400_fold1.bin'))
 
-df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-sgkf = StratifiedGroupKFold(n_splits=2)
-for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-      df.loc[val_ , "kfold"] = int(fold)
+# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+# sgkf = StratifiedGroupKFold(n_splits=2)
+# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+#       df.loc[val_ , "kfold"] = int(fold)
 
-df_valids = pd.DataFrame()
-for i in range(CONFIG['n_fold']):
-    _, valid_loader = prepare_loaders(df, i)
-    res = run_test(models[i], valid_loader, device=CONFIG['device']) 
-    df_valid = df[df.kfold == i].reset_index()
-    df_valid['eva'] = res
-    df_valids = pd.concat([df_valids, df_valid])
+# df_valids = pd.DataFrame()
+# for i in range(CONFIG['n_fold']):
+#     _, valid_loader = prepare_loaders(df, i)
+#     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
+#     df_valid = df[df.kfold == i].reset_index()
+#     df_valid['eva'] = res
+#     df_valids = pd.concat([df_valids, df_valid])
 
-from IPython import embed
-embed()
+# from IPython import embed
+# embed()
 
-df_valids = df_valids[["isic_id", "patient_id", "eva"]]
+# df_valids = df_valids[["isic_id", "patient_id", "eva"]]
 
 
-df = df[['isic_id', 'patient_id', 'target']]
-df = df.merge(df_valids, on=["isic_id", "patient_id"])
-df = df[['isic_id', 'patient_id', 'target', "eva"]]
-# df.rename(columns={'target_x': 'target'}, inplace=True)
+# df = df[['isic_id', 'patient_id', 'target']]
+# df = df.merge(df_valids, on=["isic_id", "patient_id"])
+# df = df[['isic_id', 'patient_id', 'target', "eva"]]
+# # df.rename(columns={'target_x': 'target'}, inplace=True)
 
-df['target'].sum()
+# df['target'].sum()
 
-df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train2.csv')
+# df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train3.csv')
 # ===================================================================== 进行推理
