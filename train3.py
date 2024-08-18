@@ -601,7 +601,7 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
             targets[1]=torch.tensor(targets[1]).cuda()
             targets[2]=torch.tensor(targets[2]).cuda()
         elif random_number > 0.5:
-            input,targets=mixup(input,target,2)
+            input,targets=mixup(input,target,0.5)
             
             targets[0]=torch.tensor(targets[0]).cuda()
             targets[1]=torch.tensor(targets[1]).cuda()
