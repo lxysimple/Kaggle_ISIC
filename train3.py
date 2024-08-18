@@ -84,8 +84,8 @@ CONFIG = {
     "checkpoint": None,
 
     # 手动调节学习率
-    "learning_rate": 1e-4, # 1e-5
-    "min_lr": 1e-5, # 1e-6
+    "learning_rate": 1e-5, # 1e-5
+    "min_lr": 1e-6, # 1e-6
     "T_max": 10,
     "epochs": 10,
 
@@ -537,32 +537,10 @@ def mixup_criterion(preds1, targets):
 
 
 # ============================== Function ==============================
-class FocalLoss(nn.Module):
-    """
-    correct version of FocalLoss
-    """
-    def __init__(self, alpha=0.25, gamma=2,reduce='sum'):
-        super(FocalLoss, self).__init__()
-        self.alpha = alpha
-        self.gamma=gamma
-        self.reduction=reduce
-    def forward(self,inputs,targets):
-        BCE_loss=F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
-        probas=torch.sigmoid(inputs)
-        loss=targets*self.alpha*(1-probas)**self.gamma*BCE_loss+(1-targets)*(1-self.alpha)*probas**self.gamma*BCE_loss
-        if self.reduction=='mean':
-            return torch.mean(loss)
-        elif self.reduction=='sum':
-            return torch.sum(loss)
-        else:
-            return loss
 
 
 def criterion(outputs, targets):
-    # return nn.BCELoss()(outputs, targets)
-    return FocalLoss(alpha=0.25, gamma=2.0)(outputs, targets)
-
-
+    return nn.BCELoss()(outputs, targets)
 
 
 def score(solution: pd.DataFrame, submission: pd.DataFrame, row_id_column_name: str, min_tpr: float=0.80) -> float:
@@ -609,18 +587,18 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         images = data['image'].to(device, dtype=torch.float)
         targets = data['target'].to(device, dtype=torch.float)
         
-        random_number = 0.5
-        # random_number = random.random() # 生成一个0到1之间的随机数
+        # random_number = 0.5
+        random_number = random.random() # 生成一个0到1之间的随机数
         input = images
         tmp = targets
         target = targets
-        if random_number < 0.3:
+        if random_number < 0.5:
             input,targets=cutmix(input,target,2)
             
             targets[0]=torch.tensor(targets[0]).cuda()
             targets[1]=torch.tensor(targets[1]).cuda()
             targets[2]=torch.tensor(targets[2]).cuda()
-        elif random_number > 0.7:
+        elif random_number > 999:
             input,targets=mixup(input,target,2)
             
             targets[0]=torch.tensor(targets[0]).cuda()
@@ -635,9 +613,9 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
 
         loss=None
         output = outputs
-        if random_number < 0.3:
+        if random_number < 0.5:
             loss = cutmix_criterion(output, targets) # 注意这是在CPU上运算的
-        elif random_number > 0.7:
+        elif random_number > 999:
             loss = mixup_criterion(output, targets) # 注意这是在CPU上运算的
         else:
             loss = criterion(output, target)
