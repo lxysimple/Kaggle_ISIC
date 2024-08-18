@@ -560,7 +560,7 @@ class FocalLoss(nn.Module):
 
 def criterion(outputs, targets):
     # return nn.BCELoss()(outputs, targets)
-    return FocalLoss(alpha=0.75, gamma=2.0)(outputs, targets)
+    return FocalLoss(alpha=0.25, gamma=2.0)(outputs, targets)
 
 
 
