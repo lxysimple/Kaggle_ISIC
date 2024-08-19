@@ -834,8 +834,8 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
     concat_dataset_train = ConcatDataset([
-        train_dataset, train_dataset2020
-        # train_dataset, 
+        # train_dataset, train_dataset2020
+        train_dataset, 
     ])
 
     # 用github数据时, num_workers=2
