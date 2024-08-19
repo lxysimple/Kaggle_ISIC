@@ -75,7 +75,7 @@ CONFIG = {
     "img_size": 224,
     # "model_name": "maxvit_rmlp_base_rw_224",
     # "model_name": "coatnet_rmlp_1_rw2_224",
-    "model_name": "seresnext50_32x4d",
+    "model_name": "efficientnet_b0",
 
 
     # 164: eva
