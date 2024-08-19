@@ -82,7 +82,7 @@ CONFIG = {
     
     # 训练时164，
     # eva: 96
-    # vit: 32
+    # vit推理: 32
     "valid_batch_size": 164, 
 
 
