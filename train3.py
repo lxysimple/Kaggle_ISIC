@@ -74,7 +74,8 @@ CONFIG = {
 
     # 164:only kaggle_data
     # 96:only github_data
-    "train_batch_size": 164, # 96 32
+    # 
+    "train_batch_size": 96, # 96 32
 
     # 训练时164，推理时96
     "valid_batch_size": 164, 
