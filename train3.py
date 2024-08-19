@@ -913,18 +913,23 @@ for i in range(CONFIG['n_fold']):
     df_valid['eva'] = res
     df_valids = pd.concat([df_valids, df_valid])
 
-from IPython import embed
-embed()
+# from IPython import embed
+# embed()
 
 df_valids = df_valids[["isic_id", "patient_id", "eva"]]
 
 
 df = df[['isic_id', 'patient_id', 'target']]
 df = df.merge(df_valids, on=["isic_id", "patient_id"])
-df = df[['isic_id', 'patient_id', 'target', "eva"]]
-# df.rename(columns={'target_x': 'target'}, inplace=True)
 
-df['target'].sum()
 
-df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/vit/vit_train.csv')
+try:
+    df = df[['isic_id', 'patient_id', 'target', "eva"]]
+    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/vit/vit_train.csv')
+except:
+
+    df.rename(columns={'target_x': 'target'}, inplace=True)
+    df = df[['isic_id', 'patient_id', 'target', "eva"]]
+    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/vit/vit_train.csv')
+
 # ===================================================================== 进行推理
