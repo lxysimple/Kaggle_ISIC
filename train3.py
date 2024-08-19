@@ -351,8 +351,8 @@ class ISICModel(nn.Module):
         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
 
         # in_features = self.model.head.in_features # eva
-        in_features = self.model.classifier.in_features # vit
-        
+        in_features = self.model.get_classifier.in_features # vit
+
         self.model.head = nn.Linear(in_features, num_classes)
         self.sigmoid = nn.Sigmoid()
 
