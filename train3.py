@@ -72,8 +72,8 @@ CONFIG = {
     "img_size": 224,
     "model_name": "maxvit_rmlp_base_rw_224",
 
-    # 164:only kaggle_data
-    # 96:only github_data
+    # 164: eva
+    # 96: vit
     # 
     "train_batch_size": 96, # 96 32
 
