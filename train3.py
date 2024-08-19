@@ -80,8 +80,9 @@ CONFIG = {
     # 64: vit
     "train_batch_size": 164, # 96 32
     
-    # 训练时164，推理时96
-    # vit要32
+    # 训练时164，
+    # eva: 96
+    # vit: 32
     "valid_batch_size": 164, 
 
 
