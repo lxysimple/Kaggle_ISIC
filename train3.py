@@ -359,7 +359,10 @@ class ISICModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, images):
-        return self.sigmoid(self.model(images))
+        res = self.model(images)
+        print(res.shape)
+
+        return self.sigmoid(res)
     
 
 
