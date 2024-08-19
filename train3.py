@@ -90,7 +90,7 @@ CONFIG = {
     # 训练时164，推理时96
     "valid_batch_size": 164, 
     "scheduler": 'CosineAnnealingLR',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5311_Loss0.1989_pAUC0.1241_fold0.bin',
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2250_pAUC0.1480_fold0.bin',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eff/AUROC0.5235_Loss0.3976_pAUC0.1187_fold0.bin',
     # "checkpoint": None,
 
@@ -845,8 +845,8 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
     concat_dataset_train = ConcatDataset([
-        # train_dataset, train_dataset2020
-        train_dataset, 
+        train_dataset, train_dataset2020
+        # train_dataset, 
     ])
 
     # 用github数据时, num_workers=2
