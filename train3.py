@@ -353,7 +353,9 @@ class ISICModel(nn.Module):
         # in_features = self.model.head.in_features # eva
         in_features = 7 # vit
 
-        self.model.head = nn.Linear(in_features, num_classes)
+        # self.model.head = nn.Linear(in_features, num_classes)
+        self.model.classifier = nn.Linear(in_features, num_classes)
+
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, images):
