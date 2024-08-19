@@ -76,9 +76,11 @@ CONFIG = {
     # "model_name": "maxvit_rmlp_base_rw_224",
     # "model_name": "coatnet_rmlp_1_rw2_224",
 
-    "img_size": 256,
-    "model_name": "maxvit_rmlp_tiny_rw_256",
+    # "img_size": 256,
+    # "model_name": "maxvit_rmlp_tiny_rw_256",
 
+    "img_size": 384,
+    "model_name": "maxvit_tiny_tf_384",
 
     # 164: eva
     # 64: vit
