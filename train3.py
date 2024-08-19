@@ -67,14 +67,14 @@ CONFIG = {
     "seed": 42,
     
 
-    # "img_size": 336,
-    # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
+    "img_size": 336,
+    "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
     
 
     
-    "img_size": 224,
+    # "img_size": 224,
     # "model_name": "maxvit_rmlp_base_rw_224",
-    "model_name": "coatnet_rmlp_1_rw2_224",
+    # "model_name": "coatnet_rmlp_1_rw2_224",
 
 
     # 164: eva
