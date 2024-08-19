@@ -88,6 +88,7 @@ CONFIG = {
     "train_batch_size": 64, # 96 32
 
     # 训练时164，推理时96
+    # vit要64
     "valid_batch_size": 64, 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.1854_pAUC0.1380_fold1.bin',
