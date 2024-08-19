@@ -354,15 +354,16 @@ class ISICModel(nn.Module):
         in_features = 7 # vit
 
         # self.model.head = nn.Linear(in_features, num_classes)
-        self.model.classifier = nn.Linear(in_features, num_classes)
+        self.head = nn.Linear(1000, num_classes)
 
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, images):
-        res = self.model(images)
-        print('res.shape: ', res.shape)
+        x = self.model(images)
+        x = self.head(x)
+        print('res.shape: ', x.shape)
 
-        return self.sigmoid(res)
+        return self.sigmoid(x)
 
 
 
