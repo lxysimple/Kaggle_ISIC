@@ -79,11 +79,13 @@ CONFIG = {
     # 164: eva
     # 64: vit
     # 
-    "train_batch_size": 64, # 96 32
+    "train_batch_size": 164, # 96 32
 
     # 训练时164，推理时96
-    # vit要64
-    "valid_batch_size": 32, 
+    # vit要32
+    "valid_batch_size": 164, 
+
+
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.1854_pAUC0.1380_fold1.bin',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eff/AUROC0.5235_Loss0.3976_pAUC0.1187_fold0.bin',
