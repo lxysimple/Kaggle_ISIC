@@ -75,7 +75,7 @@ CONFIG = {
     # 164: eva
     # 96: vit
     # 
-    "train_batch_size": 96, # 96 32
+    "train_batch_size": 64, # 96 32
 
     # 训练时164，推理时96
     "valid_batch_size": 164, 
@@ -351,17 +351,18 @@ class ISICModel(nn.Module):
         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
 
         # in_features = self.model.head.in_features # eva
-        in_features = 7 # vit
+        in_features = 1000 # vit
 
         # self.model.head = nn.Linear(in_features, num_classes)
-        self.head = nn.Linear(1000, num_classes)
+
+        self.head = nn.Linear(in_features, num_classes)
 
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, images):
         x = self.model(images)
         x = self.head(x)
-        print('res.shape: ', x.shape)
+        # print('res.shape: ', x.shape)
 
         return self.sigmoid(x)
 
