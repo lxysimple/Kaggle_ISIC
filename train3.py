@@ -67,10 +67,10 @@ CONFIG = {
     "seed": 42,
     
 
-    "img_size": 336,
-    "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
-    # "img_size": 384,
-    # "model_name": "vit_base_patch16_clip_384.openai_ft_in12k_in1k",
+    # "img_size": 336,
+    # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
+    "img_size": 224,
+    "model_name": "maxvit_rmlp_base_rw_224",
 
     # 164:only kaggle_data
     # 96:only github_data
@@ -805,8 +805,8 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
     concat_dataset_train = ConcatDataset([
-        # train_dataset, train_dataset2020
-        train_dataset, 
+        train_dataset, train_dataset2020
+        # train_dataset, 
     ])
 
     # 用github数据时, num_workers=2
