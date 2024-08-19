@@ -75,7 +75,7 @@ CONFIG = {
     "img_size": 224,
     # "model_name": "maxvit_rmlp_base_rw_224",
     # "model_name": "coatnet_rmlp_1_rw2_224",
-    "model_name": "efficientnet_b0",
+    "model_name": "maxvit_rmlp_tiny_rw_256",
 
 
     # 164: eva
@@ -91,9 +91,9 @@ CONFIG = {
     # "checkpoint": None,
 
     # 手动调节学习率
-    "learning_rate": 1e-4, # 1e-5
-    "min_lr": 1e-5, # 1e-6
-    "weight_decay": 1e-5, # 1e-6
+    "learning_rate": 1e-5, # 1e-5
+    "min_lr": 1e-6, # 1e-6
+    "weight_decay": 1e-6, # 1e-6
 
     "T_max": 10,
     "epochs": 10,
@@ -222,8 +222,8 @@ for i in range(2):
     df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
     df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
     # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-    # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
-    tmp = pd.concat([df_positive, df_positive, df_positive, df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+    tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+    # tmp = pd.concat([df_positive, df_positive, df_positive, df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
     tmp_sum = pd.concat([tmp_sum, tmp])
 df = tmp_sum
 
