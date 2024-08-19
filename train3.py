@@ -360,10 +360,10 @@ class ISICModel(nn.Module):
 
     def forward(self, images):
         res = self.model(images)
-        print(res.shape)
+        print('res.shape: ', res.shape)
 
         return self.sigmoid(res)
-    
+
 
 
 if CONFIG['checkpoint'] is not None:
