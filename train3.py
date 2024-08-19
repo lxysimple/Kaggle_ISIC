@@ -69,13 +69,18 @@ CONFIG = {
 
     # "img_size": 336,
     # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
+    
+
+    
     "img_size": 224,
-    "model_name": "maxvit_rmlp_base_rw_224",
+    # "model_name": "maxvit_rmlp_base_rw_224",
+    "model_name": "coatnet_rmlp_1_rw2_224",
+
 
     # 164: eva
     # 64: vit
     # 
-    "train_batch_size": 64, # 96 32
+    "train_batch_size": 164, # 96 32
 
     # 训练时164，推理时96
     "valid_batch_size": 164, 
@@ -350,8 +355,8 @@ class ISICModel(nn.Module):
         super(ISICModel, self).__init__()
         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
 
-        # in_features = self.model.head.in_features # eva
-        in_features = 1000 # vit
+        in_features = self.model.head.in_features # eva
+        # in_features = 1000 # vit
 
         # self.model.head = nn.Linear(in_features, num_classes)
 
