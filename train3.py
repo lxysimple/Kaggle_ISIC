@@ -95,9 +95,9 @@ CONFIG = {
     # "checkpoint": None,
 
     # 手动调节学习率
-    "learning_rate": 1e-6, # 1e-5
-    "min_lr": 1e-7, # 1e-6
-    "weight_decay": 1e-7, # 1e-6
+    "learning_rate": 1e-5, # 1e-5
+    "min_lr": 1e-6, # 1e-6
+    "weight_decay": 1e-6, # 1e-6
 
     # 用于vit学习
     # "learning_rate": 1e-4, # 1e-5
@@ -868,66 +868,62 @@ def prepare_loaders(df, fold):
 
 
 # ------------------------------------------------------------------ 模型训练
-train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-                       weight_decay=CONFIG['weight_decay'])
-scheduler = fetch_scheduler(optimizer)
-model, history = run_training(model, optimizer, scheduler,
-                              device=CONFIG['device'],
-                              num_epochs=CONFIG['epochs'])
+# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+#                        weight_decay=CONFIG['weight_decay'])
+# scheduler = fetch_scheduler(optimizer)
+# model, history = run_training(model, optimizer, scheduler,
+#                               device=CONFIG['device'],
+#                               num_epochs=CONFIG['epochs'])
 # ================================================================== 模型训练
 
 
 # ------------------------------------------------------------------ 进行推理
-# def load_model(path):
-#     model = ISICModel(CONFIG['model_name'], pretrained=False)
-#     checkpoint = torch.load(path)
-#     print(f"load checkpoint: {path}") 
-#     # 去掉前面多余的'module.'
-#     new_state_dict = {}
-#     for k,v in checkpoint.items():
-#         new_state_dict[k[7:]] = v
-#     model.load_state_dict( new_state_dict )
+def load_model(path):
+    model = ISICModel(CONFIG['model_name'], pretrained=False)
+    checkpoint = torch.load(path)
+    print(f"load checkpoint: {path}") 
+    # 去掉前面多余的'module.'
+    new_state_dict = {}
+    for k,v in checkpoint.items():
+        new_state_dict[k[7:]] = v
+    model.load_state_dict( new_state_dict )
 
-#     model = model.cuda() 
-#     # model.to(CONFIG['device'])
-#     model = DataParallel(model) 
-#     return model
+    model = model.cuda() 
+    # model.to(CONFIG['device'])
+    model = DataParallel(model) 
+    return model
 
-# models = []
-# # models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5334_Loss0.1797_pAUC0.1483_fold0.bin'))
-# # models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5220_Loss0.1855_pAUC0.1474_fold1.bin'))
+models = []
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5331_Loss0.2081_pAUC0.1461_fold0.bin'))
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5325_Loss0.1854_pAUC0.1401_fold1.bin'))
 
-# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5344_Loss0.1571_pAUC0.1495_fold0.bin'))
-# # models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5329_Loss0.1791_pAUC0.1421_fold1.bin'))
-# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5225_Loss0.1766_pAUC0.1400_fold1.bin'))
+df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+sgkf = StratifiedGroupKFold(n_splits=2)
+for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+      df.loc[val_ , "kfold"] = int(fold)
 
-# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-# sgkf = StratifiedGroupKFold(n_splits=2)
-# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-#       df.loc[val_ , "kfold"] = int(fold)
+df_valids = pd.DataFrame()
+for i in range(CONFIG['n_fold']):
+    _, valid_loader = prepare_loaders(df, i)
+    res = run_test(models[i], valid_loader, device=CONFIG['device']) 
+    df_valid = df[df.kfold == i].reset_index()
+    df_valid['eva'] = res
+    df_valids = pd.concat([df_valids, df_valid])
 
-# df_valids = pd.DataFrame()
-# for i in range(CONFIG['n_fold']):
-#     _, valid_loader = prepare_loaders(df, i)
-#     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
-#     df_valid = df[df.kfold == i].reset_index()
-#     df_valid['eva'] = res
-#     df_valids = pd.concat([df_valids, df_valid])
+from IPython import embed
+embed()
 
-# from IPython import embed
-# embed()
-
-# df_valids = df_valids[["isic_id", "patient_id", "eva"]]
+df_valids = df_valids[["isic_id", "patient_id", "eva"]]
 
 
-# df = df[['isic_id', 'patient_id', 'target']]
-# df = df.merge(df_valids, on=["isic_id", "patient_id"])
-# df = df[['isic_id', 'patient_id', 'target', "eva"]]
-# # df.rename(columns={'target_x': 'target'}, inplace=True)
+df = df[['isic_id', 'patient_id', 'target']]
+df = df.merge(df_valids, on=["isic_id", "patient_id"])
+df = df[['isic_id', 'patient_id', 'target', "eva"]]
+# df.rename(columns={'target_x': 'target'}, inplace=True)
 
-# df['target'].sum()
+df['target'].sum()
 
-# df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train3.csv')
+df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/vit/vit_train.csv')
 # ===================================================================== 进行推理
