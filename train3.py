@@ -87,8 +87,8 @@ CONFIG = {
     "valid_batch_size": 164, 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.2527_epoch3.bin',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eff/AUROC0.5235_Loss0.3976_pAUC0.1187_fold0.bin',
-    # "checkpoint": None,
+    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eff/AUROC0.5235_Loss0.3976_pAUC0.1187_fold0.bin',
+    "checkpoint": None,
 
     # 手动调节学习率
     "learning_rate": 1e-5, # 1e-5
