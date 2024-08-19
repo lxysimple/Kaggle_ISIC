@@ -72,9 +72,11 @@ CONFIG = {
     
 
     
-    "img_size": 224,
+    # "img_size": 224,
     # "model_name": "maxvit_rmlp_base_rw_224",
     # "model_name": "coatnet_rmlp_1_rw2_224",
+
+    "img_size": 256,
     "model_name": "maxvit_rmlp_tiny_rw_256",
 
 
