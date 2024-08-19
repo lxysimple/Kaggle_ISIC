@@ -73,7 +73,7 @@ CONFIG = {
     "model_name": "maxvit_rmlp_base_rw_224",
 
     # 164: eva
-    # 96: vit
+    # 64: vit
     # 
     "train_batch_size": 64, # 96 32
 
