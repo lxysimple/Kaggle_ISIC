@@ -88,18 +88,18 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.1854_pAUC0.1380_fold1.bin',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5247_Loss0.3124_pAUC0.0733_fold0.bin',
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eff/AUROC0.5317_Loss0.1857_pAUC0.1407_fold0.bin',
     # "checkpoint": None,
 
     # # 手动调节学习率
-    # "learning_rate": 1e-5, # 1e-5
-    # "min_lr": 1e-6, # 1e-6
-    # "weight_decay": 1e-6, # 1e-6
+    "learning_rate": 1e-5, # 1e-5
+    "min_lr": 1e-6, # 1e-6
+    "weight_decay": 1e-6, # 1e-6
 
     # 用于vit、seresnext学习
-    "learning_rate": 1e-4, # 1e-5
-    "min_lr": 1e-5, # 1e-6
-    "weight_decay": 1e-5, # 1e-6
+    # "learning_rate": 1e-4, # 1e-5
+    # "min_lr": 1e-5, # 1e-6
+    # "weight_decay": 1e-5, # 1e-6
 
     "T_max": 10,
     "epochs": 10,
