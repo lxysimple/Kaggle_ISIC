@@ -76,7 +76,7 @@ CONFIG = {
     "img_size": 288,
     "model_name": "seresnext50_32x4d",
 
-    # 164: eva
+    # 164: eva、seresnext
     # 64: vit
     "train_batch_size": 164, # 96 32
     
