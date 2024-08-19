@@ -73,8 +73,8 @@ CONFIG = {
     # "img_size": 384,
     # "model_name": "maxvit_tiny_tf_384",
 
-    "img_size": 288,
-    "model_name": "seresnext50_32x4d",
+    "img_size": 240,
+    "model_name": "tf_efficientnetv2_b3.in21k_ft_in1k",
 
     # 164: eva、seresnext
     # 64: vit
@@ -88,8 +88,8 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/vit/AUROC0.5322_Loss0.1854_pAUC0.1380_fold1.bin',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5270_Loss0.2057_pAUC0.1049_fold1.bin',
-    # "checkpoint": None,
+    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5270_Loss0.2057_pAUC0.1049_fold1.bin',
+    "checkpoint": None,
 
     # # 手动调节学习率
     "learning_rate": 1e-5, # 1e-5
@@ -105,7 +105,7 @@ CONFIG = {
     "epochs": 10,
 
     
-    "fold" : 1,
+    "fold" : 0,
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
