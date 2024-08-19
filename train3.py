@@ -220,8 +220,8 @@ for i in range(2):
     df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
     df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
     # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-    tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
-    # tmp = pd.concat([df_positive, df_positive, df_positive, df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+    # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+    tmp = pd.concat([df_positive, df_positive, df_positive, df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
     tmp_sum = pd.concat([tmp_sum, tmp])
 df = tmp_sum
 
