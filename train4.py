@@ -865,8 +865,8 @@ def prepare_loaders(df, fold):
         # train_dataset2020, 
         # train_dataset2018,
         train_dataset, 
-        # train_dataset2019,
-        train_dataset_others,
+        train_dataset2019,
+        # train_dataset_others,
 
     ])
 
