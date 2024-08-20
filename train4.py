@@ -96,17 +96,17 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5326_Loss0.2242_pAUC0.1503_fold1.bin',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5146_Loss0.4583_pAUC0.0579_fold0.bin',
-    "checkpoint": None,
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5150_Loss0.1948_pAUC0.1461_fold1.bin',
+    # "checkpoint": None,
 
   
-    "learning_rate": 1e-5, # 1e-5
-    "min_lr": 1e-6, # 1e-6
-    "weight_decay": 1e-6, # 1e-6
+    # "learning_rate": 1e-5, # 1e-5
+    # "min_lr": 1e-6, # 1e-6
+    # "weight_decay": 1e-6, # 1e-6
 
-    # "learning_rate": 1e-6, # 1e-5
-    # "min_lr": 1e-7, # 1e-6
-    # "weight_decay": 1e-7, # 1e-6
+    "learning_rate": 1e-6, # 1e-5
+    "min_lr": 1e-7, # 1e-6
+    "weight_decay": 1e-7, # 1e-6
 
 
     # "learning_rate": 1e-4, # 1e-5
