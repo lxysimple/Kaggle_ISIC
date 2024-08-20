@@ -243,7 +243,7 @@ for i in range(2):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10 + 584, :])
+        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10 + 4336, :]) 
         tmp = pd.concat(positive_list) 
     else:
         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
@@ -863,11 +863,11 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
     concat_dataset_train = ConcatDataset([
-        train_dataset2020, 
+        # train_dataset2020, 
         # train_dataset2018,
         train_dataset, 
         # train_dataset2019,
-        # train_dataset_others,
+        train_dataset_others,
 
     ])
 
