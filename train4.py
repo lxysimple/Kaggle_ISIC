@@ -99,7 +99,7 @@ CONFIG = {
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5146_Loss0.4583_pAUC0.0579_fold0.bin',
     "checkpoint": None,
 
-    # # 手动调节学习率
+  
     "learning_rate": 1e-5, # 1e-5
     "min_lr": 1e-6, # 1e-6
     "weight_decay": 1e-6, # 1e-6
@@ -108,7 +108,7 @@ CONFIG = {
     # "min_lr": 1e-7, # 1e-6
     # "weight_decay": 1e-7, # 1e-6
 
-    # 用于vit、eff学习
+
     # "learning_rate": 1e-4, # 1e-5
     # "min_lr": 1e-5, # 1e-6
     # "weight_decay": 1e-5, # 1e-6
