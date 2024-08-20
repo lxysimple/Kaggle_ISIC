@@ -501,26 +501,18 @@ data_transforms = {
     #         ToTensorV2()
     # ], p=1.),
 
-    # "valid": A.Compose([
-    #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-    #     A.Normalize(
-    #             mean=[0.4815, 0.4578, 0.4082], 
-    #             std=[0.2686, 0.2613, 0.2758], 
-    #             max_pixel_value=255.0,
-    #             p=1.0
-    #         ),
-    #     ToTensorV2(),
-    #     ], p=1.)
-    
     "valid": A.Compose([
         A.Resize(CONFIG['img_size'], CONFIG['img_size']),
         A.Normalize(
-                mean=[0.485, 0.456, 0.406], 
-                std=[0.229, 0.224, 0.225], 
-                max_pixel_value=255.0, 
+                mean=[0.4815, 0.4578, 0.4082], 
+                std=[0.2686, 0.2613, 0.2758], 
+                max_pixel_value=255.0,
                 p=1.0
             ),
-        ToTensorV2()], p=1.)
+        ToTensorV2(),
+        ], p=1.)
+    
+
 }
 
 # ============================== cutmix+mixup ==============================
