@@ -90,8 +90,8 @@ CONFIG = {
     
     # 训练时164，
     # eva: 96
-    # vit推理: 32
-    "valid_batch_size": 64, 
+    # vit推理: 64
+    "valid_batch_size": 164, 
 
 
     "scheduler": 'CosineAnnealingLR',
