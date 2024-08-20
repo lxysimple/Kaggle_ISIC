@@ -987,10 +987,7 @@ def load_model(path):
     for k,v in checkpoint.items():
         new_state_dict[k[7:]] = v
     model.load_state_dict( new_state_dict )
-
     model = model.cuda() 
-    # model.to(CONFIG['device'])
-    model = DataParallel(model) 
     return model
 
 
