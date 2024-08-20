@@ -1001,7 +1001,7 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 _, valid_loader = prepare_loaders(df, 0)
 
 _, _, epoch_val_targets, epoch_val_outputs = valid_one_epoch(
-            model, valid_loader, device=CONFIG['device'], epoch=epoch)
+            model, valid_loader, device=CONFIG['device'], epoch=999)
 
 # Create DataFrames with row_id for scoring
 solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
