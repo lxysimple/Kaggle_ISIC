@@ -242,7 +242,7 @@ for i in range(2):
         positive_list = []
         for i in range(1):
             positive_list.append(df_positive)
-        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :])
+        # positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :])
         tmp = pd.concat(positive_list) 
     else:
         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
@@ -347,8 +347,8 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         start = 0
         self.df_negative = self.df_negative[start : start+len(self.df_positive)*10]
 
-        # self.df = pd.concat([self.df_positive, self.df_negative]) 
-        # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
+        self.df = pd.concat([self.df_positive, self.df_negative]) 
+        self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
         self.df = self.df_positive
         self.isic_ids = self.df['isic_id'].values
         self.targets = self.df['target'].values
