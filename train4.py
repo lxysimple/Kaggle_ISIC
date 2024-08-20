@@ -896,14 +896,14 @@ def prepare_loaders(df, fold):
 
 
 # ------------------------------------------------------------------ 模型训练
-train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-                       weight_decay=CONFIG['weight_decay'])
-scheduler = fetch_scheduler(optimizer)
-model, history = run_training(model, optimizer, scheduler,
-                              device=CONFIG['device'],
-                              num_epochs=CONFIG['epochs'])
+# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+#                        weight_decay=CONFIG['weight_decay'])
+# scheduler = fetch_scheduler(optimizer)
+# model, history = run_training(model, optimizer, scheduler,
+#                               device=CONFIG['device'],
+#                               num_epochs=CONFIG['epochs'])
 # ================================================================== 模型训练
 
 
@@ -960,3 +960,52 @@ model, history = run_training(model, optimizer, scheduler,
 #     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 
 # ===================================================================== 进行推理
+
+# --------------------------------------------------------------------- 测试BUG
+def load_model(path):
+    model = ISICModel(CONFIG['model_name'], pretrained=False)
+    checkpoint = torch.load(path)
+    print(f"load checkpoint: {path}") 
+    # 去掉前面多余的'module.'
+    new_state_dict = {}
+    for k,v in checkpoint.items():
+        new_state_dict[k[7:]] = v
+    model.load_state_dict( new_state_dict )
+
+    model = model.cuda() 
+    # model.to(CONFIG['device'])
+    model = DataParallel(model) 
+    return model
+
+
+# class ISICModel(nn.Module):
+#     def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
+#         super(ISICModel, self).__init__()
+#         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
+
+#         in_features = self.model.head.in_features
+#         self.model.head = nn.Linear(in_features, num_classes)
+#         self.sigmoid = nn.Sigmoid()
+
+#     def forward(self, images):
+#         return self.sigmoid(self.model(images))
+
+
+model = load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5336_Loss0.2118_pAUC0.1514_fold0.bin')
+
+df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+sgkf = StratifiedGroupKFold(n_splits=2)
+for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+      df.loc[val_ , "kfold"] = int(fold)
+
+_, valid_loader = prepare_loaders(df, 0)
+
+_, _, epoch_val_targets, epoch_val_outputs = valid_one_epoch(
+            model, valid_loader, device=CONFIG['device'], epoch=epoch)
+
+# Create DataFrames with row_id for scoring
+solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
+submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
+epoch_score = score(solution_df, submission_df, 'row_id')
+print("epoch_score: {:.4f}".format(epoch_score))
+# ===================================================================== 测试BUG
