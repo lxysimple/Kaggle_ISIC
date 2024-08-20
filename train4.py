@@ -72,8 +72,8 @@ CONFIG = {
     "seed": 42,
     
 
-    "img_size": 224,
-    "model_name": "vit_large_patch14_clip_224.openai_ft_in12k_in1k",
+    "img_size": 256,
+    "model_name": "vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k",
 
     # "img_size": 336,
     # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
@@ -86,7 +86,7 @@ CONFIG = {
 
     # 164: eva、seresnext
     # 64: vit
-    "train_batch_size": 48, # 96 32
+    "train_batch_size": 64, # 96 32
     
     # 训练时164，
     # eva: 96
