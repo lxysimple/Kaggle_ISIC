@@ -71,7 +71,7 @@ from sklearn.metrics import hamming_loss, f1_score, roc_curve, auc, classificati
 CONFIG = {
     "seed": 42,
     
-
+ 
     "img_size": 256,
     "model_name": "vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k",
 
@@ -100,18 +100,18 @@ CONFIG = {
     "checkpoint": None,
 
     # # 手动调节学习率
-    # "learning_rate": 1e-5, # 1e-5
-    # "min_lr": 1e-6, # 1e-6
-    # "weight_decay": 1e-6, # 1e-6
+    "learning_rate": 1e-5, # 1e-5
+    "min_lr": 1e-6, # 1e-6
+    "weight_decay": 1e-6, # 1e-6
 
     # "learning_rate": 1e-6, # 1e-5
     # "min_lr": 1e-7, # 1e-6
     # "weight_decay": 1e-7, # 1e-6
 
     # 用于vit、eff学习
-    "learning_rate": 1e-4, # 1e-5
-    "min_lr": 1e-5, # 1e-6
-    "weight_decay": 1e-5, # 1e-6
+    # "learning_rate": 1e-4, # 1e-5
+    # "min_lr": 1e-5, # 1e-6
+    # "weight_decay": 1e-5, # 1e-6
 
     "T_max": 10,
     "epochs": 10,
