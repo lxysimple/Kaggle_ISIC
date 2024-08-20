@@ -921,8 +921,8 @@ def load_model(path):
     return model
 
 models = []
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eff/AUROC0.5336_Loss0.2118_pAUC0.1514_fold0.bin'))
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eff/AUROC0.5334_Loss0.1825_pAUC0.1508_fold1.bin'))
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5336_Loss0.2118_pAUC0.1514_fold0.bin'))
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5334_Loss0.1825_pAUC0.1508_fold1.bin'))
 
 df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
 sgkf = StratifiedGroupKFold(n_splits=2)
