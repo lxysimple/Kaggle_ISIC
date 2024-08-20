@@ -349,7 +349,7 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
         # self.df = pd.concat([self.df_positive, self.df_negative]) 
         # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
-        self.df = self.df_positive
+        self.df = self.df_positive[:600]
         self.isic_ids = self.df['isic_id'].values
         self.targets = self.df['target'].values
 
@@ -863,9 +863,9 @@ def prepare_loaders(df, fold):
 
     concat_dataset_train = ConcatDataset([
         # train_dataset2020, 
-        train_dataset2018,
+        # train_dataset2018,
         train_dataset, 
-        # train_dataset2019,
+        train_dataset2019,
         # train_dataset_others,
 
     ])
