@@ -245,7 +245,7 @@ for i in range(2):
         positive_list.append(df_negative.iloc[:df_positive.shape[0]*10 + 593*10, :])
         tmp = pd.concat(positive_list) 
     else:
-        tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10 + 593*10, :]]) 
+        tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
     tmp_sum = pd.concat([tmp_sum, tmp]) 
 
