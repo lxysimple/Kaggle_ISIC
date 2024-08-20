@@ -759,8 +759,11 @@ def valid_one_epoch(model, dataloader, device, epoch):
         epoch_loss = running_loss / dataset_size
         epoch_auroc = running_auroc / dataset_size
         
-        bar.set_postfix(Epoch=epoch, Valid_Loss=epoch_loss, Valid_Auroc=epoch_auroc,
+        try:
+            bar.set_postfix(Epoch=epoch, Valid_Loss=epoch_loss, Valid_Auroc=epoch_auroc,
                         LR=optimizer.param_groups[0]['lr'])   
+        except:
+            print('当前在测试BUG状态！')
     
     gc.collect()
     
