@@ -91,13 +91,13 @@ CONFIG = {
     # 训练时164，
     # eva: 96
     # vit推理: 32
-    "valid_batch_size": 128, 
+    "valid_batch_size": 64, 
 
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5326_Loss0.2242_pAUC0.1503_fold1.bin',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5336_Loss0.2118_pAUC0.1514_fold0.bin',
-    "checkpoint": None,
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5146_Loss0.4583_pAUC0.0579_fold0.bin',
+    # "checkpoint": None,
 
     # # 手动调节学习率
     # "learning_rate": 1e-5, # 1e-5
