@@ -348,8 +348,8 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.df_negative = self.df_negative[start : start+len(self.df_positive)*10]
 
         self.df = pd.concat([self.df_positive, self.df_negative]) 
-        self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
-        self.df = self.df_positive
+        # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
+        # self.df = self.df_positive
         self.isic_ids = self.df['isic_id'].values
         self.targets = self.df['target'].values
 
