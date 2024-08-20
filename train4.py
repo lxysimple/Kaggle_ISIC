@@ -839,8 +839,8 @@ def fetch_scheduler(optimizer):
     return scheduler
 
 def prepare_loaders(df, fold):
-    df_train = df[df.kfold != fold].reset_index(drop=True)
-    df_valid = df[df.kfold == fold].reset_index(drop=True)
+    # df_train = df[df.kfold != fold].reset_index(drop=True)
+    # df_valid = df[df.kfold == fold].reset_index(drop=True)
     
     train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
     train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
