@@ -386,30 +386,19 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
 # ============================== Create Model ==============================
 
-# class ISICModel(nn.Module):
-#     def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
-#         super(ISICModel, self).__init__()
-#         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
-
-#         # in_features = self.model.head.in_features
-#         # self.model.head = nn.Linear(in_features, num_classes)
-#         self.model.reset_classifier(num_classes=num_classes)
-#         self.sigmoid = nn.Sigmoid()
-
-#     def forward(self, images):
-#         return self.sigmoid(self.model(images))
-    
 class ISICModel(nn.Module):
     def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
 
-        in_features = self.model.head.in_features
-        self.model.head = nn.Linear(in_features, num_classes)
+        # in_features = self.model.head.in_features
+        # self.model.head = nn.Linear(in_features, num_classes)
+        self.model.reset_classifier(num_classes=num_classes)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, images):
         return self.sigmoid(self.model(images))
+    
 
 
 
@@ -512,16 +501,26 @@ data_transforms = {
     #         ToTensorV2()
     # ], p=1.),
 
+    # "valid": A.Compose([
+    #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
+    #     A.Normalize(
+    #             mean=[0.4815, 0.4578, 0.4082], 
+    #             std=[0.2686, 0.2613, 0.2758], 
+    #             max_pixel_value=255.0,
+    #             p=1.0
+    #         ),
+    #     ToTensorV2(),
+    #     ], p=1.)
+    
     "valid": A.Compose([
         A.Resize(CONFIG['img_size'], CONFIG['img_size']),
         A.Normalize(
-                mean=[0.4815, 0.4578, 0.4082], 
-                std=[0.2686, 0.2613, 0.2758], 
-                max_pixel_value=255.0,
+                mean=[0.485, 0.456, 0.406], 
+                std=[0.229, 0.224, 0.225], 
+                max_pixel_value=255.0, 
                 p=1.0
             ),
-        ToTensorV2(),
-        ], p=1.)
+        ToTensorV2()], p=1.)
 }
 
 # ============================== cutmix+mixup ==============================
