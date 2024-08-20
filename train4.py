@@ -72,8 +72,11 @@ CONFIG = {
     "seed": 42,
     
 
-    "img_size": 336,
-    "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
+    "img_size": 224,
+    "model_name": "vit_large_patch14_clip_224.openai_ft_in12k_in1k",
+
+    # "img_size": 336,
+    # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
     
     # "img_size": 384,
     # "model_name": "maxvit_tiny_tf_384",
@@ -83,12 +86,12 @@ CONFIG = {
 
     # 164: eva、seresnext
     # 64: vit
-    "train_batch_size": 164, # 96 32
+    "train_batch_size": 96, # 96 32
     
     # 训练时164，
     # eva: 96
     # vit推理: 32
-    "valid_batch_size": 96, 
+    "valid_batch_size": 164, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -97,18 +100,18 @@ CONFIG = {
     "checkpoint": None,
 
     # # 手动调节学习率
-    "learning_rate": 1e-5, # 1e-5
-    "min_lr": 1e-6, # 1e-6
-    "weight_decay": 1e-6, # 1e-6
+    # "learning_rate": 1e-5, # 1e-5
+    # "min_lr": 1e-6, # 1e-6
+    # "weight_decay": 1e-6, # 1e-6
 
     # "learning_rate": 1e-6, # 1e-5
     # "min_lr": 1e-7, # 1e-6
     # "weight_decay": 1e-7, # 1e-6
 
     # 用于vit、eff学习
-    # "learning_rate": 1e-4, # 1e-5
-    # "min_lr": 1e-5, # 1e-6
-    # "weight_decay": 1e-5, # 1e-6
+    "learning_rate": 1e-4, # 1e-5
+    "min_lr": 1e-5, # 1e-6
+    "weight_decay": 1e-5, # 1e-6
 
     "T_max": 10,
     "epochs": 10,
