@@ -86,7 +86,7 @@ CONFIG = {
 
     # 164: eva、seresnext
     # 64: vit
-    "train_batch_size": 64, # 96 32
+    "train_batch_size": 48, # 96 32
     
     # 训练时164，
     # eva: 96
