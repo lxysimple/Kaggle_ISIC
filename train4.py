@@ -240,7 +240,7 @@ for i in range(2):
 
     if CONFIG['fold'] != i:
         positive_list = []
-        for i in range(3):
+        for i in range(1):
             positive_list.append(df_positive)
         positive_list.append(df_negative.iloc[:df_positive.shape[0]*10 + 593*10, :])
         tmp = pd.concat(positive_list) 
