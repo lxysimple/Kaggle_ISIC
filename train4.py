@@ -346,7 +346,7 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         # 保持一定的正负比例，不能让其失衡
         # start = CONFIG['fold']*len(self.df_positive)*10
         start = 0
-        self.df_negative = self.df_negative[start : start+1100]
+        self.df_negative = self.df_negative[start : start+1500]
 
         self.df = pd.concat([self.df_positive, self.df_negative]) 
         # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
