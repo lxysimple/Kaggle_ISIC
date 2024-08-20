@@ -110,7 +110,7 @@ CONFIG = {
     "epochs": 10,
 
     
-    "fold" : 1,
+    "fold" : 0,
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -163,17 +163,17 @@ print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
 # ===================================== 用聚合算法后的csv
 
 
-df_positive = df[df["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
-df_negative = df[df["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
-# 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-# df = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]])  
+# df_positive = df[df["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
+# df_negative = df[df["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
+# # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
+# # df = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]])  
 
-df_train = df_negative.iloc[df_positive.shape[0]*10 : df_positive.shape[0]*10+584*10, :]
-df_valid = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]])
+# df_train = df_negative.iloc[df_positive.shape[0]*10 : df_positive.shape[0]*10+584*10, :]
+# df_valid = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]])
 
-print("filtered>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
-df = df.reset_index(drop=True)
-print(df.shape[0], df.target.sum())
+# print("filtered>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
+# df = df.reset_index(drop=True)
+# print(df.shape[0], df.target.sum())
 
 # 用于计算一个学习率调整器的一个参数
 # 因为之后要合并数据集,算了一下合并后大约是合并前2.4倍,合并前是8k,合并后是20k左右
@@ -236,11 +236,21 @@ for i in range(2):
     df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
     df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
     # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-    tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
-    # tmp = pd.concat([df_positive, df_positive, df_positive, df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
-    tmp_sum = pd.concat([tmp_sum, tmp])
-df = tmp_sum
+    # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
+    if CONFIG['fold'] != i:
+        positive_list = []
+        for i in range(6):
+            positive_list.append(df_positive)
+        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :])
+        tmp = pd.concat(positive_list) 
+    else:
+        tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+
+    tmp_sum = pd.concat([tmp_sum, tmp]) 
+
+df = tmp_sum
+ 
 """
 Total patients: 1042
 Fold Summary (patients per fold):
@@ -839,8 +849,8 @@ def fetch_scheduler(optimizer):
     return scheduler
 
 def prepare_loaders(df, fold):
-    # df_train = df[df.kfold != fold].reset_index(drop=True)
-    # df_valid = df[df.kfold == fold].reset_index(drop=True)
+    df_train = df[df.kfold != fold].reset_index(drop=True)
+    df_valid = df[df.kfold == fold].reset_index(drop=True)
     
     train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
     train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
