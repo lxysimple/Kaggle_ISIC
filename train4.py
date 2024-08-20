@@ -97,14 +97,14 @@ CONFIG = {
     "checkpoint": None,
 
     # # 手动调节学习率
-    # "learning_rate": 1e-5, # 1e-5
-    # "min_lr": 1e-6, # 1e-6
-    # "weight_decay": 1e-6, # 1e-6
+    "learning_rate": 1e-5, # 1e-5
+    "min_lr": 1e-6, # 1e-6
+    "weight_decay": 1e-6, # 1e-6
 
     # 用于vit、eff学习
-    "learning_rate": 1e-4, # 1e-5
-    "min_lr": 1e-5, # 1e-6
-    "weight_decay": 1e-5, # 1e-6
+    # "learning_rate": 1e-4, # 1e-5
+    # "min_lr": 1e-5, # 1e-6
+    # "weight_decay": 1e-5, # 1e-6
 
     "T_max": 10,
     "epochs": 10,
@@ -847,9 +847,9 @@ def prepare_loaders(df, fold):
     valid_dataset = ISICDataset(df, HDF_FILE, transforms=data_transforms["valid"])
 
     concat_dataset_train = ConcatDataset([
-        # train_dataset, train_dataset2020,
+        train_dataset2020,
         # train_dataset, 
-        train_dataset2019
+        # train_dataset2019
 
     ])
 
