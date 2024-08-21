@@ -91,7 +91,7 @@ CONFIG = {
     # 训练时164，
     # eva: 96
     # vit推理: 64
-    "valid_batch_size": 96, 
+    "valid_batch_size": 164, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -117,7 +117,7 @@ CONFIG = {
     "epochs": 10,
 
     
-    "fold" : 1,
+    "fold" : 0,
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -352,12 +352,13 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         # 保持一定的正负比例，不能让其失衡
         # start = CONFIG['fold']*len(self.df_positive)*10
-        start = 0
-        self.df_negative = self.df_negative[start : start+1500]
+        start = len(self.df_positive)*10
+        # start = 0
+        self.df_negative = self.df_negative[0 : start]
 
-        # self.df = pd.concat([self.df_positive, self.df_negative]) 
+        self.df = pd.concat([self.df_positive, self.df_negative]) 
         # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
-        self.df = self.df_positive
+        # self.df = self.df_positive
         self.isic_ids = self.df['isic_id'].values
         self.targets = self.df['target'].values
 
