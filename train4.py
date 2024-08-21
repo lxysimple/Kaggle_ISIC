@@ -96,8 +96,8 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5326_Loss0.2242_pAUC0.1503_fold1.bin',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5341_Loss0.1620_pAUC0.1523_fold0.bin',
-    "checkpoint": None,
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5323_Loss0.1705_pAUC0.1419_fold1.bin.bin',
+    # "checkpoint": None,
 
   
     "learning_rate": 1e-5, # 1e-5
@@ -250,8 +250,8 @@ for i in range(2):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
-        # positive_list.append(df_negative) 
+        # positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
+        positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
     else:
         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
@@ -353,9 +353,9 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         # 保持一定的正负比例，不能让其失衡
         # start = CONFIG['fold']*len(self.df_positive)*10
-        start = len(self.df_positive)*10
+        # start = len(self.df_positive)*10
         # start = 0
-        self.df_negative = self.df_negative[0 : start]
+        # self.df_negative = self.df_negative[0 : start]
 
         self.df = pd.concat([self.df_positive, self.df_negative]) 
         # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
