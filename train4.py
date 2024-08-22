@@ -87,7 +87,7 @@ CONFIG = {
     # 训练时164，
     # eva: 96
     # vit推理: 64
-    "valid_batch_size": 96, 
+    "valid_batch_size": 164, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -113,7 +113,7 @@ CONFIG = {
     "epochs": 10,
 
     
-    "fold" : 1,
+    "fold" : 0,
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -879,8 +879,8 @@ def prepare_loaders(df, fold):
         train_dataset2020, 
         # train_dataset2018,
         train_dataset, 
-        # train_dataset2019,
-        train_dataset_others,
+        train_dataset2019,
+        # train_dataset_others,
 
     ])
 
