@@ -950,7 +950,7 @@ models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5321_Loss0.17
 df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
 sgkf = StratifiedGroupKFold(n_splits=2)
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-      df.loc[val_ , "kfold"] = int(fold)
+    df.loc[val_ , "kfold"] = int(fold)
 
 df_valids = pd.DataFrame()
 for i in range(CONFIG['n_fold']):
