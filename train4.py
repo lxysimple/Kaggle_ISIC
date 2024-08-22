@@ -91,7 +91,7 @@ CONFIG = {
     # 训练时164，
     # eva: 96
     # vit推理: 64
-    "valid_batch_size": 96, 
+    "valid_batch_size": 164, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -117,7 +117,7 @@ CONFIG = {
     "epochs": 10,
 
     
-    "fold" : 1,
+    "fold" : 0,
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -250,8 +250,8 @@ for i in range(2):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        # positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
-        positive_list.append(df_negative) 
+        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
+        # positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
     else:
         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
@@ -353,9 +353,9 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         # 保持一定的正负比例，不能让其失衡
         # start = CONFIG['fold']*len(self.df_positive)*10
-        # start = len(self.df_positive)*10
+        start = len(self.df_positive)*10
         # start = 0
-        # self.df_negative = self.df_negative[0 : start]
+        self.df_negative = self.df_negative[0 : start]
 
         self.df = pd.concat([self.df_positive, self.df_negative]) 
         # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
@@ -392,12 +392,13 @@ class ISICModel(nn.Module):
     def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
-
-        # in_features = self.model.head.in_features
-        # self.model.head = nn.Linear(in_features, num_classes)
-        self.model.reset_classifier(num_classes=num_classes)
         self.sigmoid = nn.Sigmoid()
 
+        in_features = self.model.head.in_features
+        self.model.head = nn.Linear(in_features, num_classes)
+
+        # self.model.reset_classifier(num_classes=num_classes)
+        
     def forward(self, images):
         return self.sigmoid(self.model(images))
     
@@ -880,9 +881,9 @@ def prepare_loaders(df, fold):
 
     concat_dataset_train = ConcatDataset([
         train_dataset2020, 
-        train_dataset2018,
+        # train_dataset2018,
         train_dataset, 
-        train_dataset2019,
+        # train_dataset2019,
         train_dataset_others,
 
     ])
