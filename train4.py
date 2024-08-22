@@ -61,6 +61,10 @@ warnings.filterwarnings("ignore")
 from torch.nn.parallel import DataParallel
 
 from sklearn.metrics import hamming_loss, f1_score, roc_curve, auc, classification_report
+
+from torch.cuda.amp import autocast, GradScaler
+
+
 # ============================== Training Configuration ==============================
 
 
@@ -650,6 +654,8 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
     dataset_size = 0
     running_loss = 0.0
     running_auroc  = 0.0
+
+    scaler = GradScaler()
     
 
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
@@ -677,9 +683,10 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         else:
             None
         
-        
-        
+
         outputs = model(images).squeeze()
+
+        
 
         loss=None
         output = outputs
@@ -695,14 +702,17 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
  
  
         loss = loss / CONFIG['n_accumulate']
-        loss.backward()
-    
-        if (step + 1) % CONFIG['n_accumulate'] == 0:
-            optimizer.step()
 
-            # zero the parameter gradients
-            optimizer.zero_grad()
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
+        optimizer.zero_grad()
 
+        # loss.backward()
+        # if (step + 1) % CONFIG['n_accumulate'] == 0:
+        #     optimizer.step()
+        #     # zero the parameter gradients
+        #     optimizer.zero_grad()
             # if scheduler is not None:
             #     scheduler.step()
                 
@@ -781,6 +791,8 @@ def run_training(model, optimizer, scheduler, device, num_epochs):
     best_epoch_auroc = -np.inf
     best_pauc = 0
     history = defaultdict(list)
+
+
     
     for epoch in range(1, num_epochs + 1): 
         gc.collect()
@@ -907,6 +919,8 @@ train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
                        weight_decay=CONFIG['weight_decay'])
 scheduler = fetch_scheduler(optimizer)
+
+
 model, history = run_training(model, optimizer, scheduler,
                               device=CONFIG['device'],
                               num_epochs=CONFIG['epochs'])
