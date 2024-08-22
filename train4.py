@@ -933,8 +933,8 @@ def load_model(path):
     return model
 
 models = []
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5342_Loss0.3222_pAUC0.1612_fold0.bin'))
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5319_Loss0.3800_pAUC0.1340_fold1.bin'))
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5341_Loss0.1620_pAUC0.1523_fold0.bin'))
+models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5323_Loss0.1705_pAUC0.1419_fold1.bin'))
 
 df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
 sgkf = StratifiedGroupKFold(n_splits=2)
@@ -961,12 +961,12 @@ df = df.merge(df_valids, on=["isic_id", "patient_id"])
 
 try:
     df = df[['isic_id', 'patient_id', 'target', "eva"]]
-    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train2.csv')
 except:
 
     df.rename(columns={'target_x': 'target'}, inplace=True)
     df = df[['isic_id', 'patient_id', 'target', "eva"]]
-    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train2.csv')
 
 # ===================================================================== 进行推理
 
