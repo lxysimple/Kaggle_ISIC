@@ -390,10 +390,10 @@ class ISICModel(nn.Module):
         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
         self.sigmoid = nn.Sigmoid()
 
-        # in_features = self.model.head.in_features
-        # self.model.head = nn.Linear(in_features, num_classes)
+        in_features = self.model.head.in_features
+        self.model.head = nn.Linear(in_features, num_classes)
 
-        self.model.reset_classifier(num_classes=num_classes)
+        # self.model.reset_classifier(num_classes=num_classes)
         
     def forward(self, images):
         return self.sigmoid(self.model(images))
