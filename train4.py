@@ -117,7 +117,7 @@ CONFIG = {
     "epochs": 10,
 
     
-    "fold" : 1,
+    "fold" : 0,
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -338,16 +338,20 @@ class InferenceDataset(Dataset):
         return {
             'image': img
         }
-
-
+    
 class ISICDataset_for_Train_fromjpg(Dataset):
-    def __init__(self, path, transforms=None):
+    def __init__(self, path, transforms=None, kfold=0): 
         self.path = path
         df = pd.read_csv(f"{path}/train-metadata.csv")
 
         # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
         # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
         # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
+
+        sgkf = StratifiedGroupKFold(n_splits=2)
+        for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+            df.loc[val_ , "kfold"] = int(fold)
+        df = df[df['kfold'] != kfold]
 
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
@@ -385,6 +389,52 @@ class ISICDataset_for_Train_fromjpg(Dataset):
             'image': img,
             'target': target
         }
+
+# class ISICDataset_for_Train_fromjpg(Dataset):
+#     def __init__(self, path, transforms=None):
+#         self.path = path
+#         df = pd.read_csv(f"{path}/train-metadata.csv")
+
+#         # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
+#         # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
+#         # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
+
+#         self.df_positive = df[df["target"] == 1].reset_index()
+#         self.df_negative = df[df["target"] == 0].reset_index()
+#         # 保持一定的正负比例，不能让其失衡
+#         # start = CONFIG['fold']*len(self.df_positive)*10
+#         start = len(self.df_positive)*10
+#         # start = 0
+#         self.df_negative = self.df_negative[0 : start]
+
+#         self.df = pd.concat([self.df_positive, self.df_negative]) 
+#         # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
+#         # self.df = self.df_positive
+#         self.isic_ids = self.df['isic_id'].values
+#         self.targets = self.df['target'].values
+
+#         self.transforms = transforms
+
+#         print(path)
+#         print(len(self.df_positive), ' ', len(self.df_negative))
+
+        
+#     def __len__(self):
+#         return len(self.df)
+    
+#     def __getitem__(self, index):
+
+#         isic_id = self.isic_ids[index]
+#         img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+#         target = self.targets[index]
+
+#         if self.transforms:
+#             img = self.transforms(image=img)["image"]
+            
+#         return {
+#             'image': img,
+#             'target': target
+#         }
 
 # ============================== Create Model ==============================
 
@@ -865,21 +915,34 @@ def prepare_loaders(df, fold):
     
     train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
     train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-    train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
-     
+    # train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
+    # train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+    # train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
+    
+    train_dataset2019 = ISICDataset_for_Train_fromjpg(
+        '/home/xyli/kaggle/data2019', transforms=data_transforms["train"], kfold=CONFIG['fold'] 
+    )
+ 
 
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
+    valid_dataset2019 = ISICDataset_for_Train_fromjpg(
+        '/home/xyli/kaggle/data2019', transforms=data_transforms["train"], kfold=1-CONFIG['fold'] 
+    )
 
     concat_dataset_train = ConcatDataset([
         train_dataset2020, 
         # train_dataset2018,
         train_dataset, 
-        # train_dataset2019,
+        train_dataset2019,
         # train_dataset_others,
 
     ])
+
+    concat_dataset_valid = ConcatDataset([
+        valid_dataset, 
+        valid_dataset2019, 
+    ])
+
 
     # 用github数据时, num_workers=2
     train_loader = DataLoader(concat_dataset_train, batch_size=CONFIG['train_batch_size'], 
@@ -891,7 +954,7 @@ def prepare_loaders(df, fold):
     # from IPython import embed
     # embed()
 
-    valid_loader = DataLoader(valid_dataset, batch_size=CONFIG['valid_batch_size'], 
+    valid_loader = DataLoader(concat_dataset_valid, batch_size=CONFIG['valid_batch_size'], 
                               num_workers=16, shuffle=False, pin_memory=True)
     
     return train_loader, valid_loader
