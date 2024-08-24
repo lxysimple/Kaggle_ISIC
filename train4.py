@@ -503,7 +503,7 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 #         return self.sigmoid(self.model(images))
 
 
-class xaoyang(nn.Module):
+class Xaoyang(nn.Module):
     def __init__(self, n_meta_features, n_meta_dim):
         super(xaoyang, self).__init__()
         self.n_meta_dim = n_meta_dim
@@ -574,7 +574,7 @@ class ISICModel(nn.Module):
             #     nn.SiLU(),  
             # )
 
-            self.meta = xaoyang(n_meta_features, n_meta_dim)
+            self.meta = Xaoyang(n_meta_features, n_meta_dim)
 
             in_ch += n_meta_dim[2]
         self.myfc = nn.Linear(in_ch, out_dim)
