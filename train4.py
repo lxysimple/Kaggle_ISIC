@@ -56,7 +56,7 @@ warnings.filterwarnings("ignore")
 
 # For descriptive error messages
 # 会导致多个GPU无法并行计算
-os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+# os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 from torch.nn.parallel import DataParallel
 
