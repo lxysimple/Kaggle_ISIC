@@ -538,11 +538,11 @@ class ISICModel(nn.Module):
             self.meta = nn.Sequential(
                 nn.Linear(n_meta_features, n_meta_dim[0]),
                 nn.BatchNorm1d(n_meta_dim[0]),
-                nn.SiLU(),  # 使用 PyTorch 自带的 Swish (SiLU) 激活函数
+                Swish_Module(),
                 nn.Dropout(p=0.3),
                 nn.Linear(n_meta_dim[0], n_meta_dim[1]),
                 nn.BatchNorm1d(n_meta_dim[1]),
-                nn.SiLU(),  # 使用 PyTorch 自带的 Swish (SiLU) 激活函数
+                Swish_Module(),
             )
             in_ch += n_meta_dim[1]
         self.myfc = nn.Linear(in_ch, out_dim)
