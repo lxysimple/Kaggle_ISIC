@@ -68,9 +68,9 @@ import meta
 
 df_meta, feature_cols = meta.creat_meta()
 
-# df_meta[feature_cols]
-# from IPython import embed
-# embed()
+df_meta[feature_cols]
+from IPython import embed
+embed()
 
 # ============================== Training Configuration ==============================
 
