@@ -68,9 +68,10 @@ import meta
 
 df_meta, feature_cols = meta.creat_meta()
 
-df_meta[feature_cols]
-from IPython import embed
-embed()
+# df_meta[feature_cols]
+# from IPython import embed
+# embed()
+# df_meta.loc['ISIC_0015670',:]
 
 # ============================== Training Configuration ==============================
 
@@ -346,7 +347,9 @@ class ISICDataset(Dataset):
         if self.transforms:
             img = self.transforms(image=img)["image"]
 
-        meta = df_meta.loc[df_meta['isic_id'] == isic_id,feature_cols] 
+        
+
+        meta = np.array(df_meta.loc[isic_id, feature_cols])
 
         return {
             'image': img,
