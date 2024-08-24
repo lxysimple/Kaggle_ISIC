@@ -828,8 +828,8 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         meta = data['meta'].to(device, dtype=torch.float)
         outputs = model(images, meta).squeeze()
 
-        from IPython import embed
-        embed()
+        # from IPython import embed
+        # embed()
 
 
         loss=None
