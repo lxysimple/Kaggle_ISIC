@@ -523,7 +523,7 @@ class Swish_Module(nn.Module):
 class ISICModel(nn.Module):
 
     # 宽度、深度都可以增加
-    def __init__(self, model_name, pretrained=True, out_dim=1, n_meta_features=200, n_meta_dim=[2*512, 2*128], checkpoint_path=None):
+    def __init__(self, model_name, pretrained=True, out_dim=1, n_meta_features=200, n_meta_dim=[4*512, 4*128, 4*32], checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.n_meta_features = n_meta_features
 
@@ -541,12 +541,19 @@ class ISICModel(nn.Module):
                 # nn.SiLU(),  # 使用 PyTorch 自带的 Swish (SiLU) 激活函数
                 Swish_Module(),
                 nn.Dropout(p=0.3),
+
+
                 nn.Linear(n_meta_dim[0], n_meta_dim[1]),
                 nn.BatchNorm1d(n_meta_dim[1]),
                 # nn.SiLU(),  # 使用 PyTorch 自带的 Swish (SiLU) 激活函数
                 Swish_Module(),
+
+                nn.Linear(n_meta_dim[1], n_meta_dim[2]),
+                nn.BatchNorm1d(n_meta_dim[1]),
+                # nn.SiLU(),  # 使用 PyTorch 自带的 Swish (SiLU) 激活函数
+                Swish_Module(),
             )
-            in_ch += n_meta_dim[1]
+            in_ch += n_meta_dim[2]
         self.myfc = nn.Linear(in_ch, out_dim)
 
         self.model.head = nn.Identity()
