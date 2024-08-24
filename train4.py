@@ -294,7 +294,34 @@ show_info(df)
 # ============================== Dataset Class ==============================
 
 
+# class ISICDataset(Dataset):
+#     def __init__(self, df, file_hdf, transforms=None):
+#         self.fp_hdf = h5py.File(file_hdf, mode="r")
+#         self.df = df
+#         self.isic_ids = df['isic_id'].values
+#         self.targets = df['target'].values
+#         self.transforms = transforms
 
+#     def __len__(self):
+#         return len(self.df) 
+    
+#     def __getitem__(self, index):
+#         isic_id = self.isic_ids[index]
+#         img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
+
+#         if self.targets is not None:
+#             target = self.targets[index]
+#         else:
+#             target = torch.tensor(-1)  # Dummy target for test set
+        
+#         if self.transforms:
+#             img = self.transforms(image=img)["image"]
+    
+
+#         return {
+#             'image': img,
+#             'target': target
+#         }
 
 class ISICDataset(Dataset):
     def __init__(self, df, file_hdf, transforms=None):
@@ -318,12 +345,15 @@ class ISICDataset(Dataset):
         
         if self.transforms:
             img = self.transforms(image=img)["image"]
-        
-        
+
+        meta = df_meta.loc[df_meta['isic_id'] == isic_id,feature_cols] 
+
         return {
             'image': img,
-            'target': target
+            'target': target,
+            'meta': meta 
         }
+
 
 class InferenceDataset(Dataset):
     def __init__(self, file_hdf, transforms=None):
@@ -508,7 +538,7 @@ class ISICModel(nn.Module):
         self.model.head = nn.Identity()
 
     def extract(self, x):
-        x = self.enet(x)
+        x = self.meta(x)
         return x
 
     def forward(self, x, x_meta=None):
@@ -954,9 +984,12 @@ def run_test(model, dataloader, device):
     for step, data in bar:        
         images = data['image'].to(device, dtype=torch.float)
 
+        meta = data['meta'].to(device, dtype=torch.float)
+
         batch_size = images.size(0)
 
-        outputs = model(images).squeeze()
+        # outputs = model(images).squeeze()
+        outputs = model(images, meta).squeeze()
 
         # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
         outputs_list.append(outputs.detach().cpu().numpy())
@@ -1015,7 +1048,7 @@ def prepare_loaders(df, fold):
 
 
     # 用github数据时, num_workers=2
-    train_loader = DataLoader(valid_dataset, batch_size=CONFIG['train_batch_size'], 
+    train_loader = DataLoader(concat_dataset_train, batch_size=CONFIG['train_batch_size'], 
                               num_workers=16, shuffle=True, pin_memory=True, drop_last=True)    
     # train_loader = DataLoader(concat_dataset, batch_size=CONFIG['train_batch_size'], 
     #                           num_workers=2, shuffle=True, pin_memory=True, drop_last=True)
