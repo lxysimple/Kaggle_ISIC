@@ -350,6 +350,11 @@ class ISICDataset(Dataset):
 
         meta = torch.tensor(df_meta.loc[isic_id, feature_cols].to_numpy().astype(float)) 
 
+        # 检查数据中的 NaN 和 Inf
+        if torch.isnan(meta).any() or torch.isinf(meta).any():
+            raise ValueError("Data contains NaN or Inf values")
+
+
         return {
             'image': img,
             'target': target,
