@@ -56,7 +56,7 @@ warnings.filterwarnings("ignore")
 
 # For descriptive error messages
 # 会导致多个GPU无法并行计算
-# os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 from torch.nn.parallel import DataParallel
 
@@ -794,7 +794,7 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
     running_loss = 0.0
     running_auroc  = 0.0
 
-    # scaler = GradScaler()
+    scaler = GradScaler()
     
 
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
@@ -845,18 +845,18 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
  
         loss = loss / CONFIG['n_accumulate']
 
-        # scaler.scale(loss).backward()
-        # scaler.step(optimizer)
-        # scaler.update()
-        # optimizer.zero_grad()
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
+        optimizer.zero_grad()
 
-        loss.backward()
-        if (step + 1) % CONFIG['n_accumulate'] == 0:
-            optimizer.step()
-            # zero the parameter gradients
-            optimizer.zero_grad()
-            # if scheduler is not None:
-            #     scheduler.step()
+        # loss.backward()
+        # if (step + 1) % CONFIG['n_accumulate'] == 0:
+        #     optimizer.step()
+        #     # zero the parameter gradients
+        #     optimizer.zero_grad()
+        #     # if scheduler is not None:
+        #     #     scheduler.step()
                 
         auroc = binary_auroc(input=outputs.squeeze(), target=targets).item()
 
