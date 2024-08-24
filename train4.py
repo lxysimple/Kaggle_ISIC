@@ -558,23 +558,23 @@ class ISICModel(nn.Module):
 
         if n_meta_features > 0:
 
-            # self.meta = nn.Sequential(
-            #     nn.Linear(n_meta_features, n_meta_dim[0]),
-            #     nn.BatchNorm1d(n_meta_dim[0]),
-            #     nn.SiLU(),  
-            #     nn.Dropout(p=0.3),
+            self.meta = nn.Sequential(
+                nn.Linear(n_meta_features, n_meta_dim[0]),
+                nn.BatchNorm1d(n_meta_dim[0]),
+                nn.SiLU(),  
+                nn.Dropout(p=0.3),
 
 
-            #     nn.Linear(n_meta_dim[0], n_meta_dim[1]),
-            #     nn.BatchNorm1d(n_meta_dim[1]),
-            #     nn.SiLU(),  
+                nn.Linear(n_meta_dim[0], n_meta_dim[1]),
+                nn.BatchNorm1d(n_meta_dim[1]),
+                nn.SiLU(),  
 
-            #     nn.Linear(n_meta_dim[1], n_meta_dim[2]),
-            #     nn.BatchNorm1d(n_meta_dim[2]),
-            #     nn.SiLU(),  
-            # )
+                nn.Linear(n_meta_dim[1], n_meta_dim[2]),
+                nn.BatchNorm1d(n_meta_dim[2]),
+                nn.SiLU(),  
+            )
 
-            self.meta = Xaoyang(n_meta_features, n_meta_dim)
+            # self.meta = Xaoyang(n_meta_features, n_meta_dim)
 
             in_ch += n_meta_dim[2]
         self.myfc = nn.Linear(in_ch, out_dim)
