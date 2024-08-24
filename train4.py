@@ -503,6 +503,44 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 #         return self.sigmoid(self.model(images))
 
 
+class xaoyang(nn.Module):
+    def __init__(self, n_meta_features, n_meta_dim):
+        super(xaoyang, self).__init__()
+        self.n_meta_dim = n_meta_dim
+        
+        self.layer1 = nn.Linear(n_meta_features, n_meta_dim[0])
+        self.bn1 = nn.BatchNorm1d(n_meta_dim[0])
+        self.silu = nn.SiLU()
+        self.dropout = nn.Dropout(p=0.3)
+        
+        self.layer2 = nn.Linear(n_meta_dim[0], n_meta_dim[1])
+        self.bn2 = nn.BatchNorm1d(n_meta_dim[1])
+        
+        self.layer3 = nn.Linear(n_meta_dim[1], n_meta_dim[2])
+        self.bn3 = nn.BatchNorm1d(n_meta_dim[2])
+    
+    def forward(self, input):
+        # Process the main input
+        x = self.layer1(input)
+        x = self.bn1(x)
+        x = self.silu(x)
+        x = self.dropout(x)
+        
+        x = torch.cat((x, input), dim=1)
+        
+        # Continue with the rest of the network
+        x = self.layer2(x)
+        x = self.bn2(x)
+        x = self.silu(x)
+
+        x = torch.cat((x, input), dim=1)
+        
+        x = self.layer3(x)
+        x = self.bn3(x)
+        x = self.silu(x)
+        
+        return x
+    
 sigmoid = nn.Sigmoid()
 class ISICModel(nn.Module):
 
@@ -519,22 +557,25 @@ class ISICModel(nn.Module):
         in_ch = self.model.head.in_features
 
         if n_meta_features > 0:
-            self.meta = nn.Sequential(
-                nn.Linear(n_meta_features, n_meta_dim[0]),
-                nn.BatchNorm1d(n_meta_dim[0]),
-                nn.SiLU(),  
-                nn.Dropout(p=0.3),
+
+            # self.meta = nn.Sequential(
+            #     nn.Linear(n_meta_features, n_meta_dim[0]),
+            #     nn.BatchNorm1d(n_meta_dim[0]),
+            #     nn.SiLU(),  
+            #     nn.Dropout(p=0.3),
 
 
-                nn.Linear(n_meta_dim[0], n_meta_dim[1]),
-                nn.BatchNorm1d(n_meta_dim[1]),
-                nn.SiLU(),  
+            #     nn.Linear(n_meta_dim[0], n_meta_dim[1]),
+            #     nn.BatchNorm1d(n_meta_dim[1]),
+            #     nn.SiLU(),  
 
-                nn.Linear(n_meta_dim[1], n_meta_dim[2]),
-                nn.BatchNorm1d(n_meta_dim[2]),
-                nn.SiLU(),  
+            #     nn.Linear(n_meta_dim[1], n_meta_dim[2]),
+            #     nn.BatchNorm1d(n_meta_dim[2]),
+            #     nn.SiLU(),  
+            # )
 
-            )
+            self.meta = xaoyang(n_meta_features, n_meta_dim)
+
             in_ch += n_meta_dim[2]
         self.myfc = nn.Linear(in_ch, out_dim)
 
