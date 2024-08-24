@@ -513,10 +513,10 @@ class Xaoyang(nn.Module):
         self.silu = nn.SiLU()
         self.dropout = nn.Dropout(p=0.3)
         
-        self.layer2 = nn.Linear(n_meta_dim[0], n_meta_dim[1])
+        self.layer2 = nn.Linear(n_meta_dim[0] + n_meta_features, n_meta_dim[1])
         self.bn2 = nn.BatchNorm1d(n_meta_dim[1])
         
-        self.layer3 = nn.Linear(n_meta_dim[1], n_meta_dim[2])
+        self.layer3 = nn.Linear(n_meta_dim[1] + n_meta_features, n_meta_dim[2])
         self.bn3 = nn.BatchNorm1d(n_meta_dim[2])
     
     def forward(self, input):
