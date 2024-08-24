@@ -562,6 +562,7 @@ class ISICModel(nn.Module):
                 nn.Linear(n_meta_features, n_meta_dim[0]),
                 nn.BatchNorm1d(n_meta_dim[0]),
                 nn.SiLU(),  
+                
                 nn.Dropout(p=0.3),
 
 
