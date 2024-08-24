@@ -551,7 +551,7 @@ class ISICModel(nn.Module):
 
     def extract(self, x):
         x = self.model(x)
-        return x
+        return sigmoid(x)
 
     def forward(self, x, x_meta=None):
         x = self.extract(x).squeeze(-1).squeeze(-1)
