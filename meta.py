@@ -38,7 +38,7 @@ from sklearn.feature_selection import SelectKBest, chi2, mutual_info_classif, Va
 
 
 ROOT_DIR = "/home/xyli/kaggle"
-train_path = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
+train_path = f"{ROOT_DIR}/train-metadata.csv"
 
 id_col = 'isic_id'
 target_col = 'target'
