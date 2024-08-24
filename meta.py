@@ -37,12 +37,8 @@ import time
 from sklearn.feature_selection import SelectKBest, chi2, mutual_info_classif, VarianceThreshold
 
 
-
-root = Path('/kaggle/input/isic-2024-challenge')
-
-train_path = root / 'train-metadata.csv'
-test_path = root / 'test-metadata.csv'
-subm_path = root / 'sample_submission.csv'
+ROOT_DIR = "/home/xyli/kaggle"
+train_path = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
 
 id_col = 'isic_id'
 target_col = 'target'
