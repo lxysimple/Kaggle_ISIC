@@ -68,9 +68,9 @@ import meta
 
 df_meta, feature_cols = meta.creat_meta()
 
-df_meta[feature_cols]
-from IPython import embed
-embed()
+# df_meta[feature_cols]
+# from IPython import embed
+# embed()
 
 # ============================== Training Configuration ==============================
 
@@ -448,19 +448,19 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
 # ============================== Create Model ==============================
 
-class ISICModel(nn.Module):
-    def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
-        super(ISICModel, self).__init__()
-        self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
-        self.sigmoid = nn.Sigmoid()
+# class ISICModel(nn.Module):
+#     def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
+#         super(ISICModel, self).__init__()
+#         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
+#         self.sigmoid = nn.Sigmoid()
 
-        in_features = self.model.head.in_features
-        self.model.head = nn.Linear(in_features, num_classes)
+#         in_features = self.model.head.in_features
+#         self.model.head = nn.Linear(in_features, num_classes)
 
-        # self.model.reset_classifier(num_classes=num_classes)
+#         # self.model.reset_classifier(num_classes=num_classes)
         
-    def forward(self, images):
-        return self.sigmoid(self.model(images))
+#     def forward(self, images):
+#         return self.sigmoid(self.model(images))
     
 class Swish(torch.autograd.Function):
     @staticmethod
@@ -478,9 +478,9 @@ class Swish_Module(nn.Module):
     def forward(self, x):
         return Swish.apply(x)
     
-class Eva_Xaoyang(nn.Module):
+class ISICModel(nn.Module):
     def __init__(self, model_name, out_dim, n_meta_features=0, n_meta_dim=[512, 128], pretrained=True, checkpoint_path=None):
-        super(Eva_Xaoyang, self).__init__()
+        super(ISICModel, self).__init__()
         self.n_meta_features = n_meta_features
 
         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
@@ -566,46 +566,46 @@ model = DataParallel(model)
 
 # ============================== Augmentations ==============================
 data_transforms = {
-    # "train": A.Compose([
-    #     A.RandomRotate90(p=0.5),
-    #     A.Flip(p=0.5),
-    #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-    #     A.Normalize(
-    #             mean=[0.485, 0.456, 0.406], 
-    #             std=[0.229, 0.224, 0.225], 
-    #             max_pixel_value=255.0, 
-    #             p=1.0
-    #         ),
-    #     ToTensorV2()
-    # ], p=1.),
-
     "train": A.Compose([
-        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
         A.RandomRotate90(p=0.5),
         A.Flip(p=0.5),
-        A.Downscale(p=0.25),
-        A.ShiftScaleRotate(shift_limit=0.1, 
-                           scale_limit=0.15, 
-                           rotate_limit=60, 
-                           p=0.5),
-        A.HueSaturationValue(
-                hue_shift_limit=0.2, 
-                sat_shift_limit=0.2, 
-                val_shift_limit=0.2, 
-                p=0.5
-            ),
-        A.RandomBrightnessContrast(
-                brightness_limit=(-0.1,0.1), 
-                contrast_limit=(-0.1, 0.1), 
-                p=0.5
-            ),
+        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
         A.Normalize(
                 mean=[0.485, 0.456, 0.406], 
                 std=[0.229, 0.224, 0.225], 
                 max_pixel_value=255.0, 
                 p=1.0
             ),
-        ToTensorV2()], p=1.),
+        ToTensorV2()
+    ], p=1.),
+
+    # "train": A.Compose([
+    #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
+    #     A.RandomRotate90(p=0.5),
+    #     A.Flip(p=0.5),
+    #     A.Downscale(p=0.25),
+    #     A.ShiftScaleRotate(shift_limit=0.1, 
+    #                        scale_limit=0.15, 
+    #                        rotate_limit=60, 
+    #                        p=0.5),
+    #     A.HueSaturationValue(
+    #             hue_shift_limit=0.2, 
+    #             sat_shift_limit=0.2, 
+    #             val_shift_limit=0.2, 
+    #             p=0.5
+    #         ),
+    #     A.RandomBrightnessContrast(
+    #             brightness_limit=(-0.1,0.1), 
+    #             contrast_limit=(-0.1, 0.1), 
+    #             p=0.5
+    #         ),
+    #     A.Normalize(
+    #             mean=[0.485, 0.456, 0.406], 
+    #             std=[0.229, 0.224, 0.225], 
+    #             max_pixel_value=255.0, 
+    #             p=1.0
+    #         ),
+    #     ToTensorV2()], p=1.),
 
     "valid": A.Compose([
         A.Resize(CONFIG['img_size'], CONFIG['img_size']),
@@ -998,7 +998,7 @@ def prepare_loaders(df, fold):
     # )
 
     concat_dataset_train = ConcatDataset([
-        train_dataset2020, 
+        # train_dataset2020, 
         # train_dataset2018,
         train_dataset, 
         # train_dataset2019,
