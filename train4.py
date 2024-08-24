@@ -479,7 +479,9 @@ class Swish_Module(nn.Module):
         return Swish.apply(x)
     
 class ISICModel(nn.Module):
-    def __init__(self, model_name, out_dim, n_meta_features=0, n_meta_dim=[512, 128], pretrained=True, checkpoint_path=None):
+
+    # 宽度、深度都可以增加
+    def __init__(self, model_name, pretrained=True, out_dim=1, n_meta_features=200, n_meta_dim=[512, 128], checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.n_meta_features = n_meta_features
 
