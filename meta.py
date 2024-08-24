@@ -249,5 +249,5 @@ def creat_meta():
     df_train = read_data(train_path)
     df_train = preprocess(df_train)
 
-    return df_train
+    return df_train, feature_cols
 

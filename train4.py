@@ -66,7 +66,7 @@ from torch.cuda.amp import autocast, GradScaler
 
 import meta
 
-df_meta = meta.creat_meta()
+df_meta, feature_cols = meta.creat_meta()
 
 from IPython import embed
 embed()
