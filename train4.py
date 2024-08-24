@@ -490,7 +490,7 @@ class ISICModel(nn.Module):
             nn.Dropout(0.5) for _ in range(5)
         ])
 
-        in_ch = self.model.classifier.in_features
+        in_ch = self.model.head.in_features
 
         if n_meta_features > 0:
             self.meta = nn.Sequential(
@@ -505,7 +505,7 @@ class ISICModel(nn.Module):
             in_ch += n_meta_dim[1]
         self.myfc = nn.Linear(in_ch, out_dim)
 
-        self.model.classifier = nn.Identity()
+        self.model.head = nn.Identity()
 
     def extract(self, x):
         x = self.enet(x)
