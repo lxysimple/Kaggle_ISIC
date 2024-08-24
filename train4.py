@@ -348,7 +348,7 @@ class ISICDataset(Dataset):
         if self.transforms:
             img = self.transforms(image=img)["image"]
 
-        meta = torch.tensor(df_meta.loc['ISIC_0015864', feature_cols].to_numpy().astype(float))
+        meta = torch.tensor(df_meta.loc[isic_id, feature_cols].to_numpy().astype(float))
 
         return {
             'image': img,
