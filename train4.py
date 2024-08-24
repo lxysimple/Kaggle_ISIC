@@ -331,6 +331,7 @@ class ISICDataset(Dataset):
         self.isic_ids = df['isic_id'].values
         self.targets = df['target'].values
         self.transforms = transforms
+        self.df_meta = df_meta
 
     def __len__(self):
         return len(self.df) 
@@ -347,7 +348,7 @@ class ISICDataset(Dataset):
         if self.transforms:
             img = self.transforms(image=img)["image"]
 
-        meta = np.array(df_meta.loc[[isic_id], feature_cols])
+        meta = torch.tensor(self.df_meta.loc[[isic_id], feature_cols]).float()
 
         return {
             'image': img,
