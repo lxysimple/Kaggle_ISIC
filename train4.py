@@ -538,13 +538,13 @@ class ISICModel(nn.Module):
             self.meta = nn.Sequential(
                 nn.Linear(n_meta_features, n_meta_dim[0]),
                 nn.BatchNorm1d(n_meta_dim[0]),
-                # nn.SiLU(),  # 使用 PyTorch 自带的 Swish (SiLU) 激活函数
-                Swish_Module(),
+                nn.SiLU(),  # 使用 PyTorch 自带的 Swish (SiLU) 激活函数
+                # Swish_Module(),
                 nn.Dropout(p=0.3),
                 nn.Linear(n_meta_dim[0], n_meta_dim[1]),
                 nn.BatchNorm1d(n_meta_dim[1]),
-                # nn.SiLU(),  # 使用 PyTorch 自带的 Swish (SiLU) 激活函数
-                Swish_Module(),
+                nn.SiLU(),  # 使用 PyTorch 自带的 Swish (SiLU) 激活函数
+                # Swish_Module(),
             )
             in_ch += n_meta_dim[1]
         self.myfc = nn.Linear(in_ch, out_dim)
@@ -553,7 +553,7 @@ class ISICModel(nn.Module):
 
     def extract(self, x):
         x = self.model(x)
-        return sigmoid(x)
+        return x
 
     def forward(self, x, x_meta=None):
         x = self.extract(x).squeeze(-1).squeeze(-1)
@@ -566,7 +566,8 @@ class ISICModel(nn.Module):
             else:
                 out += self.myfc(dropout(x))
         out /= len(self.dropouts)
-        return out
+
+        return sigmoid(out)
 
 
 # class ISICModel(nn.Module):
