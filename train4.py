@@ -64,6 +64,12 @@ from sklearn.metrics import hamming_loss, f1_score, roc_curve, auc, classificati
 
 from torch.cuda.amp import autocast, GradScaler
 
+import meta
+
+df_meta = meta.creat_meta()
+
+from IPython import embed
+embed()
 
 # ============================== Training Configuration ==============================
 
@@ -286,6 +292,9 @@ show_info(df)
 # embed()
 # ============================== Dataset Class ==============================
 
+
+
+
 class ISICDataset(Dataset):
     def __init__(self, df, file_hdf, transforms=None):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
@@ -452,7 +461,65 @@ class ISICModel(nn.Module):
     def forward(self, images):
         return self.sigmoid(self.model(images))
     
+class Swish(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, i):
+        result = i * sigmoid(i)
+        ctx.save_for_backward(i)
+        return result
+    @staticmethod
+    def backward(ctx, grad_output):
+        i = ctx.saved_variables[0]
+        sigmoid_i = sigmoid(i)
+        return grad_output * (sigmoid_i * (1 + i * (1 - sigmoid_i)))
 
+class Swish_Module(nn.Module):
+    def forward(self, x):
+        return Swish.apply(x)
+    
+class Eva_Xaoyang(nn.Module):
+    def __init__(self, model_name, out_dim, n_meta_features=0, n_meta_dim=[512, 128], pretrained=True, checkpoint_path=None):
+        super(Eva_Xaoyang, self).__init__()
+        self.n_meta_features = n_meta_features
+
+        self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
+        self.dropouts = nn.ModuleList([
+            nn.Dropout(0.5) for _ in range(5)
+        ])
+
+        in_ch = self.model.classifier.in_features
+
+        if n_meta_features > 0:
+            self.meta = nn.Sequential(
+                nn.Linear(n_meta_features, n_meta_dim[0]),
+                nn.BatchNorm1d(n_meta_dim[0]),
+                Swish_Module(),
+                nn.Dropout(p=0.3),
+                nn.Linear(n_meta_dim[0], n_meta_dim[1]),
+                nn.BatchNorm1d(n_meta_dim[1]),
+                Swish_Module(),
+            )
+            in_ch += n_meta_dim[1]
+        self.myfc = nn.Linear(in_ch, out_dim)
+
+        self.model.classifier = nn.Identity()
+
+    def extract(self, x):
+        x = self.enet(x)
+        return x
+
+    def forward(self, x, x_meta=None):
+        x = self.extract(x).squeeze(-1).squeeze(-1)
+        if self.n_meta_features > 0:
+            x_meta = self.meta(x_meta)
+            x = torch.cat((x, x_meta), dim=1)
+        for i, dropout in enumerate(self.dropouts):
+            if i == 0:
+                out = self.myfc(dropout(x))
+            else:
+                out += self.myfc(dropout(x))
+        out /= len(self.dropouts)
+        return out
 
 
 # class ISICModel(nn.Module):
