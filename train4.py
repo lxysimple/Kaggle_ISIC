@@ -545,7 +545,7 @@ sigmoid = nn.Sigmoid()
 class ISICModel(nn.Module):
 
     # 宽度、深度都可以增加
-    def __init__(self, model_name, pretrained=True, out_dim=1, n_meta_features=200, n_meta_dim=[3*512, 3*128, 3*32], checkpoint_path=None):
+    def __init__(self, model_name, pretrained=True, out_dim=1, n_meta_features=200, n_meta_dim=[2*512, 2*128, 2*32], checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.n_meta_features = n_meta_features
 
@@ -562,7 +562,7 @@ class ISICModel(nn.Module):
                 nn.Linear(n_meta_features, n_meta_dim[0]),
                 nn.BatchNorm1d(n_meta_dim[0]),
                 nn.SiLU(),  
-                
+
                 nn.Dropout(p=0.3),
 
 
