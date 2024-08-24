@@ -505,7 +505,7 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
 class Xaoyang(nn.Module):
     def __init__(self, n_meta_features, n_meta_dim):
-        super(xaoyang, self).__init__()
+        super(Xaoyang, self).__init__()
         self.n_meta_dim = n_meta_dim
         
         self.layer1 = nn.Linear(n_meta_features, n_meta_dim[0])
