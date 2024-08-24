@@ -540,7 +540,7 @@ class ISICModel(nn.Module):
         self.model.head = nn.Identity()
 
     def extract(self, x):
-        x = self.meta(x)
+        x = self.model(x)
         return x
 
     def forward(self, x, x_meta=None):
