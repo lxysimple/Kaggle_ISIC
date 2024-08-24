@@ -348,7 +348,7 @@ class ISICDataset(Dataset):
         if self.transforms:
             img = self.transforms(image=img)["image"]
 
-        meta = torch.tensor(df_meta.loc[isic_id, feature_cols].to_numpy().astype(float))
+        meta = torch.tensor(df_meta.loc[isic_id, feature_cols].to_numpy().astype(float)) 
 
         return {
             'image': img,
@@ -821,7 +821,10 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
             None
         
 
-        outputs = model(images).squeeze()
+        # outputs = model(images).squeeze()
+
+        meta = data['meta'].to(device, dtype=torch.float)
+        outputs = model(images, meta).squeeze()
 
         
 
@@ -890,7 +893,13 @@ def valid_one_epoch(model, dataloader, device, epoch):
         
         batch_size = images.size(0)
 
-        outputs = model(images).squeeze()
+
+
+        # outputs = model(images).squeeze()
+        meta = data['meta'].to(device, dtype=torch.float)
+        outputs = model(images, meta).squeeze()
+
+
 
         val_targets.append(targets.cpu())
         val_outputs.append(outputs.cpu())
