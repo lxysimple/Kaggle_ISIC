@@ -1024,7 +1024,7 @@ def prepare_loaders(df, fold):
     # from IPython import embed
     # embed()
 
-    valid_loader = DataLoader(concat_dataset_valid, batch_size=CONFIG['valid_batch_size'], 
+    valid_loader = DataLoader(valid_dataset, batch_size=CONFIG['valid_batch_size'], 
                               num_workers=16, shuffle=False, pin_memory=True)
     
     return train_loader, valid_loader
