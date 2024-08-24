@@ -347,8 +347,6 @@ class ISICDataset(Dataset):
         if self.transforms:
             img = self.transforms(image=img)["image"]
 
-        
-
         meta = np.array(df_meta.loc[isic_id, feature_cols])
 
         return {
