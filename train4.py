@@ -767,40 +767,40 @@ class ISICModel(nn.Module):
 
         self.model.head = nn.Identity()
 
-    # def extract(self, x):
-    #     x = self.model(x)
-    #     return x
+    def extract(self, x):
+        x = self.model(x)
+        return x
 
-    def forward(self, x, x_meta=None):
-        x = self.extract(x).squeeze(-1).squeeze(-1)
-        if self.n_meta_features > 0:
-            x_meta = self.meta(x_meta)
-            x = torch.cat((x, x_meta), dim=1)
-        for i, dropout in enumerate(self.dropouts):
-            if i == 0:
-                out = self.myfc(dropout(x))
-            else:
-                out += self.myfc(dropout(x))
-        out /= len(self.dropouts)
+    # def forward(self, x, x_meta=None):
+    #     x = self.extract(x).squeeze(-1).squeeze(-1)
+    #     if self.n_meta_features > 0:
+    #         x_meta = self.meta(x_meta)
+    #         x = torch.cat((x, x_meta), dim=1)
+    #     for i, dropout in enumerate(self.dropouts):
+    #         if i == 0:
+    #             out = self.myfc(dropout(x))
+    #         else:
+    #             out += self.myfc(dropout(x))
+    #     out /= len(self.dropouts)
 
-        return sigmoid(out)
+    #     return sigmoid(out)
     
     # def forward(self, x_meta=None):
     #     x_meta = self.meta(x_meta)
 
     #     return sigmoid(x_meta)
 
-    # def forward(self, x_meta=None):
+    def forward(self, x_meta=None):
 
-    #     x_meta = self.meta(x_meta)
-    #     for i, dropout in enumerate(self.dropouts):
-    #         if i == 0:
-    #             out = self.myfc(dropout(x_meta))
-    #         else:
-    #             out += self.myfc(dropout(x_meta))
-    #     out /= len(self.dropouts)
+        x_meta = self.meta(x_meta)
+        for i, dropout in enumerate(self.dropouts):
+            if i == 0:
+                out = self.myfc(dropout(x_meta))
+            else:
+                out += self.myfc(dropout(x_meta))
+        out /= len(self.dropouts)
 
-    #     return sigmoid(out)
+        return sigmoid(out)
 
 
 # class ISICModel(nn.Module):
