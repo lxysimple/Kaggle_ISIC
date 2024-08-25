@@ -936,7 +936,7 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         # _, outputs = model(images)
         # outputs = outputs.squeeze()
 
-        # meta = data['meta'].to(device, dtype=torch.float)
+        meta = data['meta'].to(device, dtype=torch.float)
         outputs = model(images, meta).squeeze()
         # outputs = model(meta).squeeze()
 
@@ -1017,7 +1017,7 @@ def valid_one_epoch(model, dataloader, device, epoch):
         # _, outputs = model(images)
         # outputs = outputs.squeeze()
 
-        # meta = data['meta'].to(device, dtype=torch.float)
+        meta = data['meta'].to(device, dtype=torch.float)
         outputs = model(images, meta).squeeze()
         # outputs = model(meta).squeeze()
 
