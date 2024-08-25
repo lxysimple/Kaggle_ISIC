@@ -571,6 +571,7 @@ class ISICModel(nn.Module):
         self.myfc = nn.Linear(in_ch, out_dim)
         # self.myfc = nn.Linear(n_meta_dim[2], out_dim)
 
+        self.fea16 = nn.Linear(self.model.head.in_features, 16)
 
         self.model.head = nn.Identity()
 
@@ -578,10 +579,27 @@ class ISICModel(nn.Module):
         x = self.model(x)
         return x
 
+    # def forward(self, x, x_meta=None):
+    #     x = self.extract(x).squeeze(-1).squeeze(-1)
+    #     if self.n_meta_features > 0:
+    #         x_meta = self.meta(x_meta)
+            
+    #         x = torch.cat((x, x_meta), dim=1)
+    #     for i, dropout in enumerate(self.dropouts):
+    #         if i == 0:
+    #             out = self.myfc(dropout(x))
+    #         else:
+    #             out += self.myfc(dropout(x))
+    #     out /= len(self.dropouts)
+
+    #     return sigmoid(out)
+    
     def forward(self, x, x_meta=None):
         x = self.extract(x).squeeze(-1).squeeze(-1)
         if self.n_meta_features > 0:
             x_meta = self.meta(x_meta)
+            x_meta = self.fea16(x_meta)
+
             x = torch.cat((x, x_meta), dim=1)
         for i, dropout in enumerate(self.dropouts):
             if i == 0:
@@ -590,11 +608,7 @@ class ISICModel(nn.Module):
                 out += self.myfc(dropout(x))
         out /= len(self.dropouts)
 
-        return sigmoid(out)
-    
-    # def forward(self, x_meta=None):
-    #     x_meta = self.meta(x_meta)
-    #     return sigmoid(x_meta)
+        return sigmoid(out), x_meta
 
     # def forward(self, x_meta=None):
 
@@ -637,17 +651,12 @@ if CONFIG['checkpoint'] is not None:
     checkpoint = torch.load(CONFIG['checkpoint'])
     print(f"load checkpoint: {CONFIG['checkpoint']}") 
 
-    try:
-        # 去掉前面多余的'module.'
-        new_state_dict = {}
-        for k,v in checkpoint.items():
-            new_state_dict[k[7:]] = v
-        model.load_state_dict( new_state_dict )
-    except:
-        # 提取backbone的权重
-        backbone_weights = {k: v for k, v in checkpoint.items() if 'head' not in k}
-        # 加载这些权重到当前模型的backbone中
-        model.load_state_dict(backbone_weights, strict=False)
+
+    # 去掉前面多余的'module.'
+    new_state_dict = {}
+    for k,v in checkpoint.items():
+        new_state_dict[k[7:]] = v
+    model.load_state_dict( new_state_dict )
 
 
     model = model.cuda() 
@@ -936,7 +945,10 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         # outputs = outputs.squeeze()
 
         meta = data['meta'].to(device, dtype=torch.float)
-        outputs = model(images, meta).squeeze()
+        outputs, _ = model(images, meta)
+        outputs = outputs.squeeze()
+        
+        # outputs = model(images, meta).squeeze()
         # outputs = model(meta).squeeze()
 
         # from IPython import embed
@@ -1017,7 +1029,8 @@ def valid_one_epoch(model, dataloader, device, epoch):
         # outputs = outputs.squeeze()
 
         meta = data['meta'].to(device, dtype=torch.float)
-        outputs = model(images, meta).squeeze()
+        outputs, _ = model(images, meta)
+        outputs = outputs.squeeze()
         # outputs = model(meta).squeeze()
 
 
