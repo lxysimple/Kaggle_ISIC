@@ -731,7 +731,7 @@ class ISICModel(nn.Module):
                 n_in = n_meta_features, 
                 n_out = 1,
                 hidden_size = [512, 128],
-                drop_rate = 0,
+                drop_rate = 0.1,
                 act_fun = nn.SiLU(),
             )
 
