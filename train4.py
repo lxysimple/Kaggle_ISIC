@@ -1239,7 +1239,7 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 df_valids = pd.DataFrame()
 for i in range(CONFIG['n_fold']):
     _, valid_loader = prepare_loaders(df, i)
-    res = run_test(models[i], valid_loader, device=CONFIG['device']) 
+    res, idxs = run_test(models[i], valid_loader, device=CONFIG['device']) 
     df_valid = df[df.kfold == i].reset_index()
 
     from IPython import embed
