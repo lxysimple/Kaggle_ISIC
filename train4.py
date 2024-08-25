@@ -1227,13 +1227,16 @@ def run_test(model, dataloader, device):
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:        
         images = data['image'].to(device, dtype=torch.float)
-        # meta = data['meta'].to(device, dtype=torch.float)
+        meta = data['meta'].to(device, dtype=torch.float)
         
-        outputs, _ = model(images)
-        outputs = outputs.squeeze()
+        # outputs, _ = model(images)
+        # outputs = outputs.squeeze()
 
         # outputs = model(images).squeeze()
         # outputs = model(images, meta).squeeze()
+        
+        outputs, _ = model(images, meta)
+        outputs = outputs.squeeze()
 
         # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
         outputs_list.append(outputs.detach().cpu().numpy())
