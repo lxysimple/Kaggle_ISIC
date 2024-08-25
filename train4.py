@@ -107,7 +107,7 @@ CONFIG = {
     # 训练时164，
     # eva: 96
     # vit推理: 64
-    "valid_batch_size": 96*10, 
+    "valid_batch_size": 96, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -332,7 +332,7 @@ class ISICDataset(Dataset):
     
 
         return {
-            'isic_id': isic_id,
+            # 'isic_id': isic_id,
             'image': img,
             'target': target
         }
@@ -1205,11 +1205,11 @@ def run_test(model, dataloader, device):
     isic_id_list = []
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:        
-        # images = data['image'].to(device, dtype=torch.float)
+        images = data['image'].to(device, dtype=torch.float)
         # meta = data['meta'].to(device, dtype=torch.float)
         
-        # outputs, _ = model(images)
-        # outputs = outputs.squeeze()
+        outputs, _ = model(images)
+        outputs = outputs.squeeze()
 
         # outputs = model(images).squeeze()
         # outputs = model(images, meta).squeeze()
@@ -1220,8 +1220,7 @@ def run_test(model, dataloader, device):
     
     gc.collect()
     
-    # return np.concatenate(outputs_list, axis=0), np.concatenate(isic_id_list, axis=0) 
-    return None, np.concatenate(isic_id_list, axis=0) 
+    return np.concatenate(outputs_list, axis=0)
 
 models = []
 models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin'))
@@ -1236,16 +1235,15 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 
 df_valids = pd.DataFrame()
 for i in range(CONFIG['n_fold']):
-    _, valid_loader = prepare_loaders(df, i)
-    res, idxs = run_test(models[i], valid_loader, device=CONFIG['device']) 
+    _, valid_loader = prepare_loaders(df[:1000], i)
+    res = run_test(models[i], valid_loader, device=CONFIG['device']) 
     df_valid = df[df.kfold == i].reset_index()
-
-    from IPython import embed
-    embed()
 
     # for i in range(16):
     #     df_valid[f'eva{i}'] = res
 
+    from IPython import embed
+    embed()
     df_valids = pd.concat([df_valids, df_valid])
 
 
