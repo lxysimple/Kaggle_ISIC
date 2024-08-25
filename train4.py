@@ -116,24 +116,24 @@ CONFIG = {
     "checkpoint": None,
 
   
-    "learning_rate": 1e-5, # 1e-5
-    "min_lr": 1e-6, # 1e-6
-    "weight_decay": 1e-6, # 1e-6
+    # "learning_rate": 1e-5, # 1e-5
+    # "min_lr": 1e-6, # 1e-6
+    # "weight_decay": 1e-6, # 1e-6
 
     # "learning_rate": 1e-6, # 1e-5
     # "min_lr": 1e-7, # 1e-6
     # "weight_decay": 1e-7, # 1e-6
 
 
-    # "learning_rate": 1e-4, # 1e-5
-    # "min_lr": 1e-5, # 1e-6
-    # "weight_decay": 1e-5, # 1e-6
+    "learning_rate": 1e-4, # 1e-5
+    "min_lr": 1e-5, # 1e-6
+    "weight_decay": 1e-5, # 1e-6
 
     "T_max": 10,
     "epochs": 10,
 
     
-    "fold" : 1,
+    "fold" : 0,
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
