@@ -125,13 +125,10 @@ CONFIG = {
     # "weight_decay": 1e-7, # 1e-6
 
 
-    # "learning_rate": 1e-4, # 1e-5
-    # "min_lr": 1e-5, # 1e-6
-    # "weight_decay": 1e-5, # 1e-6
+    "learning_rate": 1e-4, # 1e-5
+    "min_lr": 1e-5, # 1e-6
+    "weight_decay": 1e-5, # 1e-6
 
-    "learning_rate": 1e-3, # 1e-5
-    "min_lr": 1e-4, # 1e-6
-    "weight_decay": 1e-4, # 1e-6
 
     "T_max": 10,
     "epochs": 10,
