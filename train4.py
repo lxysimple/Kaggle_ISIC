@@ -637,18 +637,17 @@ if CONFIG['checkpoint'] is not None:
     checkpoint = torch.load(CONFIG['checkpoint'])
     print(f"load checkpoint: {CONFIG['checkpoint']}") 
 
-
-    # # 去掉前面多余的'module.'
-    # new_state_dict = {}
-    # for k,v in checkpoint.items():
-    #     new_state_dict[k[7:]] = v
-    # model.load_state_dict( new_state_dict )
-
-
-    # 提取backbone的权重
-    backbone_weights = {k: v for k, v in checkpoint.items() if 'head' not in k}
-    # 加载这些权重到当前模型的backbone中
-    model.load_state_dict(backbone_weights, strict=False)
+    try:
+        # 去掉前面多余的'module.'
+        new_state_dict = {}
+        for k,v in checkpoint.items():
+            new_state_dict[k[7:]] = v
+        model.load_state_dict( new_state_dict )
+    except:
+        # 提取backbone的权重
+        backbone_weights = {k: v for k, v in checkpoint.items() if 'head' not in k}
+        # 加载这些权重到当前模型的backbone中
+        model.load_state_dict(backbone_weights, strict=False)
 
 
     model = model.cuda() 
