@@ -762,7 +762,7 @@ class ISICModel(nn.Module):
             in_ch += n_meta_dim[3]
 
         # self.myfc = nn.Linear(in_ch, out_dim)
-        self.myfc = nn.Linear(n_meta_dim[2], out_dim)
+        self.myfc = nn.Linear(n_meta_dim[3], out_dim)
 
 
         self.model.head = nn.Identity()
