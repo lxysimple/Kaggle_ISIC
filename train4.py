@@ -662,7 +662,7 @@ if CONFIG['checkpoint'] is not None:
     model = model.cuda() 
     # model.to(CONFIG['device'])
 
-model = DataParallel(model) 
+    model = DataParallel(model) 
 
 # ============================== Augmentations ==============================
 data_transforms = {
