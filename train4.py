@@ -663,6 +663,7 @@ class ISICModel(nn.Module):
             )
 
             # self.meta = Xaoyang(n_meta_features, n_meta_dim)
+            self.meta = DenseLightModel(n_meta_features)
 
             in_ch += n_meta_dim[2]
         self.myfc = nn.Linear(in_ch, out_dim)
