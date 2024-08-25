@@ -690,11 +690,11 @@ data_transforms = {
         # A.Resize(image_size, image_size),
         A.CoarseDropout(
                 max_holes=5,
-                max_height=int(image_size * 0.175),
-                max_width=int(image_size * 0.175),
+                max_height=int(CONFIG['img_size'] * 0.175),
+                max_width=int(CONFIG['img_size'] * 0.175),
                 min_holes=2,
-                min_height=int(image_size * 0.175),
-                min_width=int(image_size * 0.175),
+                min_height=int(CONFIG['img_size'] * 0.175),
+                min_width=int(CONFIG['img_size'] * 0.175),
                 fill_value=0,
                 p=0.7
             ),
