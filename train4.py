@@ -734,7 +734,7 @@ class ISICModel(nn.Module):
             self.meta = DenseLightModel(
                 n_in = n_meta_features, 
                 n_out = 1,
-                hidden_size = [512, 128],
+                hidden_size = [3*512, 3*128, 3*32],
                 drop_rate = 0.1,
                 act_fun = nn.SiLU,
             )
