@@ -307,7 +307,7 @@ show_info(df)
 # ============================== Dataset Class ==============================
 
 
-class ISICDataset(Dataset):
+class ISICDataset2(Dataset):
     def __init__(self, df, file_hdf, transforms=None):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
         self.df = df
@@ -337,7 +337,7 @@ class ISICDataset(Dataset):
             'target': target
         }
 
-class ISICDataset2(Dataset):
+class ISICDataset(Dataset):
     def __init__(self, df, file_hdf, transforms=None):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
         self.df = df
