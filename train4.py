@@ -765,21 +765,21 @@ class ISICModel(nn.Module):
 
     #     return sigmoid(out)
     
-    # def forward(self, x_meta=None):
-    #     x_meta = self.meta(x_meta)
-    #     return sigmoid(x_meta)
-
     def forward(self, x_meta=None):
-
         x_meta = self.meta(x_meta)
-        for i, dropout in enumerate(self.dropouts):
-            if i == 0:
-                out = self.myfc(dropout(x_meta))
-            else:
-                out += self.myfc(dropout(x_meta))
-        out /= len(self.dropouts)
+        return sigmoid(x_meta)
 
-        return sigmoid(out)
+    # def forward(self, x_meta=None):
+
+    #     x_meta = self.meta(x_meta)
+    #     for i, dropout in enumerate(self.dropouts):
+    #         if i == 0:
+    #             out = self.myfc(dropout(x_meta))
+    #         else:
+    #             out += self.myfc(dropout(x_meta))
+    #     out /= len(self.dropouts)
+
+    #     return sigmoid(out)
 
 
 # class ISICModel(nn.Module):
