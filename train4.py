@@ -112,7 +112,7 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5326_Loss0.2242_pAUC0.1503_fold1.bin',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5295_Loss0.2576_pAUC0.1258_fold0.bin',
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5312_Loss0.2079_pAUC0.1326_fold0.bin',
     # "checkpoint": None,
 
   
@@ -125,13 +125,13 @@ CONFIG = {
     # "weight_decay": 1e-7, # 1e-6
 
 
-    # "learning_rate": 1e-4, # 1e-5
-    # "min_lr": 1e-5, # 1e-6
-    # "weight_decay": 1e-5, # 1e-6
+    "learning_rate": 1e-4, # 1e-5
+    "min_lr": 1e-5, # 1e-6
+    "weight_decay": 1e-5, # 1e-6
 
-    "learning_rate": 1e-3, # 1e-5
-    "min_lr": 1e-4, # 1e-6
-    "weight_decay": 1e-4, # 1e-6
+    # "learning_rate": 1e-3, # 1e-5
+    # "min_lr": 1e-4, # 1e-6
+    # "weight_decay": 1e-4, # 1e-6
 
     "T_max": 10,
     "epochs": 10,
@@ -270,11 +270,11 @@ for i in range(2):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
+        positive_list.append(df_negative.iloc[:df_positive.shape[0]*20, :]) 
         # positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
     else:
-        tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+        tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*20, :]]) 
 
     tmp_sum = pd.concat([tmp_sum, tmp]) 
 
