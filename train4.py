@@ -531,8 +531,8 @@ class ISICModel(nn.Module):
         super(ISICModel, self).__init__()
         self.n_meta_features = n_meta_features
         
-        self.model = timm.create_model(model_name, pretrained=True, checkpoint_path='/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin')
-        # self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
+        # self.model = timm.create_model(model_name, pretrained=True, checkpoint_path='/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin')
+        self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
         self.dropouts = nn.ModuleList([
             nn.Dropout(0.5) for _ in range(5)
         ])
@@ -634,19 +634,25 @@ class ISICModel(nn.Module):
 
 if CONFIG['checkpoint'] is not None:
     model = ISICModel(CONFIG['model_name'], pretrained=False)
-
     checkpoint = torch.load(CONFIG['checkpoint'])
     print(f"load checkpoint: {CONFIG['checkpoint']}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
-else:
-    model = ISICModel(CONFIG['model_name'], pretrained=True)
 
-model = model.cuda() 
-# model.to(CONFIG['device'])
+
+    # # 去掉前面多余的'module.'
+    # new_state_dict = {}
+    # for k,v in checkpoint.items():
+    #     new_state_dict[k[7:]] = v
+    # model.load_state_dict( new_state_dict )
+
+
+    # 提取backbone的权重
+    backbone_weights = {k: v for k, v in checkpoint['state_dict'].items() if 'head' not in k}
+    # 加载这些权重到当前模型的backbone中
+    model.load_state_dict(backbone_weights, strict=False)
+
+
+    model = model.cuda() 
+    # model.to(CONFIG['device'])
 
 model = DataParallel(model) 
 
