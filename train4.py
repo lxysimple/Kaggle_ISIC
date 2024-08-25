@@ -991,9 +991,10 @@ def valid_one_epoch(model, dataloader, device, epoch):
 
 
 
-        # outputs = model(images).squeeze()
-        meta = data['meta'].to(device, dtype=torch.float)
-        outputs = model(images, meta).squeeze()
+        outputs = model(images).squeeze()
+        
+        # meta = data['meta'].to(device, dtype=torch.float)
+        # outputs = model(images, meta).squeeze()
 
 
 
