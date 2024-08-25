@@ -496,18 +496,6 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
 # ============================== Create Model ==============================
 
-class MyModel(nn.Module):
-    def __init__(self, in_features, hidden_dim, num_classes):
-        super(MyModel, self).__init__()
-        self.fc1 = nn.Linear(in_features, hidden_dim)
-        self.sigmoid = nn.Sigmoid()  # 将 ReLU 替换为 Sigmoid
-        self.fc2 = nn.Linear(hidden_dim, num_classes)
-
-    def forward(self, x):
-        out_fc1 = self.fc1(x)
-        out_sigmoid = self.sigmoid(out_fc1)  # 使用 Sigmoid 激活
-        out_fc2 = self.fc2(out_sigmoid)
-        return out_fc1, out_fc2
 
 
 class ISICModel(nn.Module):
@@ -518,16 +506,18 @@ class ISICModel(nn.Module):
 
         in_features = self.model.head.in_features
 
-        # self.model.head = nn.Linear(in_features, num_classes)
-        self.model.head = MyModel(in_features=in_features, hidden_dim=16, num_classes=num_classes)
+        self.model.head = nn.Linear(in_features, 16)
+        self.my_head = nn.Linear(16, num_classes)
 
         # self.model.reset_classifier(num_classes=num_classes)
         
     def forward(self, images):
-        x1, x2 = self.model(images)
+        x1 = self.model(images)
+        x1 = self.sigmoid(x1)
+
         # return self.sigmoid(self.model(images))
 
-        return x1, self.sigmoid(x2)
+        return x1, self.sigmoid(self.my_head(x1))
 
 
 sigmoid = nn.Sigmoid()
