@@ -529,7 +529,7 @@ class DenseLightModel(nn.Module):
         self,
         n_in: int,
         n_out: int = 1,
-        hidden_size: = [
+        hidden_size: List[int] = [
             512,
             750,
         ],
