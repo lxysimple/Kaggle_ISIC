@@ -1223,7 +1223,8 @@ def run_test(model, dataloader, device):
     
     gc.collect()
     
-    return np.concatenate(outputs_list, axis=0), np.concatenate(isic_id_list, axis=0), 
+    # return np.concatenate(outputs_list, axis=0), np.concatenate(isic_id_list, axis=0) 
+    return None, np.concatenate(isic_id_list, axis=0) 
 
 models = []
 models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin'))
