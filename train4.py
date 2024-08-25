@@ -1211,7 +1211,7 @@ def run_test(model, dataloader, device):
 
         batch_size = images.size(0)
         
-        outputs, _ = model(images)
+        # outputs, _ = model(images)
         outputs = outputs.squeeze()
 
         # outputs = model(images).squeeze()
