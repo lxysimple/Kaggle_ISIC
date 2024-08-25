@@ -389,58 +389,58 @@ class InferenceDataset(Dataset):
             'image': img
         }
     
-class ISICDataset_for_Train_fromjpg(Dataset):
-    def __init__(self, path, transforms=None, kfold=0): 
-        self.path = path
-        df = pd.read_csv(f"{path}/train-metadata.csv")
+# class ISICDataset_for_Train_fromjpg(Dataset):
+#     def __init__(self, path, transforms=None, kfold=0): 
+#         self.path = path
+#         df = pd.read_csv(f"{path}/train-metadata.csv")
 
-        # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
-        # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
-        # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
+#         # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
+#         # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
+#         # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
 
-        sgkf = StratifiedGroupKFold(n_splits=2)
-        for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-            df.loc[val_ , "kfold"] = int(fold)
-        df = df[df['kfold'] != kfold]
+#         sgkf = StratifiedGroupKFold(n_splits=2)
+#         for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+#             df.loc[val_ , "kfold"] = int(fold)
+#         df = df[df['kfold'] != kfold]
 
-        self.df_positive = df[df["target"] == 1].reset_index()
-        self.df_negative = df[df["target"] == 0].reset_index()
-        # 保持一定的正负比例，不能让其失衡
-        # start = CONFIG['fold']*len(self.df_positive)*10
-        start = len(self.df_positive)*10
-        # start = 0
-        self.df_negative = self.df_negative[0 : start]
+#         self.df_positive = df[df["target"] == 1].reset_index()
+#         self.df_negative = df[df["target"] == 0].reset_index()
+#         # 保持一定的正负比例，不能让其失衡
+#         # start = CONFIG['fold']*len(self.df_positive)*10
+#         start = len(self.df_positive)*10
+#         # start = 0
+#         self.df_negative = self.df_negative[0 : start]
 
-        self.df = pd.concat([self.df_positive, self.df_negative]) 
-        # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
-        # self.df = self.df_positive
-        self.isic_ids = self.df['isic_id'].values
-        self.targets = self.df['target'].values
+#         self.df = pd.concat([self.df_positive, self.df_negative]) 
+#         # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
+#         # self.df = self.df_positive
+#         self.isic_ids = self.df['isic_id'].values
+#         self.targets = self.df['target'].values
 
-        self.transforms = transforms
+#         self.transforms = transforms
 
-        print(path)
-        print(len(self.df_positive), ' ', len(self.df_negative))
+#         print(path)
+#         print(len(self.df_positive), ' ', len(self.df_negative))
 
         
-    def __len__(self):
-        return len(self.df)
+#     def __len__(self):
+#         return len(self.df)
     
-    def __getitem__(self, index):
+#     def __getitem__(self, index):
 
-        isic_id = self.isic_ids[index]
-        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-        target = self.targets[index]
+#         isic_id = self.isic_ids[index]
+#         img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+#         target = self.targets[index]
 
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
+#         if self.transforms:
+#             img = self.transforms(image=img)["image"]
             
-        return {
-            'image': img,
-            'target': target
-        }
+#         return {
+#             'image': img,
+#             'target': target
+#         }
 
-class ISICDataset_for_Train_fromjpg2(Dataset):
+class ISICDataset_for_Train_fromjpg(Dataset):
     def __init__(self, path, transforms=None):
         self.path = path
         df = pd.read_csv(f"{path}/train-metadata.csv")
@@ -453,9 +453,9 @@ class ISICDataset_for_Train_fromjpg2(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         # 保持一定的正负比例，不能让其失衡
         # start = CONFIG['fold']*len(self.df_positive)*10
-        # start = len(self.df_positive)*10
+        start = len(self.df_positive)*10
         # start = 0
-        # self.df_negative = self.df_negative[0 : start]
+        self.df_negative = self.df_negative[0 : start]
 
         self.df = pd.concat([self.df_positive, self.df_negative]) 
         # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
