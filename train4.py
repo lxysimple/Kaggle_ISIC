@@ -736,7 +736,7 @@ class ISICModel(nn.Module):
                 n_in = n_meta_features, 
                 n_out = 1,
                 hidden_size = [3*512, 3*128, 3*32],
-                drop_rate = 0.5,
+                drop_rate = 0.1,
                 act_fun = nn.SiLU,
             )
 
@@ -744,6 +744,7 @@ class ISICModel(nn.Module):
 
         # self.myfc = nn.Linear(in_ch, out_dim)
         self.myfc = nn.Linear(n_meta_dim[2], out_dim)
+
 
         self.model.head = nn.Identity()
 
@@ -767,6 +768,7 @@ class ISICModel(nn.Module):
     
     def forward(self, x_meta=None):
         x_meta = self.meta(x_meta)
+
         return sigmoid(x_meta)
 
     # def forward(self, x_meta=None):
