@@ -1277,12 +1277,12 @@ df = df.merge(df_valids, on=["isic_id", "patient_id"])
 
 try:
     df = df[['isic_id', 'patient_id', 'target'] + [f"eva{i}" for i in range(16)]]
-    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train_mix16.csv')
 except:
 
     df.rename(columns={'target_x': 'target'}, inplace=True)
     df = df[['isic_id', 'patient_id', 'target'] + [f"eva{i}" for i in range(16)]]
-    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
+    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train_mix16.csv')
 
 # ===================================================================== 进行推理
 
