@@ -102,12 +102,12 @@ CONFIG = {
 
     # 164: eva、seresnext
     # 64: vit
-    "train_batch_size": 164, # 96 32
+    "train_batch_size": 164*20, # 96 32
     
     # 训练时164，
     # eva: 96
     # vit推理: 64
-    "valid_batch_size": 164, 
+    "valid_batch_size": 164*20, 
 
 
     "scheduler": 'CosineAnnealingLR',
