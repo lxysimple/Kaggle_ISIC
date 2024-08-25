@@ -648,21 +648,22 @@ class ISICModel(nn.Module):
 
 if CONFIG['checkpoint'] is not None:
     model = ISICModel(CONFIG['model_name'], pretrained=False)
+
     checkpoint = torch.load(CONFIG['checkpoint'])
     print(f"load checkpoint: {CONFIG['checkpoint']}") 
-
-
     # 去掉前面多余的'module.'
     new_state_dict = {}
     for k,v in checkpoint.items():
         new_state_dict[k[7:]] = v
     model.load_state_dict( new_state_dict )
+else:
+    model = ISICModel(CONFIG['model_name'], pretrained=True)
 
+model = model.cuda() 
+# model.to(CONFIG['device'])
 
-    model = model.cuda() 
-    # model.to(CONFIG['device'])
+model = DataParallel(model) 
 
-    model = DataParallel(model) 
 
 # ============================== Augmentations ==============================
 data_transforms = {
