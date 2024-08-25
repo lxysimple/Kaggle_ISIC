@@ -496,6 +496,20 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
 # ============================== Create Model ==============================
 
+class MyModel(nn.Module):
+    def __init__(self, in_features, hidden_dim, num_classes):
+        super(MyModel, self).__init__()
+        self.fc1 = nn.Linear(in_features, hidden_dim)
+        self.sigmoid = nn.Sigmoid()  # 将 ReLU 替换为 Sigmoid
+        self.fc2 = nn.Linear(hidden_dim, num_classes)
+
+    def forward(self, x):
+        out_fc1 = self.fc1(x)
+        out_sigmoid = self.sigmoid(out_fc1)  # 使用 Sigmoid 激活
+        out_fc2 = self.fc2(out_sigmoid)
+        return out_fc1, out_fc2
+
+
 class ISICModel(nn.Module):
     def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
         super(ISICModel, self).__init__()
@@ -503,216 +517,21 @@ class ISICModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
         in_features = self.model.head.in_features
-        self.model.head = nn.Linear(in_features, num_classes)
+
+        # self.model.head = nn.Linear(in_features, num_classes)
+        self.model.head = MyModel(in_features=in_features, hidden_dim=16, num_classes=num_classes)
 
         # self.model.reset_classifier(num_classes=num_classes)
         
     def forward(self, images):
-        return self.sigmoid(self.model(images))
+        x1, x2 = self.model(images)
+        # return self.sigmoid(self.model(images))
+
+        return x1, self.sigmoid(x2)
 
 
-class DenseLightBlock(nn.Module):
-    """Realisation of `'denselight'` model block.
-
-    Args:
-            n_in: Input dim.
-            n_out: Output dim.
-            drop_rate: Dropout rate.
-            noise_std: Std of noise.
-            act_fun: Activation function.
-            use_bn: Use BatchNorm.
-            use_noise: Use noise.
-            device: Device to compute on.
-
-    """
-
-    def __init__(
-        self,
-        n_in: int,
-        n_out: int,
-        drop_rate: float = 0.1,
-        noise_std: float = 0.05,
-        act_fun: nn.Module = nn.ReLU,
-        use_bn: bool = True,
-        use_noise: bool = False,
-        device: torch.device = torch.device("cuda:0"),
-        bn_momentum: float = 0.1,
-        ghost_batch: Optional[int] = None,
-        **kwargs,
-    ):
-        super(DenseLightBlock, self).__init__()
-        self.features = nn.Sequential(OrderedDict([]))
-        self.features.add_module("dense", nn.Linear(n_in, n_out, bias=(not use_bn)))
-        if use_bn:
-            if ghost_batch is None:
-                self.features.add_module("norm", nn.BatchNorm1d(n_out, momentum=bn_momentum))
-            else:
-                self.features.add_module("norm", GhostBatchNorm(n_out, ghost_batch, momentum=bn_momentum))
-
-        self.features.add_module("act", act_fun())
-
-        if drop_rate:
-            self.features.add_module("dropout", nn.Dropout(p=drop_rate))
-        if use_noise:
-            self.features.add_module("noise", GaussianNoise(noise_std, device))
-
-        # self.features.add_module("dense", nn.Linear(n_in, n_out))
-        # self.features.add_module("act", act_fun())
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward-pass."""
-        for name, layer in self.features.named_children():
-            x = layer(x)
-        return x
-    
-class DenseLightModel(nn.Module):
-    """Realisation of `'denselight'` model.
-
-    Args:
-            n_in: Input dim.
-            n_out: Output dim.
-            hidden_size: List of hidden dims.
-            drop_rate: Dropout rate for each layer separately or altogether.
-            act_fun: Activation function.
-            noise_std: Std of noise.
-            num_init_features: If not none add fc layer before model with certain dim.
-            use_bn: Use BatchNorm.
-            use_noise: Use noise.
-            concat_input: Concatenate input to all hidden layers. # MLP False
-            dropout_first: Use dropout in the first layer or not.
-            bn_momentum: BatchNorm momentum
-            ghost_batch: If not none use GhoastNorm with ghost_batch.
-            leaky_gate: Use LeakyGate or not.
-            use_skip: Use another Linear model to blend them after.
-            weighted_sum: Use weighted blender or half-half.
-            device: Device to compute on.
-
-            self.meta = DenseLightModel(
-                n_in = n_meta_features, 
-                n_out = 1,
-                hidden_size = [512, 128],
-                drop_rate = 0,
-                act_fun = nn.SiLU,
-            )
-    """
-
-    def __init__(
-        self,
-        n_in: int,
-        n_out: int = 1,
-        hidden_size: List[int] = [
-            512,
-            750,
-        ],
-        drop_rate: Union[float, List[float]] = 0.1,
-        act_fun: nn.Module = nn.LeakyReLU,
-
-        # noise_std: float = 0.05,
-        noise_std: float = 0.,
-
-        num_init_features: Optional[int] = None,
-        use_bn: bool = True,
-        use_noise: bool = False,
-
-        # concat_input: bool = True,
-        concat_input: bool = False,
-
-        # dropout_first: bool = True,
-        dropout_first: bool = False,
-
-        # bn_momentum: float = 0.1,
-        bn_momentum: float = 0.,
-
-        ghost_batch: Optional[int] = None,
-        use_skip: bool = False,
-        leaky_gate: bool = False,
-
-        # weighted_sum: bool = True,
-        weighted_sum: bool = False,
-
-        device: torch.device = torch.device("cuda:0"),
-        **kwargs,
-    ):
-        super(DenseLightModel, self).__init__()
-
-        if isinstance(hidden_size, int):
-            hidden_size = [hidden_size]
-
-        if isinstance(drop_rate, float):
-            drop_rate = [drop_rate] * (len(hidden_size) + (1 if dropout_first else 0))
-
-        assert (
-            len(hidden_size) == len(drop_rate) if not dropout_first else 1 + len(hidden_size) == len(drop_rate)
-        ), "Wrong number hidden_sizes/drop_rates. Must be equal."
-
-        self.concat_input = concat_input
-        num_features = n_in if num_init_features is None else num_init_features
-
-        self.features = nn.Sequential(OrderedDict([]))
-        if num_init_features is not None:
-            self.features.add_module("dense0", nn.Linear(n_in, num_features))
-
-        if leaky_gate:
-            self.features.add_module("leakygate0", LeakyGate(num_features))
-
-        if dropout_first and drop_rate[0] > 0:
-            self.features.add_module("dropout0", nn.Dropout(drop_rate[0]))
-            drop_rate = drop_rate[1:]
-
-        for i, hid_size in enumerate(hidden_size):
-            block = DenseLightBlock(
-                n_in=num_features,
-                n_out=hid_size,
-                drop_rate=drop_rate[i],
-                noise_std=noise_std,
-                act_fun=act_fun,
-                use_bn=use_bn,
-                use_noise=use_noise,
-                device=device,
-                bn_momentum=bn_momentum,
-                ghost_batch=ghost_batch,
-            )
-            self.features.add_module("denseblock%d" % (i + 1), block)
-
-            if concat_input:
-                num_features = n_in + hid_size
-            else:
-                num_features = hid_size
-
-        num_features = hidden_size[-1]
-        self.fc = nn.Linear(num_features, n_out)
-        self.use_skip = use_skip
-        if use_skip:
-            skip_linear = nn.Linear(n_in, n_out)
-            if leaky_gate:
-                self.skip_layers = nn.Sequential(LeakyGate(n_in), skip_linear)
-            else:
-                self.skip_layers = skip_linear
-            if weighted_sum:
-                self.mix = nn.Parameter(torch.tensor([0.0]))
-            else:
-                self.mix = torch.tensor([0.0], device=device)
-        else:
-            self.skip_layers = None
-            self.mix = None
-
-    def forward(self, X: torch.Tensor) -> torch.Tensor: 
-        """Forward-pass."""
-        x = X
-        input = x.detach().clone()
-        for name, layer in self.features.named_children():
-            if name not in ["dropout0", "leakygate0", "denseblock1", "dense0"] and self.concat_input:
-                x = torch.cat([x, input], 1)
-            x = layer(x)
-        out = self.fc(x)
-        if self.use_skip:
-            mix = torch.sigmoid(self.mix)
-            skip_out = self.skip_layers(X)
-            out = mix * skip_out + (1 - mix) * out
-        return out
-    
 sigmoid = nn.Sigmoid()
-class ISICModel(nn.Module):
+class ISICModel2(nn.Module):
 
     # 宽度、深度都可以增加
 
@@ -1116,8 +935,9 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
 
         # outputs = model(images).squeeze()
 
-        meta = data['meta'].to(device, dtype=torch.float)
-        outputs = model(images, meta).squeeze()
+        _, outputs = model(images).squeeze()
+        # meta = data['meta'].to(device, dtype=torch.float)
+        # outputs = model(images, meta).squeeze()
         # outputs = model(meta).squeeze()
 
         # from IPython import embed
@@ -1194,8 +1014,9 @@ def valid_one_epoch(model, dataloader, device, epoch):
 
         # outputs = model(images).squeeze()
 
-        meta = data['meta'].to(device, dtype=torch.float)
-        outputs = model(images, meta).squeeze()
+        _, outputs = model(images).squeeze()
+        # meta = data['meta'].to(device, dtype=torch.float)
+        # outputs = model(images, meta).squeeze()
         # outputs = model(meta).squeeze()
 
 
