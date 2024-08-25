@@ -506,6 +506,61 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 #     def forward(self, images):
 #         return self.sigmoid(self.model(images))
 
+
+class DenseLightBlock(nn.Module):
+    """Realisation of `'denselight'` model block.
+
+    Args:
+            n_in: Input dim.
+            n_out: Output dim.
+            drop_rate: Dropout rate.
+            noise_std: Std of noise.
+            act_fun: Activation function.
+            use_bn: Use BatchNorm.
+            use_noise: Use noise.
+            device: Device to compute on.
+
+    """
+
+    def __init__(
+        self,
+        n_in: int,
+        n_out: int,
+        drop_rate: float = 0.1,
+        noise_std: float = 0.05,
+        act_fun: nn.Module = nn.ReLU,
+        use_bn: bool = True,
+        use_noise: bool = False,
+        device: torch.device = torch.device("cuda:0"),
+        bn_momentum: float = 0.1,
+        ghost_batch: Optional[int] = None,
+        **kwargs,
+    ):
+        super(DenseLightBlock, self).__init__()
+        self.features = nn.Sequential(OrderedDict([]))
+        self.features.add_module("dense", nn.Linear(n_in, n_out, bias=(not use_bn)))
+        if use_bn:
+            if ghost_batch is None:
+                self.features.add_module("norm", nn.BatchNorm1d(n_out, momentum=bn_momentum))
+            else:
+                self.features.add_module("norm", GhostBatchNorm(n_out, ghost_batch, momentum=bn_momentum))
+
+        self.features.add_module("act", act_fun())
+
+        if drop_rate:
+            self.features.add_module("dropout", nn.Dropout(p=drop_rate))
+        if use_noise:
+            self.features.add_module("noise", GaussianNoise(noise_std, device))
+
+        # self.features.add_module("dense", nn.Linear(n_in, n_out))
+        # self.features.add_module("act", act_fun())
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward-pass."""
+        for name, layer in self.features.named_children():
+            x = layer(x)
+        return x
+    
 class DenseLightModel(nn.Module):
     """Realisation of `'denselight'` model.
 
