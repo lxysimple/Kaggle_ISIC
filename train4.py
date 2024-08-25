@@ -656,7 +656,7 @@ data_transforms = {
     # ], p=1.),
 
     'train': A.Compose([
-        A.Resize(image_size, image_size),
+        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
         A.Transpose(p=0.6),
         A.HorizontalFlip(p=0.6),
         A.VerticalFlip(p=0.6),
