@@ -1075,6 +1075,7 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
 
         from IPython import embed
         embed()
+        exit()
 
 
         loss=None
