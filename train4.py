@@ -715,7 +715,9 @@ sigmoid = nn.Sigmoid()
 class ISICModel(nn.Module):
 
     # 宽度、深度都可以增加
-    def __init__(self, model_name, pretrained=True, out_dim=1, n_meta_features=200, n_meta_dim=[3*512, 3*128, 3*32], checkpoint_path=None):
+
+    # [3*512, 3*128, 3*32]
+    def __init__(self, model_name, pretrained=True, out_dim=1, n_meta_features=200, n_meta_dim=[3*2048, 3*512, 3*128, 3*32], checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.n_meta_features = n_meta_features
 
@@ -728,20 +730,24 @@ class ISICModel(nn.Module):
 
         if n_meta_features > 0:
 
-            # self.meta = nn.Sequential(
-            #     nn.Linear(n_meta_features, n_meta_dim[0]),
-            #     nn.BatchNorm1d(n_meta_dim[0]),
-            #     nn.SiLU(),  
-            #     nn.Dropout(p=0.3),
+            self.meta = nn.Sequential(
+                nn.Linear(n_meta_features, n_meta_dim[0]),
+                nn.BatchNorm1d(n_meta_dim[0]),
+                nn.SiLU(),  
+                nn.Dropout(p=0.3),
 
-            #     nn.Linear(n_meta_dim[0], n_meta_dim[1]),
-            #     nn.BatchNorm1d(n_meta_dim[1]),
-            #     nn.SiLU(),  
+                nn.Linear(n_meta_dim[0], n_meta_dim[1]),
+                nn.BatchNorm1d(n_meta_dim[1]),
+                nn.SiLU(),  
 
-            #     nn.Linear(n_meta_dim[1], n_meta_dim[2]),
-            #     nn.BatchNorm1d(n_meta_dim[2]),
-            #     nn.SiLU(),  
-            # )
+                nn.Linear(n_meta_dim[1], n_meta_dim[2]),
+                nn.BatchNorm1d(n_meta_dim[2]),
+                nn.SiLU(), 
+
+                nn.Linear(n_meta_dim[2], n_meta_dim[3]),
+                nn.BatchNorm1d(n_meta_dim[3]),
+                nn.SiLU(), 
+            )
 
             # self.meta = Xaoyang(n_meta_features, n_meta_dim)
 
@@ -753,7 +759,7 @@ class ISICModel(nn.Module):
                 act_fun = nn.SiLU,
             )
 
-            in_ch += n_meta_dim[2]
+            in_ch += n_meta_dim[3]
 
         # self.myfc = nn.Linear(in_ch, out_dim)
         self.myfc = nn.Linear(n_meta_dim[2], out_dim)
