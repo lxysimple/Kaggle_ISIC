@@ -512,12 +512,12 @@ class ISICModel(nn.Module):
         # self.model.reset_classifier(num_classes=num_classes)
         
     def forward(self, images):
+        # x1、x2本质上是线性相关的
         x1 = self.model(images)
-        x1 = self.sigmoid(x1)
+        x2 = self.my_head(x1)
 
         # return self.sigmoid(self.model(images))
-
-        return x1, self.sigmoid(self.my_head(x1))
+        return self.sigmoid(x1), self.sigmoid(x2)
 
 
 sigmoid = nn.Sigmoid()
