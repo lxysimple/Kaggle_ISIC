@@ -125,10 +125,13 @@ CONFIG = {
     # "weight_decay": 1e-7, # 1e-6
 
 
-    "learning_rate": 1e-4, # 1e-5
-    "min_lr": 1e-5, # 1e-6
-    "weight_decay": 1e-5, # 1e-6
+    # "learning_rate": 1e-4, # 1e-5
+    # "min_lr": 1e-5, # 1e-6
+    # "weight_decay": 1e-5, # 1e-6
 
+    "learning_rate": 1e-3, # 1e-5
+    "min_lr": 1e-4, # 1e-6
+    "weight_decay": 1e-4, # 1e-6
 
     "T_max": 10,
     "epochs": 10,
@@ -728,7 +731,7 @@ class ISICModel(nn.Module):
             )
 
             # self.meta = Xaoyang(n_meta_features, n_meta_dim)
-            
+
             # self.meta = DenseLightModel(
             #     n_in = n_meta_features, 
             #     n_out = 1,
