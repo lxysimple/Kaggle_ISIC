@@ -1289,7 +1289,7 @@ def prepare_loaders(df, fold):
 
 # ===================================================================== 进行推理
 
-# ------------------------------------------------------------------ 1 target推理
+# ------------------------------------------------------------------ 多模态1 target推理
 def run_test(model, dataloader, device):
     model.eval()
     
@@ -1342,9 +1342,9 @@ for i in range(CONFIG['n_fold']):
 
     df_valid['eva'] = res
 
-    from IPython import embed
-    embed()
-    exit()
+    # from IPython import embed
+    # embed()
+    # exit()
 
     df_valids = pd.concat([df_valids, df_valid])
 
@@ -1367,7 +1367,7 @@ except:
     df = df[['isic_id', 'patient_id', 'target', "eva"]]
     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
 
-# ===================================================================== 1 target推理
+# ===================================================================== 多模态1 target推理
     
 # --------------------------------------------------------------------- 测试BUG
 # def load_model(path):
