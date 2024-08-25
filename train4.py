@@ -496,19 +496,19 @@ class ISICDataset_for_Train_fromjpg(Dataset):
 
 # ============================== Create Model ==============================
 
-# class ISICModel(nn.Module):
-#     def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
-#         super(ISICModel, self).__init__()
-#         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
-#         self.sigmoid = nn.Sigmoid()
+class ISICModel(nn.Module):
+    def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
+        super(ISICModel, self).__init__()
+        self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
+        self.sigmoid = nn.Sigmoid()
 
-#         in_features = self.model.head.in_features
-#         self.model.head = nn.Linear(in_features, num_classes)
+        in_features = self.model.head.in_features
+        self.model.head = nn.Linear(in_features, num_classes)
 
-#         # self.model.reset_classifier(num_classes=num_classes)
+        # self.model.reset_classifier(num_classes=num_classes)
         
-#     def forward(self, images):
-#         return self.sigmoid(self.model(images))
+    def forward(self, images):
+        return self.sigmoid(self.model(images))
 
 
 class DenseLightBlock(nn.Module):
@@ -1343,11 +1343,11 @@ def prepare_loaders(df, fold):
     # )
 
     concat_dataset_train = ConcatDataset([
-        # train_dataset2020, 
-        # train_dataset2018,
+        train_dataset2020, 
+        train_dataset2018,
         train_dataset, 
-        # train_dataset2019,
-        # train_dataset_others,
+        train_dataset2019,
+        train_dataset_others,
 
     ])
 
