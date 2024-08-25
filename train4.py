@@ -768,9 +768,9 @@ class ISICModel(nn.Module):
         x_meta = self.meta(x_meta)
         for i, dropout in enumerate(self.dropouts):
             if i == 0:
-                out = self.myfc(dropout(x))
+                out = self.myfc(dropout(x_meta))
             else:
-                out += self.myfc(dropout(x))
+                out += self.myfc(dropout(x_meta))
         out /= len(self.dropouts)
 
         return sigmoid(out)
