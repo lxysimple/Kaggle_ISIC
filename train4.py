@@ -588,7 +588,7 @@ class DenseLightModel(nn.Module):
                 n_out = 1,
                 hidden_size = [512, 128],
                 drop_rate = 0,
-                act_fun = nn.SiLU(),
+                act_fun = nn.SiLU,
             )
     """
 
@@ -732,7 +732,7 @@ class ISICModel(nn.Module):
                 n_out = 1,
                 hidden_size = [512, 128],
                 drop_rate = 0.1,
-                act_fun = nn.SiLU(),
+                act_fun = nn.SiLU,
             )
 
             in_ch += n_meta_dim[2]
