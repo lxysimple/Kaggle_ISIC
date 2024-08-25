@@ -646,7 +646,7 @@ if CONFIG['checkpoint'] is not None:
 
 
     # 提取backbone的权重
-    backbone_weights = {k: v for k, v in checkpoint['state_dict'].items() if 'head' not in k}
+    backbone_weights = {k: v for k, v in checkpoint.items() if 'head' not in k}
     # 加载这些权重到当前模型的backbone中
     model.load_state_dict(backbone_weights, strict=False)
 
