@@ -606,17 +606,30 @@ class DenseLightModel(nn.Module):
         ],
         drop_rate: Union[float, List[float]] = 0.1,
         act_fun: nn.Module = nn.LeakyReLU,
-        noise_std: float = 0.05,
+
+        # noise_std: float = 0.05,
+        noise_std: float = 0.,
+
         num_init_features: Optional[int] = None,
         use_bn: bool = True,
         use_noise: bool = False,
-        concat_input: bool = True,
-        dropout_first: bool = True,
-        bn_momentum: float = 0.1,
+
+        # concat_input: bool = True,
+        concat_input: bool = False,
+
+        # dropout_first: bool = True,
+        dropout_first: bool = False,
+
+        # bn_momentum: float = 0.1,
+        bn_momentum: float = 0.,
+
         ghost_batch: Optional[int] = None,
         use_skip: bool = False,
         leaky_gate: bool = False,
-        weighted_sum: bool = True,
+
+        # weighted_sum: bool = True,
+        weighted_sum: bool = False,
+
         device: torch.device = torch.device("cuda:0"),
         **kwargs,
     ):
