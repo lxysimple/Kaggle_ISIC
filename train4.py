@@ -69,13 +69,11 @@ from typing import Optional
 from typing import Union
 
 
-# import meta
-
-# df_meta, feature_cols = meta.creat_meta()
-
-# df_meta = df_meta.apply(pd.to_numeric, errors='coerce')
-# df_meta = df_meta.fillna(0)
-# df_meta = df_meta.replace([np.inf, -np.inf], 0)
+import meta
+df_meta, feature_cols = meta.creat_meta()
+df_meta = df_meta.apply(pd.to_numeric, errors='coerce')
+df_meta = df_meta.fillna(0)
+df_meta = df_meta.replace([np.inf, -np.inf], 0)
 
 # df_meta[feature_cols]
 # from IPython import embed
