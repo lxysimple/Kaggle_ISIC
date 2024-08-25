@@ -596,10 +596,11 @@ class ISICModel(nn.Module):
     
     def forward(self, x, x_meta=None):
         x = self.extract(x).squeeze(-1).squeeze(-1)
+        x = self.fea16(x)
+
         if self.n_meta_features > 0:
             x_meta = self.meta(x_meta)
-            x_meta = self.fea16(x_meta)
-
+            
             x = torch.cat((x, x_meta), dim=1)
         for i, dropout in enumerate(self.dropouts):
             if i == 0:
