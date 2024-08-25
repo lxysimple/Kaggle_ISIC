@@ -1235,7 +1235,7 @@ def run_test(model, dataloader, device):
         # outputs = model(images).squeeze()
         # outputs = model(images, meta).squeeze()
         
-        outputs, _ = model(images, meta)
+        _, outputs = model(images, meta)
         outputs = outputs.squeeze()
 
         # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
