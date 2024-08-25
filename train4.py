@@ -1073,8 +1073,8 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         # outputs = model(images, meta).squeeze()
         outputs = model(meta).squeeze()
 
-        # from IPython import embed
-        # embed()
+        from IPython import embed
+        embed()
 
 
         loss=None
