@@ -1234,20 +1234,20 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
 
 df_valids = pd.DataFrame()
 for i in range(CONFIG['n_fold']):
-    _, valid_loader = prepare_loaders(df[:1000], i)
+    _, valid_loader = prepare_loaders(df, i)
     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
     df_valid = df[df.kfold == i].reset_index()
 
-    # for i in range(16):
-    #     df_valid[f'eva{i}'] = res
+    for i in range(16):
+        df_valid.loc[:, f'eva{i}'] = res[:,i]
 
-    from IPython import embed
-    embed()
+    # from IPython import embed
+    # embed()
     df_valids = pd.concat([df_valids, df_valid])
 
 
 
-df_valids = df_valids[["isic_id", "patient_id", "eva"]]
+df_valids = df_valids[["isic_id", "patient_id"] + [f"eva{i}" for i in range(16)]] 
 
 
 df = df[['isic_id', 'patient_id', 'target']]
@@ -1255,12 +1255,12 @@ df = df.merge(df_valids, on=["isic_id", "patient_id"])
 
 
 try:
-    df = df[['isic_id', 'patient_id', 'target', "eva"]]
+    df = df[['isic_id', 'patient_id', 'target'] + [f"eva{i}" for i in range(16)]]
     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 except:
 
     df.rename(columns={'target_x': 'target'}, inplace=True)
-    df = df[['isic_id', 'patient_id', 'target', "eva"]]
+    df = df[['isic_id', 'patient_id', 'target'] + [f"eva{i}" for i in range(16)]]
     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train.csv')
 
 # ===================================================================== 进行推理
