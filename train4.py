@@ -270,7 +270,7 @@ for i in range(2):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        positive_list.append(df_negative.iloc[:df_positive.shape[0]*20, :]) 
+        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
         # positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
     else:
