@@ -582,6 +582,14 @@ class DenseLightModel(nn.Module):
             use_skip: Use another Linear model to blend them after.
             weighted_sum: Use weighted blender or half-half.
             device: Device to compute on.
+
+            self.meta = DenseLightModel(
+                n_in = n_meta_features, 
+                n_out = 1,
+                hidden_size = [512, 128],
+                drop_rate = 0,
+                act_fun = nn.SiLU(),
+            )
     """
 
     def __init__(
@@ -719,7 +727,13 @@ class ISICModel(nn.Module):
             )
 
             # self.meta = Xaoyang(n_meta_features, n_meta_dim)
-            self.meta = DenseLightModel(n_meta_features)
+            self.meta = DenseLightModel(
+                n_in = n_meta_features, 
+                n_out = 1,
+                hidden_size = [512, 128],
+                drop_rate = 0,
+                act_fun = nn.SiLU(),
+            )
 
             in_ch += n_meta_dim[2]
         self.myfc = nn.Linear(in_ch, out_dim)
