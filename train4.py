@@ -1205,11 +1205,8 @@ def run_test(model, dataloader, device):
     isic_id_list = []
     bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for step, data in bar:        
-        images = data['image'].to(device, dtype=torch.float)
-
+        # images = data['image'].to(device, dtype=torch.float)
         # meta = data['meta'].to(device, dtype=torch.float)
-
-        batch_size = images.size(0)
         
         # outputs, _ = model(images)
         # outputs = outputs.squeeze()
