@@ -20,17 +20,6 @@ import lightgbm as lgb
 import catboost as cb
 import xgboost as xgb
 
-# import optuna
-# from optuna.samplers import TPESampler
-
-#downsampling techniques
-# they took long time, so we use RandomUnderSampler
-# from imblearn.under_sampling import NearMiss
-# from imblearn.under_sampling import ClusterCentroids
-# from imblearn.under_sampling import TomekLinks
-# from imblearn.under_sampling import EditedNearestNeighbours
-# from imblearn.pipeline import Pipeline as ImbPipeline
-# from imblearn.under_sampling import NearMiss, TomekLinks
 from sklearn.impute import SimpleImputer
 
 import time
