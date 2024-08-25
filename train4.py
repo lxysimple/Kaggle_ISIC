@@ -748,7 +748,7 @@ class ISICModel(nn.Module):
  
         x_meta = self.meta(x_meta)
 
-        return x_meta
+        return sigmoid(x_meta)
 
 
 # class ISICModel(nn.Module):
@@ -1073,9 +1073,9 @@ def train_one_epoch(model, optimizer, scheduler, dataloader, device, epoch):
         # outputs = model(images, meta).squeeze()
         outputs = model(meta).squeeze()
 
-        from IPython import embed
-        embed()
-        exit()
+        # from IPython import embed
+        # embed()
+        # exit()
 
 
         loss=None
