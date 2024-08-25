@@ -1329,14 +1329,14 @@ models = []
 models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5332_Loss0.1692_pAUC0.1556_fold0.bin'))
 models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5341_Loss0.1807_pAUC0.1544_fold1.bin'))
 
-df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")[:500]
 sgkf = StratifiedGroupKFold(n_splits=2)
-for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)): 
       df.loc[val_ , "kfold"] = int(fold)
 
 df_valids = pd.DataFrame()
 for i in range(CONFIG['n_fold']):
-    _, valid_loader = prepare_loaders(df[:500], i)
+    _, valid_loader = prepare_loaders(df, i)
     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
     df_valid = df[df.kfold == i].reset_index()
 
