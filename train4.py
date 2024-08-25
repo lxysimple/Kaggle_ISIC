@@ -111,9 +111,9 @@ CONFIG = {
 
 
     "scheduler": 'CosineAnnealingLR',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin',
+    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5312_Loss0.2079_pAUC0.1326_fold0.bin',
-    # "checkpoint": None,
+    "checkpoint": None,
 
   
     "learning_rate": 1e-5, # 1e-5
@@ -530,8 +530,9 @@ class ISICModel(nn.Module):
     def __init__(self, model_name, pretrained=True, out_dim=1, n_meta_features=200, n_meta_dim=[3*512, 3*128, 3*32], checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.n_meta_features = n_meta_features
-
-        self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
+        
+        self.model = timm.create_model(model_name, pretrained=True, checkpoint_path='/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin')
+        # self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
         self.dropouts = nn.ModuleList([
             nn.Dropout(0.5) for _ in range(5)
         ])
