@@ -307,36 +307,36 @@ show_info(df)
 # ============================== Dataset Class ==============================
 
 
-# class ISICDataset(Dataset):
-#     def __init__(self, df, file_hdf, transforms=None):
-#         self.fp_hdf = h5py.File(file_hdf, mode="r")
-#         self.df = df
-#         self.isic_ids = df['isic_id'].values
-#         self.targets = df['target'].values
-#         self.transforms = transforms
-
-#     def __len__(self):
-#         return len(self.df) 
-    
-#     def __getitem__(self, index):
-#         isic_id = self.isic_ids[index]
-#         img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
-
-#         if self.targets is not None:
-#             target = self.targets[index]
-#         else:
-#             target = torch.tensor(-1)  # Dummy target for test set
-        
-#         if self.transforms:
-#             img = self.transforms(image=img)["image"]
-    
-
-#         return {
-#             'image': img,
-#             'target': target
-#         }
-
 class ISICDataset(Dataset):
+    def __init__(self, df, file_hdf, transforms=None):
+        self.fp_hdf = h5py.File(file_hdf, mode="r")
+        self.df = df
+        self.isic_ids = df['isic_id'].values
+        self.targets = df['target'].values
+        self.transforms = transforms
+
+    def __len__(self):
+        return len(self.df) 
+    
+    def __getitem__(self, index):
+        isic_id = self.isic_ids[index]
+        img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
+
+        if self.targets is not None:
+            target = self.targets[index]
+        else:
+            target = torch.tensor(-1)  # Dummy target for test set
+        
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
+    
+
+        return {
+            'image': img,
+            'target': target
+        }
+
+class ISICDataset2(Dataset):
     def __init__(self, df, file_hdf, transforms=None):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
         self.df = df
