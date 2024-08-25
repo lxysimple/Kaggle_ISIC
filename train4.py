@@ -112,8 +112,8 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5326_Loss0.2242_pAUC0.1503_fold1.bin',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5312_Loss0.2079_pAUC0.1326_fold0.bin',
-    # "checkpoint": None,
+    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5312_Loss0.2079_pAUC0.1326_fold0.bin',
+    "checkpoint": None,
 
   
     # "learning_rate": 1e-5, # 1e-5
@@ -715,30 +715,30 @@ class ISICModel(nn.Module):
 
         if n_meta_features > 0:
 
-            self.meta = nn.Sequential(
-                nn.Linear(n_meta_features, n_meta_dim[0]),
-                nn.BatchNorm1d(n_meta_dim[0]),
-                nn.SiLU(),  
-                nn.Dropout(p=0.3),
+            # self.meta = nn.Sequential(
+            #     nn.Linear(n_meta_features, n_meta_dim[0]),
+            #     nn.BatchNorm1d(n_meta_dim[0]),
+            #     nn.SiLU(),  
+            #     nn.Dropout(p=0.3),
 
-                nn.Linear(n_meta_dim[0], n_meta_dim[1]),
-                nn.BatchNorm1d(n_meta_dim[1]),
-                nn.SiLU(),  
+            #     nn.Linear(n_meta_dim[0], n_meta_dim[1]),
+            #     nn.BatchNorm1d(n_meta_dim[1]),
+            #     nn.SiLU(),  
 
-                nn.Linear(n_meta_dim[1], n_meta_dim[2]),
-                nn.BatchNorm1d(n_meta_dim[2]),
-                nn.SiLU(),  
-            )
+            #     nn.Linear(n_meta_dim[1], n_meta_dim[2]),
+            #     nn.BatchNorm1d(n_meta_dim[2]),
+            #     nn.SiLU(),  
+            # )
 
             # self.meta = Xaoyang(n_meta_features, n_meta_dim)
 
-            # self.meta = DenseLightModel(
-            #     n_in = n_meta_features, 
-            #     n_out = 1,
-            #     hidden_size = [3*512, 3*128, 3*32],
-            #     drop_rate = 0.1,
-            #     act_fun = nn.SiLU,
-            # )
+            self.meta = DenseLightModel(
+                n_in = n_meta_features, 
+                n_out = 1,
+                hidden_size = [3*512, 3*128, 3*32],
+                drop_rate = 0.5,
+                act_fun = nn.SiLU,
+            )
 
             in_ch += n_meta_dim[2]
 
