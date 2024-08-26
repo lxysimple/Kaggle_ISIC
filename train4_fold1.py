@@ -536,30 +536,22 @@ class ISICDataset_for_Valid_fromjpg(Dataset):
 
 
 
-class ISICModel1(nn.Module):
+class ISICModel(nn.Module):
     def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
-        self.sigmoid = nn.Sigmoid()
 
         in_features = self.model.head.in_features
-
-        self.model.head = nn.Linear(in_features, 16)
-        self.my_head = nn.Linear(16, num_classes)
-
+        self.model.head = nn.Linear(in_features, num_classes)
         # self.model.reset_classifier(num_classes=num_classes)
-        
-    def forward(self, images):
-        # x1、x2本质上是线性相关的
-        x1 = self.model(images)
-        x2 = self.my_head(x1)
+        self.sigmoid = nn.Sigmoid()
 
-        # return self.sigmoid(self.model(images))
-        return self.sigmoid(x1), self.sigmoid(x2)
+    def forward(self, images):
+        return self.sigmoid(self.model(images))
 
 
 sigmoid = nn.Sigmoid()
-class ISICModel(nn.Module):
+class ISICModel1(nn.Module):
 
     # 宽度、深度都可以增加
 
