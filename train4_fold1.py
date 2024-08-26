@@ -500,7 +500,7 @@ class ISICDataset_for_Valid_fromjpg(Dataset):
         
         # 取前 1/10
         self.df_positive = self.df_positive[:len(self.df_positive)//10]
-        self.df_negative = self.df_negative[:len(self.df_positive)//10]
+        self.df_negative = self.df_negative[:len(self.df_negative)//10]
 
 
         self.df = pd.concat([self.df_positive, self.df_negative]) 
