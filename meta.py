@@ -11,10 +11,6 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import roc_auc_score
 from sklearn.ensemble import VotingClassifier
 
-from imblearn.under_sampling import RandomUnderSampler
-from imblearn.pipeline import Pipeline
-from imblearn.over_sampling import RandomOverSampler
-
 
 import lightgbm as lgb
 import catboost as cb
