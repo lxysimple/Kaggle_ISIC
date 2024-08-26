@@ -1342,9 +1342,9 @@ for i in range(CONFIG['n_fold']):
 
     df_valid['eva'] = res
 
-    from IPython import embed
-    embed()
-    exit()
+    # from IPython import embed
+    # embed()
+    # exit()
 
     df_valids = pd.concat([df_valids, df_valid])
 
