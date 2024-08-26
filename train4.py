@@ -1203,7 +1203,7 @@ def prepare_loaders(df, fold):
 # ================================================================== 模型训练
 
 
-# ------------------------------------------------------------------ 进行推理
+# ------------------------------------------------------------------ 多模态16 target推理
 # def load_model(path):
 #     model = ISICModel(CONFIG['model_name'], pretrained=False)
 #     checkpoint = torch.load(path)
@@ -1287,7 +1287,7 @@ def prepare_loaders(df, fold):
 #     df = df[['isic_id', 'patient_id', 'target'] + [f"eva{i}" for i in range(16)]]
 #     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train_mix16.csv')
 
-# ===================================================================== 进行推理
+# ===================================================================== 多模态16 target推理
 
 # ------------------------------------------------------------------ 多模态1 target推理
 def run_test(model, dataloader, device):
@@ -1342,9 +1342,9 @@ for i in range(CONFIG['n_fold']):
 
     df_valid['eva'] = res
 
-    # from IPython import embed
-    # embed()
-    # exit()
+    from IPython import embed
+    embed()
+    exit()
 
     df_valids = pd.concat([df_valids, df_valid])
 
