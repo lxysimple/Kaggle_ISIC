@@ -1221,16 +1221,16 @@ def prepare_loaders(df, fold):
 
 
 # ------------------------------------------------------------------ 模型训练
-# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
+optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+                       weight_decay=CONFIG['weight_decay'])
+scheduler = fetch_scheduler(optimizer)
 
 
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+model, history = run_training(model, optimizer, scheduler,
+                              device=CONFIG['device'],
+                              num_epochs=CONFIG['epochs'])
 # ================================================================== 模型训练
 
 
@@ -1321,82 +1321,82 @@ def prepare_loaders(df, fold):
 # --------------------------------------------------------------------- 多模态16 target推理
 
 # ===================================================================== 多模态1 target推理
-def run_test(model, dataloader, device):
-    model.eval()
+# def run_test(model, dataloader, device):
+#     model.eval()
     
-    outputs_list = []
-    isic_id_list = []
-    bar = tqdm(enumerate(dataloader), total=len(dataloader))
-    for step, data in bar:        
-        images = data['image'].to(device, dtype=torch.float)
-        meta = data['meta'].to(device, dtype=torch.float)
+#     outputs_list = []
+#     isic_id_list = []
+#     bar = tqdm(enumerate(dataloader), total=len(dataloader))
+#     for step, data in bar:        
+#         images = data['image'].to(device, dtype=torch.float)
+#         meta = data['meta'].to(device, dtype=torch.float)
         
-        outputs, _ = model(images, meta)
-        outputs = outputs.squeeze()
+#         outputs, _ = model(images, meta)
+#         outputs = outputs.squeeze()
 
-        # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
-        outputs_list.append(outputs.detach().cpu().numpy())
+#         # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
+#         outputs_list.append(outputs.detach().cpu().numpy())
     
-    gc.collect()
+#     gc.collect()
     
-    return np.concatenate(outputs_list, axis=0)
+#     return np.concatenate(outputs_list, axis=0)
 
-def load_model(path):
-    model = ISICModel(CONFIG['model_name'], pretrained=False)
-    checkpoint = torch.load(path)
-    print(f"load checkpoint: {path}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
+# def load_model(path):
+#     model = ISICModel(CONFIG['model_name'], pretrained=False)
+#     checkpoint = torch.load(path)
+#     print(f"load checkpoint: {path}") 
+#     # 去掉前面多余的'module.'
+#     new_state_dict = {}
+#     for k,v in checkpoint.items():
+#         new_state_dict[k[7:]] = v
+#     model.load_state_dict( new_state_dict )
 
-    model = model.cuda() 
-    # model.to(CONFIG['device'])
-    model = DataParallel(model) 
-    return model
+#     model = model.cuda() 
+#     # model.to(CONFIG['device'])
+#     model = DataParallel(model) 
+#     return model
 
-models = []
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5332_Loss0.1692_pAUC0.1556_fold0.bin'))
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5341_Loss0.1807_pAUC0.1544_fold1.bin'))
+# models = []
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5332_Loss0.1692_pAUC0.1556_fold0.bin'))
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5341_Loss0.1807_pAUC0.1544_fold1.bin'))
 
-df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-sgkf = StratifiedGroupKFold(n_splits=2)
-for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)): 
-      df.loc[val_ , "kfold"] = int(fold)
+# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+# sgkf = StratifiedGroupKFold(n_splits=2)
+# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)): 
+#       df.loc[val_ , "kfold"] = int(fold)
 
-df_valids = pd.DataFrame()
-for i in range(CONFIG['n_fold']):
-    _, valid_loader = prepare_loaders(df, i)
-    res = run_test(models[i], valid_loader, device=CONFIG['device']) 
-    df_valid = df[df.kfold == i].reset_index()
+# df_valids = pd.DataFrame()
+# for i in range(CONFIG['n_fold']):
+#     _, valid_loader = prepare_loaders(df, i)
+#     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
+#     df_valid = df[df.kfold == i].reset_index()
 
-    df_valid['eva'] = res
+#     df_valid['eva'] = res
 
-    from IPython import embed
-    embed()
-    exit()
+#     from IPython import embed
+#     embed()
+#     exit()
 
-    df_valids = pd.concat([df_valids, df_valid])
+#     df_valids = pd.concat([df_valids, df_valid])
 
-# from IPython import embed
-# embed()
+# # from IPython import embed
+# # embed()
 
-df_valids = df_valids[["isic_id", "patient_id", "eva"]]
-
-
-df = df[['isic_id', 'patient_id', 'target']]
-df = df.merge(df_valids, on=["isic_id", "patient_id"])
+# df_valids = df_valids[["isic_id", "patient_id", "eva"]]
 
 
-try:
-    df = df[['isic_id', 'patient_id', 'target', "eva"]]
-    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
-except:
+# df = df[['isic_id', 'patient_id', 'target']]
+# df = df.merge(df_valids, on=["isic_id", "patient_id"])
 
-    df.rename(columns={'target_x': 'target'}, inplace=True)
-    df = df[['isic_id', 'patient_id', 'target', "eva"]]
-    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
+
+# try:
+#     df = df[['isic_id', 'patient_id', 'target', "eva"]]
+#     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
+# except:
+
+#     df.rename(columns={'target_x': 'target'}, inplace=True)
+#     df = df[['isic_id', 'patient_id', 'target', "eva"]]
+#     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
 
 # -------------------------------------------------------------------- 多模态1 target推理
     
