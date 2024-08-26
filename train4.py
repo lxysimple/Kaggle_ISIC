@@ -1287,9 +1287,9 @@ def prepare_loaders(df, fold):
 #     df = df[['isic_id', 'patient_id', 'target'] + [f"eva{i}" for i in range(16)]]
 #     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train_mix16.csv')
 
-# ===================================================================== 多模态16 target推理
+# --------------------------------------------------------------------- 多模态16 target推理
 
-# ------------------------------------------------------------------ 多模态1 target推理
+# ===================================================================== 多模态1 target推理
 def run_test(model, dataloader, device):
     model.eval()
     
@@ -1367,9 +1367,9 @@ except:
     df = df[['isic_id', 'patient_id', 'target', "eva"]]
     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
 
-# ===================================================================== 多模态1 target推理
+# -------------------------------------------------------------------- 多模态1 target推理
     
-# --------------------------------------------------------------------- 测试BUG
+# ==================================================================== 测试BUG
 # def load_model(path):
 #     model = ISICModel(CONFIG['model_name'], pretrained=False)
 #     checkpoint = torch.load(path)
@@ -1396,4 +1396,4 @@ except:
 # submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
 # epoch_score = score(solution_df, submission_df, 'row_id')
 # print("epoch_score: {:.4f}".format(epoch_score))
-# ===================================================================== 测试BUG
+# -------------------------------------------------------------------- 测试BUG
