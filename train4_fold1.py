@@ -1414,7 +1414,7 @@ def load_model(path):
     return model
 
 
-model = load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5611_Loss0.0494_pAUC0.1831_fold10.bin')
+model = load_model('/home/xyli/kaggle/Kaggle_ISIC/eva10/AUROC0.5585_Loss0.0505_pAUC0.1822_fold10.bin')
 
 
 _, valid_loader = prepare_loaders(df, 0)
