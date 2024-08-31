@@ -240,48 +240,48 @@ show_info(df)
 
 
 # ------------------------------------- 对各折下采样
-tmp_sum = pd.DataFrame()
-for i in range(10):
-    df_fold = df[df['kfold'] == i]
-    df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
-    df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
-    # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-    # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+# tmp_sum = pd.DataFrame()
+# for i in range(10):
+#     df_fold = df[df['kfold'] == i]
+#     df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
+#     df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
+#     # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
+#     # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
-    if CONFIG['fold'] != i:
-        positive_list = []
-        for i in range(1):
-            positive_list.append(df_positive)
-            # continue
-        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
-        # positive_list.append(df_negative) 
-        tmp = pd.concat(positive_list) 
-    else:
-        tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+#     if CONFIG['fold'] != i:
+#         positive_list = []
+#         for i in range(1):
+#             positive_list.append(df_positive)
+#             # continue
+#         positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
+#         # positive_list.append(df_negative) 
+#         tmp = pd.concat(positive_list) 
+#     else:
+#         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
-    tmp_sum = pd.concat([tmp_sum, tmp]) 
+#     tmp_sum = pd.concat([tmp_sum, tmp]) 
 
-df = tmp_sum
+# df = tmp_sum
  
-"""
-Total patients: 1042
-Fold Summary (patients per fold):
-Fold 0.0: 428 patients
-Original Dataset Summary:
-Total number of samples: 2189
-Number of positive cases: 199
-Number of negative cases: 1990
-Ratio of negative to positive cases: 10.00:1
+# """
+# Total patients: 1042
+# Fold Summary (patients per fold):
+# Fold 0.0: 428 patients
+# Original Dataset Summary:
+# Total number of samples: 2189
+# Number of positive cases: 199
+# Number of negative cases: 1990
+# Ratio of negative to positive cases: 10.00:1
 
 
-Fold 1.0: 432 patients
-Original Dataset Summary:
-Total number of samples: 2134
-Number of positive cases: 194
-Number of negative cases: 1940
-Ratio of negative to positive cases: 10.00:1
-"""
-show_info(df)
+# Fold 1.0: 432 patients
+# Original Dataset Summary:
+# Total number of samples: 2134
+# Number of positive cases: 194
+# Number of negative cases: 1940
+# Ratio of negative to positive cases: 10.00:1
+# """
+# show_info(df)
 # ========================================== 对各折下采样
 
 
@@ -444,8 +444,8 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
 
-        start = len(self.df_positive)*10
-        self.df_negative = self.df_negative[0 : start]
+        # start = len(self.df_positive)*10
+        # self.df_negative = self.df_negative[0 : start]
 
         # 取后 9/10
         self.df_positive = self.df_positive[len(self.df_positive)//10:len(self.df_positive)]
@@ -493,9 +493,9 @@ class ISICDataset_for_Valid_fromjpg(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         # 保持一定的正负比例，不能让其失衡
         # start = CONFIG['fold']*len(self.df_positive)*10
-        start = len(self.df_positive)*10
+        # start = len(self.df_positive)*10
         # start = 0
-        self.df_negative = self.df_negative[0 : start]
+        # self.df_negative = self.df_negative[0 : start]
 
         
         # 取前 1/10
@@ -697,70 +697,70 @@ model = DataParallel(model)
 
 # ============================== Augmentations ==============================
 data_transforms = {
-    "train": A.Compose([
-        A.RandomRotate90(p=0.5),
-        A.Flip(p=0.5),
-        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-        A.Normalize(
-                mean=[0.485, 0.456, 0.406], 
-                std=[0.229, 0.224, 0.225], 
-                max_pixel_value=255.0, 
-                p=1.0 
-            ),
-        ToTensorV2()
-    ], p=1.),
-
-    # 'train': A.Compose([
+    # "train": A.Compose([
+    #     A.RandomRotate90(p=0.5),
+    #     A.Flip(p=0.5),
     #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-    #     A.Transpose(p=0.6),
-    #     A.HorizontalFlip(p=0.6),
-    #     A.VerticalFlip(p=0.6),
-    #     # A.HueSaturationValue(p=0.5),
-    #     A.OneOf([
-    #         A.MotionBlur(blur_limit=5),
-    #         # A.MedianBlur(blur_limit=5),
-    #         A.GaussianBlur(blur_limit=(3,5),sigma_limit=0.1),
-    #         A.GaussNoise(var_limit=(5.0, 15.0)),
-    #         # A.NoOp()
-    #         ], p=0.7),
-    #     A.OneOf([
-    #         A.OpticalDistortion(distort_limit=0.5),
-    #         A.GridDistortion(num_steps=5, distort_limit=1.),
-    #         A.ElasticTransform(alpha=3),
-    #         # A.NoOp()
-    #         ], p=0.7),
-    #     # A.ShiftScaleRotate(shift_limit=0.5,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT,value=0,p=0.5),
-    #     # A.CLAHE(clip_limit=2.0, p=0.6),
-    #     # A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
-    #     A.OneOf([
-    #             A.CLAHE(clip_limit=2),
-    #             A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
-    #             ], p=0.6),
-    #     # A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.2, p=0.6),
-    # #     A.OneOf([
-    # #     A.ShiftScaleRotate(shift_limit=0.05,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT, value=0),
-    # #     A.OpticalDistortion(distort_limit=0.11, shift_limit=0.15,border_mode=cv2.BORDER_CONSTANT,value=0)
-    # #     # A.NoOp()
-    # # ],p=0.6),
-    #     # A.Resize(image_size, image_size),
-    #     A.CoarseDropout(
-    #             max_holes=5,
-    #             max_height=int(CONFIG['img_size'] * 0.175),
-    #             max_width=int(CONFIG['img_size'] * 0.175),
-    #             min_holes=2,
-    #             min_height=int(CONFIG['img_size'] * 0.175),
-    #             min_width=int(CONFIG['img_size'] * 0.175),
-    #             fill_value=0,
-    #             p=0.7
-    #         ),
     #     A.Normalize(
-    #         mean=[0.485, 0.456, 0.406],
-    #         std=[0.229, 0.224, 0.225],
-    #         max_pixel_value=255.0,
-    #         p=1.0
-    #     ),
-    #     ToTensorV2(),
-    # ]),
+    #             mean=[0.485, 0.456, 0.406], 
+    #             std=[0.229, 0.224, 0.225], 
+    #             max_pixel_value=255.0, 
+    #             p=1.0 
+    #         ),
+    #     ToTensorV2()
+    # ], p=1.),
+
+    'train': A.Compose([
+        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
+        A.Transpose(p=0.6),
+        A.HorizontalFlip(p=0.6),
+        A.VerticalFlip(p=0.6),
+        # A.HueSaturationValue(p=0.5),
+        A.OneOf([
+            A.MotionBlur(blur_limit=5),
+            # A.MedianBlur(blur_limit=5),
+            A.GaussianBlur(blur_limit=(3,5),sigma_limit=0.1),
+            A.GaussNoise(var_limit=(5.0, 15.0)),
+            # A.NoOp()
+            ], p=0.7),
+        A.OneOf([
+            A.OpticalDistortion(distort_limit=0.5),
+            A.GridDistortion(num_steps=5, distort_limit=1.),
+            A.ElasticTransform(alpha=3),
+            # A.NoOp()
+            ], p=0.7),
+        # A.ShiftScaleRotate(shift_limit=0.5,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT,value=0,p=0.5),
+        # A.CLAHE(clip_limit=2.0, p=0.6),
+        # A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
+        A.OneOf([
+                A.CLAHE(clip_limit=2),
+                A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
+                ], p=0.6),
+        # A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.2, p=0.6),
+    #     A.OneOf([
+    #     A.ShiftScaleRotate(shift_limit=0.05,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT, value=0),
+    #     A.OpticalDistortion(distort_limit=0.11, shift_limit=0.15,border_mode=cv2.BORDER_CONSTANT,value=0)
+    #     # A.NoOp()
+    # ],p=0.6),
+        # A.Resize(image_size, image_size),
+        A.CoarseDropout(
+                max_holes=5,
+                max_height=int(CONFIG['img_size'] * 0.175),
+                max_width=int(CONFIG['img_size'] * 0.175),
+                min_holes=2,
+                min_height=int(CONFIG['img_size'] * 0.175),
+                min_width=int(CONFIG['img_size'] * 0.175),
+                fill_value=0,
+                p=0.7
+            ),
+        A.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+            max_pixel_value=255.0,
+            p=1.0
+        ),
+        ToTensorV2(),
+    ]),
 
     # "train": A.Compose([
     #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
@@ -1183,16 +1183,19 @@ def prepare_loaders(df, fold):
 
     concat_dataset_train = ConcatDataset([
         train_dataset2020, 
-        # train_dataset2018,
+        train_dataset2018,
         train_dataset, 
-        # train_dataset2019,
-        # train_dataset_others,
+        train_dataset2019,
+        train_dataset_others,
 
     ])
 
     concat_dataset_valid = ConcatDataset([
-        valid_dataset, 
-        valid_dataset2020, 
+        train_dataset2020, 
+        train_dataset2018,
+        train_dataset, 
+        train_dataset2019,
+        train_dataset_others,
     ])
 
 
@@ -1214,16 +1217,16 @@ def prepare_loaders(df, fold):
 
 
 # ------------------------------------------------------------------ 模型训练
-# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
+optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+                       weight_decay=CONFIG['weight_decay'])
+scheduler = fetch_scheduler(optimizer)
 
 
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+model, history = run_training(model, optimizer, scheduler,
+                              device=CONFIG['device'],
+                              num_epochs=CONFIG['epochs'])
 # ================================================================== 模型训练
 
 
@@ -1314,82 +1317,82 @@ def prepare_loaders(df, fold):
 # --------------------------------------------------------------------- 多模态16 target推理
 
 # ===================================================================== 多模态1 target推理
-def run_test(model, dataloader, device):
-    model.eval()
+# def run_test(model, dataloader, device):
+#     model.eval()
     
-    outputs_list = []
-    isic_id_list = []
-    bar = tqdm(enumerate(dataloader), total=len(dataloader))
-    for step, data in bar:        
-        images = data['image'].to(device, dtype=torch.float)
-        meta = data['meta'].to(device, dtype=torch.float)
+#     outputs_list = []
+#     isic_id_list = []
+#     bar = tqdm(enumerate(dataloader), total=len(dataloader))
+#     for step, data in bar:        
+#         images = data['image'].to(device, dtype=torch.float)
+#         meta = data['meta'].to(device, dtype=torch.float)
         
-        outputs, _ = model(images, meta)
-        outputs = outputs.squeeze()
+#         outputs, _ = model(images, meta)
+#         outputs = outputs.squeeze()
 
-        # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
-        outputs_list.append(outputs.detach().cpu().numpy())
+#         # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
+#         outputs_list.append(outputs.detach().cpu().numpy())
     
-    gc.collect()
+#     gc.collect()
     
-    return np.concatenate(outputs_list, axis=0)
+#     return np.concatenate(outputs_list, axis=0)
 
-def load_model(path):
-    model = ISICModel(CONFIG['model_name'], pretrained=False)
-    checkpoint = torch.load(path)
-    print(f"load checkpoint: {path}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
+# def load_model(path):
+#     model = ISICModel(CONFIG['model_name'], pretrained=False)
+#     checkpoint = torch.load(path)
+#     print(f"load checkpoint: {path}") 
+#     # 去掉前面多余的'module.'
+#     new_state_dict = {}
+#     for k,v in checkpoint.items():
+#         new_state_dict[k[7:]] = v
+#     model.load_state_dict( new_state_dict )
 
-    model = model.cuda() 
-    # model.to(CONFIG['device'])
-    model = DataParallel(model) 
-    return model
+#     model = model.cuda() 
+#     # model.to(CONFIG['device'])
+#     model = DataParallel(model) 
+#     return model
 
-models = []
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5332_Loss0.1692_pAUC0.1556_fold0.bin'))
-models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5341_Loss0.1807_pAUC0.1544_fold1.bin'))
+# models = []
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5332_Loss0.1692_pAUC0.1556_fold0.bin'))
+# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5341_Loss0.1807_pAUC0.1544_fold1.bin'))
 
-df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-sgkf = StratifiedGroupKFold(n_splits=2)
-for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)): 
-      df.loc[val_ , "kfold"] = int(fold)
+# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
+# sgkf = StratifiedGroupKFold(n_splits=2)
+# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)): 
+#       df.loc[val_ , "kfold"] = int(fold)
 
-df_valids = pd.DataFrame()
-for i in range(CONFIG['n_fold']):
-    _, valid_loader = prepare_loaders(df, i) # 这里注意！
-    res = run_test(models[i], valid_loader, device=CONFIG['device']) 
-    df_valid = df[df.kfold == i].reset_index()
+# df_valids = pd.DataFrame()
+# for i in range(CONFIG['n_fold']):
+#     _, valid_loader = prepare_loaders(df, i) # 这里注意！
+#     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
+#     df_valid = df[df.kfold == i].reset_index()
 
-    df_valid['eva'] = res
+#     df_valid['eva'] = res
 
-    # from IPython import embed
-    # embed()
-    # exit()
+#     # from IPython import embed
+#     # embed()
+#     # exit()
 
-    df_valids = pd.concat([df_valids, df_valid])
+#     df_valids = pd.concat([df_valids, df_valid])
 
-# from IPython import embed
-# embed()
+# # from IPython import embed
+# # embed()
 
-df_valids = df_valids[["isic_id", "patient_id", "eva"]]
-
-
-df = df[['isic_id', 'patient_id', 'target']]
-df = df.merge(df_valids, on=["isic_id", "patient_id"])
+# df_valids = df_valids[["isic_id", "patient_id", "eva"]]
 
 
-try:
-    df = df[['isic_id', 'patient_id', 'target', "eva"]]
-    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
-except:
+# df = df[['isic_id', 'patient_id', 'target']]
+# df = df.merge(df_valids, on=["isic_id", "patient_id"])
 
-    df.rename(columns={'target_x': 'target'}, inplace=True)
-    df = df[['isic_id', 'patient_id', 'target', "eva"]]
-    df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
+
+# try:
+#     df = df[['isic_id', 'patient_id', 'target', "eva"]]
+#     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
+# except:
+
+#     df.rename(columns={'target_x': 'target'}, inplace=True)
+#     df = df[['isic_id', 'patient_id', 'target', "eva"]]
+#     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
 
 # -------------------------------------------------------------------- 多模态1 target推理
     
