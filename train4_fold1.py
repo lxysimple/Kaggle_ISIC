@@ -112,8 +112,8 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5875_Loss0.4008_pAUC0.1273_fold0.bin',
-    # "checkpoint": None,
+    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5875_Loss0.4008_pAUC0.1273_fold0.bin',
+    "checkpoint": None,
 
   
     # "learning_rate": 1e-5, # 1e-5
