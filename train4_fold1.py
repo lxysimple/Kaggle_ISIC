@@ -112,8 +112,8 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5611_Loss0.0494_pAUC0.1831_fold10.bin',
-    "checkpoint": None,
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5865_Loss0.4338_pAUC0.1275_fold0.bin',
+    # "checkpoint": None,
 
   
     "learning_rate": 1e-5, # 1e-5
@@ -697,70 +697,70 @@ model = DataParallel(model)
 
 # ============================== Augmentations ==============================
 data_transforms = {
-    "train": A.Compose([
-        A.RandomRotate90(p=0.5),
-        A.Flip(p=0.5),
-        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-        A.Normalize(
-                mean=[0.485, 0.456, 0.406], 
-                std=[0.229, 0.224, 0.225], 
-                max_pixel_value=255.0, 
-                p=1.0 
-            ),
-        ToTensorV2()
-    ], p=1.),
-
-    # 'train': A.Compose([
+    # "train": A.Compose([
+    #     A.RandomRotate90(p=0.5),
+    #     A.Flip(p=0.5),
     #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-    #     A.Transpose(p=0.6),
-    #     A.HorizontalFlip(p=0.6),
-    #     A.VerticalFlip(p=0.6),
-    #     # A.HueSaturationValue(p=0.5),
-    #     A.OneOf([
-    #         A.MotionBlur(blur_limit=5),
-    #         # A.MedianBlur(blur_limit=5),
-    #         A.GaussianBlur(blur_limit=(3,5),sigma_limit=0.1),
-    #         A.GaussNoise(var_limit=(5.0, 15.0)),
-    #         # A.NoOp()
-    #         ], p=0.7),
-    #     A.OneOf([
-    #         A.OpticalDistortion(distort_limit=0.5),
-    #         A.GridDistortion(num_steps=5, distort_limit=1.),
-    #         A.ElasticTransform(alpha=3),
-    #         # A.NoOp()
-    #         ], p=0.7),
-    #     # A.ShiftScaleRotate(shift_limit=0.5,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT,value=0,p=0.5),
-    #     # A.CLAHE(clip_limit=2.0, p=0.6),
-    #     # A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
-    #     A.OneOf([
-    #             A.CLAHE(clip_limit=2),
-    #             A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
-    #             ], p=0.6),
-    #     # A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.2, p=0.6),
-    # #     A.OneOf([
-    # #     A.ShiftScaleRotate(shift_limit=0.05,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT, value=0),
-    # #     A.OpticalDistortion(distort_limit=0.11, shift_limit=0.15,border_mode=cv2.BORDER_CONSTANT,value=0)
-    # #     # A.NoOp()
-    # # ],p=0.6),
-    #     # A.Resize(image_size, image_size),
-    #     A.CoarseDropout(
-    #             max_holes=5,
-    #             max_height=int(CONFIG['img_size'] * 0.175),
-    #             max_width=int(CONFIG['img_size'] * 0.175),
-    #             min_holes=2,
-    #             min_height=int(CONFIG['img_size'] * 0.175),
-    #             min_width=int(CONFIG['img_size'] * 0.175),
-    #             fill_value=0,
-    #             p=0.7
-    #         ),
     #     A.Normalize(
-    #         mean=[0.485, 0.456, 0.406],
-    #         std=[0.229, 0.224, 0.225],
-    #         max_pixel_value=255.0,
-    #         p=1.0
-    #     ),
-    #     ToTensorV2(),
-    # ]),
+    #             mean=[0.485, 0.456, 0.406], 
+    #             std=[0.229, 0.224, 0.225], 
+    #             max_pixel_value=255.0, 
+    #             p=1.0 
+    #         ),
+    #     ToTensorV2()
+    # ], p=1.),
+
+    'train': A.Compose([
+        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
+        A.Transpose(p=0.6),
+        A.HorizontalFlip(p=0.6),
+        A.VerticalFlip(p=0.6),
+        # A.HueSaturationValue(p=0.5),
+        A.OneOf([
+            A.MotionBlur(blur_limit=5),
+            # A.MedianBlur(blur_limit=5),
+            A.GaussianBlur(blur_limit=(3,5),sigma_limit=0.1),
+            A.GaussNoise(var_limit=(5.0, 15.0)),
+            # A.NoOp()
+            ], p=0.7),
+        A.OneOf([
+            A.OpticalDistortion(distort_limit=0.5),
+            A.GridDistortion(num_steps=5, distort_limit=1.),
+            A.ElasticTransform(alpha=3),
+            # A.NoOp()
+            ], p=0.7),
+        # A.ShiftScaleRotate(shift_limit=0.5,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT,value=0,p=0.5),
+        # A.CLAHE(clip_limit=2.0, p=0.6),
+        # A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
+        A.OneOf([
+                A.CLAHE(clip_limit=2),
+                A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
+                ], p=0.6),
+        # A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.2, p=0.6),
+    #     A.OneOf([
+    #     A.ShiftScaleRotate(shift_limit=0.05,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT, value=0),
+    #     A.OpticalDistortion(distort_limit=0.11, shift_limit=0.15,border_mode=cv2.BORDER_CONSTANT,value=0)
+    #     # A.NoOp()
+    # ],p=0.6),
+        # A.Resize(image_size, image_size),
+        A.CoarseDropout(
+                max_holes=5,
+                max_height=int(CONFIG['img_size'] * 0.175),
+                max_width=int(CONFIG['img_size'] * 0.175),
+                min_holes=2,
+                min_height=int(CONFIG['img_size'] * 0.175),
+                min_width=int(CONFIG['img_size'] * 0.175),
+                fill_value=0,
+                p=0.7
+            ),
+        A.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+            max_pixel_value=255.0,
+            p=1.0
+        ),
+        ToTensorV2(),
+    ]),
 
     # "train": A.Compose([
     #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
@@ -1196,10 +1196,10 @@ def prepare_loaders(df, fold):
 
     concat_dataset_valid = ConcatDataset([
         valid_dataset2020, 
-        # valid_dataset2018,
+        valid_dataset2018,
         valid_dataset, 
-        # valid_dataset2019,
-        # valid_dataset_others,
+        valid_dataset2019,
+        valid_dataset_others,
     ])
 
 
@@ -1221,16 +1221,16 @@ def prepare_loaders(df, fold):
 
 
 # ------------------------------------------------------------------ 模型训练
-# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
+optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+                       weight_decay=CONFIG['weight_decay'])
+scheduler = fetch_scheduler(optimizer)
 
 
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+model, history = run_training(model, optimizer, scheduler,
+                              device=CONFIG['device'],
+                              num_epochs=CONFIG['epochs'])
 # ================================================================== 模型训练
 
 
@@ -1401,30 +1401,30 @@ def prepare_loaders(df, fold):
 # -------------------------------------------------------------------- 多模态1 target推理
     
 # ==================================================================== 测试BUG
-def load_model(path):
-    model = ISICModel(CONFIG['model_name'], pretrained=False)
-    checkpoint = torch.load(path)
-    print(f"load checkpoint: {path}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
-    model = model.cuda() 
-    return model
+# def load_model(path):
+#     model = ISICModel(CONFIG['model_name'], pretrained=False)
+#     checkpoint = torch.load(path)
+#     print(f"load checkpoint: {path}") 
+#     # 去掉前面多余的'module.'
+#     new_state_dict = {}
+#     for k,v in checkpoint.items():
+#         new_state_dict[k[7:]] = v
+#     model.load_state_dict( new_state_dict )
+#     model = model.cuda() 
+#     return model
 
 
-model = load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5865_Loss0.4338_pAUC0.1275_fold0.bin')
+# model = load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5865_Loss0.4338_pAUC0.1275_fold0.bin')
 
 
-_, valid_loader = prepare_loaders(df, 0)
+# _, valid_loader = prepare_loaders(df, 0)
 
-_, _, epoch_val_targets, epoch_val_outputs = valid_one_epoch(
-            model, valid_loader, device=CONFIG['device'], epoch=999)
+# _, _, epoch_val_targets, epoch_val_outputs = valid_one_epoch(
+#             model, valid_loader, device=CONFIG['device'], epoch=999)
 
-# Create DataFrames with row_id for scoring
-solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
-submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
-epoch_score = score(solution_df, submission_df, 'row_id')
-print("epoch_score: {:.4f}".format(epoch_score))
+# # Create DataFrames with row_id for scoring
+# solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
+# submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
+# epoch_score = score(solution_df, submission_df, 'row_id')
+# print("epoch_score: {:.4f}".format(epoch_score))
 # -------------------------------------------------------------------- 测试BUG
