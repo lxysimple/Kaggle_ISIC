@@ -112,8 +112,8 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5334_Loss0.1801_pAUC0.1543_fold1.bin',
-    "checkpoint": None,
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5611_Loss0.0494_pAUC0.1831_fold10.bin',
+    # "checkpoint": None,
 
   
     "learning_rate": 1e-5, # 1e-5
@@ -1221,16 +1221,16 @@ def prepare_loaders(df, fold):
 
 
 # ------------------------------------------------------------------ 模型训练
-# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
+optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+                       weight_decay=CONFIG['weight_decay'])
+scheduler = fetch_scheduler(optimizer)
 
 
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+model, history = run_training(model, optimizer, scheduler,
+                              device=CONFIG['device'],
+                              num_epochs=CONFIG['epochs'])
 # ================================================================== 模型训练
 
 
@@ -1401,30 +1401,30 @@ def prepare_loaders(df, fold):
 # -------------------------------------------------------------------- 多模态1 target推理
     
 # ==================================================================== 测试BUG
-def load_model(path):
-    model = ISICModel(CONFIG['model_name'], pretrained=False)
-    checkpoint = torch.load(path)
-    print(f"load checkpoint: {path}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
-    model = model.cuda() 
-    return model
+# def load_model(path):
+#     model = ISICModel(CONFIG['model_name'], pretrained=False)
+#     checkpoint = torch.load(path)
+#     print(f"load checkpoint: {path}") 
+#     # 去掉前面多余的'module.'
+#     new_state_dict = {}
+#     for k,v in checkpoint.items():
+#         new_state_dict[k[7:]] = v
+#     model.load_state_dict( new_state_dict )
+#     model = model.cuda() 
+#     return model
 
 
-model = load_model('/home/xyli/kaggle/Kaggle_ISIC/eva10/AUROC0.5585_Loss0.0505_pAUC0.1822_fold10.bin')
+# model = load_model('/home/xyli/kaggle/Kaggle_ISIC/eva10/AUROC0.5585_Loss0.0505_pAUC0.1822_fold10.bin')
 
 
-_, valid_loader = prepare_loaders(df, 0)
+# _, valid_loader = prepare_loaders(df, 0)
 
-_, _, epoch_val_targets, epoch_val_outputs = valid_one_epoch(
-            model, valid_loader, device=CONFIG['device'], epoch=999)
+# _, _, epoch_val_targets, epoch_val_outputs = valid_one_epoch(
+#             model, valid_loader, device=CONFIG['device'], epoch=999)
 
-# Create DataFrames with row_id for scoring
-solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
-submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
-epoch_score = score(solution_df, submission_df, 'row_id')
-print("epoch_score: {:.4f}".format(epoch_score))
+# # Create DataFrames with row_id for scoring
+# solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
+# submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
+# epoch_score = score(solution_df, submission_df, 'row_id')
+# print("epoch_score: {:.4f}".format(epoch_score))
 # -------------------------------------------------------------------- 测试BUG
