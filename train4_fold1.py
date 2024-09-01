@@ -697,70 +697,70 @@ model = DataParallel(model)
 
 # ============================== Augmentations ==============================
 data_transforms = {
-    # "train": A.Compose([
-    #     A.RandomRotate90(p=0.5),
-    #     A.Flip(p=0.5),
-    #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-    #     A.Normalize(
-    #             mean=[0.485, 0.456, 0.406], 
-    #             std=[0.229, 0.224, 0.225], 
-    #             max_pixel_value=255.0, 
-    #             p=1.0 
-    #         ),
-    #     ToTensorV2()
-    # ], p=1.),
-
-    'train': A.Compose([
+    "train": A.Compose([
+        A.RandomRotate90(p=0.5),
+        A.Flip(p=0.5),
         A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-        A.Transpose(p=0.6),
-        A.HorizontalFlip(p=0.6),
-        A.VerticalFlip(p=0.6),
-        # A.HueSaturationValue(p=0.5),
-        A.OneOf([
-            A.MotionBlur(blur_limit=5),
-            # A.MedianBlur(blur_limit=5),
-            A.GaussianBlur(blur_limit=(3,5),sigma_limit=0.1),
-            A.GaussNoise(var_limit=(5.0, 15.0)),
-            # A.NoOp()
-            ], p=0.7),
-        A.OneOf([
-            A.OpticalDistortion(distort_limit=0.5),
-            A.GridDistortion(num_steps=5, distort_limit=1.),
-            A.ElasticTransform(alpha=3),
-            # A.NoOp()
-            ], p=0.7),
-        # A.ShiftScaleRotate(shift_limit=0.5,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT,value=0,p=0.5),
-        # A.CLAHE(clip_limit=2.0, p=0.6),
-        # A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
-        A.OneOf([
-                A.CLAHE(clip_limit=2),
-                A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
-                ], p=0.6),
-        # A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.2, p=0.6),
-    #     A.OneOf([
-    #     A.ShiftScaleRotate(shift_limit=0.05,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT, value=0),
-    #     A.OpticalDistortion(distort_limit=0.11, shift_limit=0.15,border_mode=cv2.BORDER_CONSTANT,value=0)
-    #     # A.NoOp()
-    # ],p=0.6),
-        # A.Resize(image_size, image_size),
-        A.CoarseDropout(
-                max_holes=5,
-                max_height=int(CONFIG['img_size'] * 0.175),
-                max_width=int(CONFIG['img_size'] * 0.175),
-                min_holes=2,
-                min_height=int(CONFIG['img_size'] * 0.175),
-                min_width=int(CONFIG['img_size'] * 0.175),
-                fill_value=0,
-                p=0.7
-            ),
         A.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225],
-            max_pixel_value=255.0,
-            p=1.0
-        ),
-        ToTensorV2(),
-    ]),
+                mean=[0.485, 0.456, 0.406], 
+                std=[0.229, 0.224, 0.225], 
+                max_pixel_value=255.0, 
+                p=1.0 
+            ),
+        ToTensorV2()
+    ], p=1.),
+
+    # 'train': A.Compose([
+    #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
+    #     A.Transpose(p=0.6),
+    #     A.HorizontalFlip(p=0.6),
+    #     A.VerticalFlip(p=0.6),
+    #     # A.HueSaturationValue(p=0.5),
+    #     A.OneOf([
+    #         A.MotionBlur(blur_limit=5),
+    #         # A.MedianBlur(blur_limit=5),
+    #         A.GaussianBlur(blur_limit=(3,5),sigma_limit=0.1),
+    #         A.GaussNoise(var_limit=(5.0, 15.0)),
+    #         # A.NoOp()
+    #         ], p=0.7),
+    #     A.OneOf([
+    #         A.OpticalDistortion(distort_limit=0.5),
+    #         A.GridDistortion(num_steps=5, distort_limit=1.),
+    #         A.ElasticTransform(alpha=3),
+    #         # A.NoOp()
+    #         ], p=0.7),
+    #     # A.ShiftScaleRotate(shift_limit=0.5,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT,value=0,p=0.5),
+    #     # A.CLAHE(clip_limit=2.0, p=0.6),
+    #     # A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
+    #     A.OneOf([
+    #             A.CLAHE(clip_limit=2),
+    #             A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
+    #             ], p=0.6),
+    #     # A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.2, p=0.6),
+    # #     A.OneOf([
+    # #     A.ShiftScaleRotate(shift_limit=0.05,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT, value=0),
+    # #     A.OpticalDistortion(distort_limit=0.11, shift_limit=0.15,border_mode=cv2.BORDER_CONSTANT,value=0)
+    # #     # A.NoOp()
+    # # ],p=0.6),
+    #     # A.Resize(image_size, image_size),
+    #     A.CoarseDropout(
+    #             max_holes=5,
+    #             max_height=int(CONFIG['img_size'] * 0.175),
+    #             max_width=int(CONFIG['img_size'] * 0.175),
+    #             min_holes=2,
+    #             min_height=int(CONFIG['img_size'] * 0.175),
+    #             min_width=int(CONFIG['img_size'] * 0.175),
+    #             fill_value=0,
+    #             p=0.7
+    #         ),
+    #     A.Normalize(
+    #         mean=[0.485, 0.456, 0.406],
+    #         std=[0.229, 0.224, 0.225],
+    #         max_pixel_value=255.0,
+    #         p=1.0
+    #     ),
+    #     ToTensorV2(),
+    # ]),
 
     # "train": A.Compose([
     #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
