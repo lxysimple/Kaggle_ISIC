@@ -236,7 +236,7 @@ Number of positive cases: 194
 Number of negative cases: 200333
 Ratio of negative to positive cases: 1032.64:1
 """
-show_info(df)
+# show_info(df)
 
 
 # ------------------------------------- 对各折下采样
@@ -281,7 +281,7 @@ Number of positive cases: 194
 Number of negative cases: 1940
 Ratio of negative to positive cases: 10.00:1
 """
-show_info(df)
+# show_info(df)
 # ========================================== 对各折下采样
 
 
@@ -319,44 +319,75 @@ class ISICDataset(Dataset):
             'image': img,
             'target': target
         }
-
-# class ISICDataset(Dataset):
-#     def __init__(self, df, file_hdf, transforms=None):
-#         self.fp_hdf = h5py.File(file_hdf, mode="r")
-#         self.df = df
-#         self.isic_ids = df['isic_id'].values
-#         self.targets = df['target'].values
-#         self.transforms = transforms
-#         self.df_meta = df_meta
-
-#     def __len__(self):
-#         return len(self.df) 
     
-#     def __getitem__(self, index):
-#         isic_id = self.isic_ids[index]
-#         img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
+class ISICDataset_1(Dataset):
+    def __init__(self, df, file_hdf, transforms=None):
+        self.fp_hdf = h5py.File(file_hdf, mode="r")
 
-#         if self.targets is not None:
-#             target = self.targets[index]
-#         else:
-#             target = torch.tensor(-1)  # Dummy target for test set
+        self.df = df[df["target"] == 1].reset_index()
+        self.isic_ids = df['isic_id'].values
+        self.targets = df['target'].values
+        self.transforms = transforms
+
+        print(file_hdf)
+        print('just 1: ', len(self.df))
+
+
+    def __len__(self):
+        return len(self.df) 
+    
+    def __getitem__(self, index):
+        isic_id = self.isic_ids[index]
+        img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
+
+        if self.targets is not None:
+            target = self.targets[index]
+        else:
+            target = torch.tensor(-1)  # Dummy target for test set
         
-#         if self.transforms:
-#             img = self.transforms(image=img)["image"]
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
+    
 
-#         meta = torch.tensor(df_meta.loc[isic_id, feature_cols].to_numpy().astype(float)) 
+        return {
+            # 'isic_id': isic_id,
+            'image': img,
+            'target': target
+        }
 
-#         # 检查数据中的 NaN 和 Inf
-#         if torch.isnan(meta).any() or torch.isinf(meta).any():
-#             raise ValueError("Data contains NaN or Inf values") 
+class ISICDataset_0(Dataset):
+    def __init__(self, df, file_hdf, transforms=None):
+        self.fp_hdf = h5py.File(file_hdf, mode="r")
 
-#         return {
-#             'image': img,
-#             'target': target,
-#             'meta': meta 
-#         }
+        self.df = df[df["target"] == 0].reset_index()
+        self.isic_ids = df['isic_id'].values
+        self.targets = df['target'].values
+        self.transforms = transforms
 
+        print(file_hdf)
+        print('just 0: ', len(self.df))
 
+    def __len__(self):
+        return len(self.df) 
+    
+    def __getitem__(self, index):
+        isic_id = self.isic_ids[index]
+        img = np.array( Image.open(BytesIO(self.fp_hdf[isic_id][()])) )
+
+        if self.targets is not None:
+            target = self.targets[index]
+        else:
+            target = torch.tensor(-1)  # Dummy target for test set
+        
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
+    
+        return {
+            # 'isic_id': isic_id,
+            'image': img,
+            'target': target
+        }
+    
 class InferenceDataset(Dataset):
     def __init__(self, file_hdf, transforms=None):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
@@ -381,57 +412,82 @@ class InferenceDataset(Dataset):
             'image': img
         }
     
-# class ISICDataset_for_Train_fromjpg(Dataset):
-#     def __init__(self, path, transforms=None, kfold=0): 
-#         self.path = path
-#         df = pd.read_csv(f"{path}/train-metadata.csv")
+class ISICDataset_for_Train_fromjpg_1(Dataset):
+    def __init__(self, path, transforms=None):
+        self.path = path
+        df = pd.read_csv(f"{path}/train-metadata.csv")
 
-#         # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
-#         # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
-#         # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
+        self.df_positive = df[df["target"] == 1].reset_index()
 
-#         sgkf = StratifiedGroupKFold(n_splits=2)
-#         for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-#             df.loc[val_ , "kfold"] = int(fold)
-#         df = df[df['kfold'] != kfold]
+        # 取后 9/10
+        self.df_positive = self.df_positive[len(self.df_positive)//10:len(self.df_positive)]
+  
+        self.df = self.df_positive
 
-#         self.df_positive = df[df["target"] == 1].reset_index()
-#         self.df_negative = df[df["target"] == 0].reset_index()
-#         # 保持一定的正负比例，不能让其失衡
-#         # start = CONFIG['fold']*len(self.df_positive)*10
-#         start = len(self.df_positive)*10
-#         # start = 0
-#         self.df_negative = self.df_negative[0 : start]
+        self.isic_ids = self.df['isic_id'].values
+        self.targets = self.df['target'].values
 
-#         self.df = pd.concat([self.df_positive, self.df_negative]) 
-#         # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
-#         # self.df = self.df_positive
-#         self.isic_ids = self.df['isic_id'].values
-#         self.targets = self.df['target'].values
+        self.transforms = transforms
 
-#         self.transforms = transforms
-
-#         print(path)
-#         print(len(self.df_positive), ' ', len(self.df_negative))
+        print(path)
+        print('just 1: ', len(self.df_positive))
 
         
-#     def __len__(self):
-#         return len(self.df)
+    def __len__(self):
+        return len(self.df)
     
-#     def __getitem__(self, index):
+    def __getitem__(self, index):
 
-#         isic_id = self.isic_ids[index]
-#         img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-#         target = self.targets[index]
+        isic_id = self.isic_ids[index]
+        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        target = self.targets[index]
 
-#         if self.transforms:
-#             img = self.transforms(image=img)["image"]
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
             
-#         return {
-#             'image': img,
-#             'target': target
-#         }
+        return {
+            'image': img,
+            'target': target
+        }
 
+class ISICDataset_for_Train_fromjpg_0(Dataset):
+    def __init__(self, path, transforms=None):
+        self.path = path
+        df = pd.read_csv(f"{path}/train-metadata.csv")
+
+        self.df_negative = df[df["target"] == 0].reset_index()
+
+        # 取后 9/10
+        self.df_negative = self.df_negative[len(self.df_negative)//10:len(self.df_negative)]
+  
+        self.df = self.df_negative
+
+        self.isic_ids = self.df['isic_id'].values
+        self.targets = self.df['target'].values
+
+        self.transforms = transforms
+
+        print(path)
+        print('just 0: ', len(self.df_negative))
+
+        
+    def __len__(self):
+        return len(self.df)
+    
+    def __getitem__(self, index):
+
+        isic_id = self.isic_ids[index]
+        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
+        target = self.targets[index]
+
+        if self.transforms:
+            img = self.transforms(image=img)["image"]
+            
+        return {
+            'image': img,
+            'target': target
+        }
+       
 class ISICDataset_for_Train_fromjpg(Dataset):
     def __init__(self, path, transforms=None):
         self.path = path
@@ -697,70 +753,70 @@ model = DataParallel(model)
 
 # ============================== Augmentations ==============================
 data_transforms = {
-    "train": A.Compose([
-        A.RandomRotate90(p=0.5),
-        A.Flip(p=0.5),
-        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-        A.Normalize(
-                mean=[0.485, 0.456, 0.406], 
-                std=[0.229, 0.224, 0.225], 
-                max_pixel_value=255.0, 
-                p=1.0 
-            ),
-        ToTensorV2()
-    ], p=1.),
-
-    # 'train': A.Compose([
+    # "train": A.Compose([
+    #     A.RandomRotate90(p=0.5),
+    #     A.Flip(p=0.5),
     #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
-    #     A.Transpose(p=0.6),
-    #     A.HorizontalFlip(p=0.6),
-    #     A.VerticalFlip(p=0.6),
-    #     # A.HueSaturationValue(p=0.5),
-    #     A.OneOf([
-    #         A.MotionBlur(blur_limit=5),
-    #         # A.MedianBlur(blur_limit=5),
-    #         A.GaussianBlur(blur_limit=(3,5),sigma_limit=0.1),
-    #         A.GaussNoise(var_limit=(5.0, 15.0)),
-    #         # A.NoOp()
-    #         ], p=0.7),
-    #     A.OneOf([
-    #         A.OpticalDistortion(distort_limit=0.5),
-    #         A.GridDistortion(num_steps=5, distort_limit=1.),
-    #         A.ElasticTransform(alpha=3),
-    #         # A.NoOp()
-    #         ], p=0.7),
-    #     # A.ShiftScaleRotate(shift_limit=0.5,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT,value=0,p=0.5),
-    #     # A.CLAHE(clip_limit=2.0, p=0.6),
-    #     # A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
-    #     A.OneOf([
-    #             A.CLAHE(clip_limit=2),
-    #             A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
-    #             ], p=0.6),
-    #     # A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.2, p=0.6),
-    # #     A.OneOf([
-    # #     A.ShiftScaleRotate(shift_limit=0.05,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT, value=0),
-    # #     A.OpticalDistortion(distort_limit=0.11, shift_limit=0.15,border_mode=cv2.BORDER_CONSTANT,value=0)
-    # #     # A.NoOp()
-    # # ],p=0.6),
-    #     # A.Resize(image_size, image_size),
-    #     A.CoarseDropout(
-    #             max_holes=5,
-    #             max_height=int(CONFIG['img_size'] * 0.175),
-    #             max_width=int(CONFIG['img_size'] * 0.175),
-    #             min_holes=2,
-    #             min_height=int(CONFIG['img_size'] * 0.175),
-    #             min_width=int(CONFIG['img_size'] * 0.175),
-    #             fill_value=0,
-    #             p=0.7
-    #         ),
     #     A.Normalize(
-    #         mean=[0.485, 0.456, 0.406],
-    #         std=[0.229, 0.224, 0.225],
-    #         max_pixel_value=255.0,
-    #         p=1.0
-    #     ),
-    #     ToTensorV2(),
-    # ]),
+    #             mean=[0.485, 0.456, 0.406], 
+    #             std=[0.229, 0.224, 0.225], 
+    #             max_pixel_value=255.0, 
+    #             p=1.0 
+    #         ),
+    #     ToTensorV2()
+    # ], p=1.),
+
+    'train': A.Compose([
+        A.Resize(CONFIG['img_size'], CONFIG['img_size']),
+        A.Transpose(p=0.6),
+        A.HorizontalFlip(p=0.6),
+        A.VerticalFlip(p=0.6),
+        # A.HueSaturationValue(p=0.5),
+        A.OneOf([
+            A.MotionBlur(blur_limit=5),
+            # A.MedianBlur(blur_limit=5),
+            A.GaussianBlur(blur_limit=(3,5),sigma_limit=0.1),
+            A.GaussNoise(var_limit=(5.0, 15.0)),
+            # A.NoOp()
+            ], p=0.7),
+        A.OneOf([
+            A.OpticalDistortion(distort_limit=0.5),
+            A.GridDistortion(num_steps=5, distort_limit=1.),
+            A.ElasticTransform(alpha=3),
+            # A.NoOp()
+            ], p=0.7),
+        # A.ShiftScaleRotate(shift_limit=0.5,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT,value=0,p=0.5),
+        # A.CLAHE(clip_limit=2.0, p=0.6),
+        # A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
+        A.OneOf([
+                A.CLAHE(clip_limit=2),
+                A.HueSaturationValue(hue_shift_limit=5, sat_shift_limit=10, val_shift_limit=5, p=0.6),
+                ], p=0.6),
+        # A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.2, p=0.6),
+    #     A.OneOf([
+    #     A.ShiftScaleRotate(shift_limit=0.05,scale_limit=0.1,rotate_limit=15,border_mode=cv2.BORDER_CONSTANT, value=0),
+    #     A.OpticalDistortion(distort_limit=0.11, shift_limit=0.15,border_mode=cv2.BORDER_CONSTANT,value=0)
+    #     # A.NoOp()
+    # ],p=0.6),
+        # A.Resize(image_size, image_size),
+        A.CoarseDropout(
+                max_holes=5,
+                max_height=int(CONFIG['img_size'] * 0.175),
+                max_width=int(CONFIG['img_size'] * 0.175),
+                min_holes=2,
+                min_height=int(CONFIG['img_size'] * 0.175),
+                min_width=int(CONFIG['img_size'] * 0.175),
+                fill_value=0,
+                p=0.7
+            ),
+        A.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+            max_pixel_value=255.0,
+            p=1.0
+        ),
+        ToTensorV2(),
+    ]),
 
     # "train": A.Compose([
     #     A.Resize(CONFIG['img_size'], CONFIG['img_size']),
@@ -1170,11 +1226,11 @@ def prepare_loaders(df, fold):
     df_train = df[df.kfold != 0].reset_index(drop=True)
     df_valid = df[df.kfold == 0].reset_index(drop=True)
     
-    train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
-    train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-    train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
+    # train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
+    # train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
+    # train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
+    # train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+    # train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
     
 
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
@@ -1183,16 +1239,14 @@ def prepare_loaders(df, fold):
     valid_dataset2018 = ISICDataset_for_Valid_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
     valid_dataset_others = ISICDataset_for_Valid_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
 
+    # concat_dataset_train = ConcatDataset([
+    #     train_dataset2020, 
+    #     train_dataset2018,
+    #     train_dataset, 
+    #     train_dataset2019,
+    #     train_dataset_others,
 
-
-    concat_dataset_train = ConcatDataset([
-        train_dataset2020, 
-        train_dataset2018,
-        train_dataset, 
-        train_dataset2019,
-        train_dataset_others,
-
-    ])
+    # ])
 
     concat_dataset_valid = ConcatDataset([
         valid_dataset,
@@ -1201,6 +1255,35 @@ def prepare_loaders(df, fold):
         valid_dataset2019,
         valid_dataset_others,
     ])
+
+
+    train0_dataset = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["valid"])
+    train0_dataset2020 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2020', transforms=data_transforms["valid"])
+    train0_dataset2019 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2019', transforms=data_transforms["valid"])
+    train0_dataset2018 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
+    train0_dataset_others = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
+    
+    train1_dataset = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train"])
+    train1_dataset2020 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
+    train1_dataset2019 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
+    train1_dataset2018 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+    train1_dataset_others = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
+   
+
+    concat_dataset_train = ConcatDataset([
+        train0_dataset2020, 
+        train0_dataset2018,
+        train0_dataset, 
+        train0_dataset2019,
+        train0_dataset_others,
+
+        train1_dataset2020, 
+        train1_dataset2018,
+        train1_dataset, 
+        train1_dataset2019,
+        train1_dataset_others,
+    ])
+
 
 
     # 用github数据时, num_workers=2
