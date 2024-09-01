@@ -116,13 +116,13 @@ CONFIG = {
     "checkpoint": None,
 
   
-    # "learning_rate": 1e-5, # 1e-5
-    # "min_lr": 1e-6, # 1e-6
-    # "weight_decay": 1e-6, # 1e-6
+    "learning_rate": 1e-5, # 1e-5
+    "min_lr": 1e-6, # 1e-6
+    "weight_decay": 1e-6, # 1e-6
 
-    "learning_rate": 1e-6, # 1e-5
-    "min_lr": 1e-7, # 1e-6
-    "weight_decay": 1e-7, # 1e-6
+    # "learning_rate": 1e-6, # 1e-5
+    # "min_lr": 1e-7, # 1e-6
+    # "weight_decay": 1e-7, # 1e-6
 
 
     # "learning_rate": 1e-4, # 1e-5
@@ -468,7 +468,7 @@ class ISICDataset_for_Train_fromjpg_0(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         self.df_positive = df[df["target"] == 1].reset_index()
 
-        
+
         # 取后 9/10
         self.df_negative = self.df_negative[len(self.df_negative)//10:len(self.df_negative)]
 
@@ -1285,17 +1285,18 @@ def prepare_loaders(df, fold):
    
 
     concat_dataset_train = ConcatDataset([
+        train1_dataset2020, 
+        # train1_dataset2018,
+        # train1_dataset, 
+        # train1_dataset2019,
+        # train1_dataset_others,
+
         train0_dataset2020, 
         # train0_dataset2018,
         # train0_dataset, 
         # train0_dataset2019,
         # train0_dataset_others,
 
-        train1_dataset2020, 
-        # train1_dataset2018,
-        # train1_dataset, 
-        # train1_dataset2019,
-        # train1_dataset_others,
     ])
 
 
