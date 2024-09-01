@@ -1285,13 +1285,13 @@ def prepare_loaders(df, fold):
    
 
     concat_dataset_train = ConcatDataset([
-        # train1_dataset2020, 
+        train1_dataset2020, 
         # train1_dataset2018,
         train1_dataset, 
         # train1_dataset2019,
         # train1_dataset_others,
 
-        # train0_dataset2020, 
+        train0_dataset2020, 
         # train0_dataset2018,
         train0_dataset, 
         # train0_dataset2019,
