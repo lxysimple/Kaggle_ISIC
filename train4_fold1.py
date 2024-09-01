@@ -468,6 +468,7 @@ class ISICDataset_for_Train_fromjpg_0(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         self.df_positive = df[df["target"] == 1].reset_index()
 
+        
         # 取后 9/10
         self.df_negative = self.df_negative[len(self.df_negative)//10:len(self.df_negative)]
 
