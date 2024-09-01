@@ -236,10 +236,13 @@ Number of positive cases: 194
 Number of negative cases: 200333
 Ratio of negative to positive cases: 1032.64:1
 """
-# show_info(df)
+show_info(df)
 
 
 # ------------------------------------- 对各折下采样
+
+print('# ------------------------------------- 对各折下采样')
+
 tmp_sum = pd.DataFrame()
 for i in range(10):
     df_fold = df[df['kfold'] == i]
@@ -253,8 +256,8 @@ for i in range(10):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        # positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
-        positive_list.append(df_negative) 
+        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
+        # positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
     else:
         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
@@ -281,7 +284,7 @@ Number of positive cases: 194
 Number of negative cases: 1940
 Ratio of negative to positive cases: 10.00:1
 """
-# show_info(df)
+show_info(df)
 # ========================================== 对各折下采样
 
 
@@ -359,7 +362,14 @@ class ISICDataset_0(Dataset):
     def __init__(self, df, file_hdf, transforms=None):
         self.fp_hdf = h5py.File(file_hdf, mode="r")
 
-        self.df = df[df["target"] == 0].reset_index()
+        
+        self.df_negative = df[df["target"] == 0].reset_index()
+        self.df_positive = df[df["target"] == 1].reset_index()
+
+        self.df_negative = self.df_negative[:len(self.df_positive)*10]
+        self.df = self.df_negative
+
+        
         self.isic_ids = df['isic_id'].values
         self.targets = df['target'].values
         self.transforms = transforms
@@ -456,10 +466,13 @@ class ISICDataset_for_Train_fromjpg_0(Dataset):
         df = pd.read_csv(f"{path}/train-metadata.csv")
 
         self.df_negative = df[df["target"] == 0].reset_index()
+        self.df_positive = df[df["target"] == 1].reset_index()
 
         # 取后 9/10
         self.df_negative = self.df_negative[len(self.df_negative)//10:len(self.df_negative)]
-  
+
+        start = len(self.df_positive)*10
+        self.df_negative = self.df_negative[0 : start]
         self.df = self.df_negative
 
         self.isic_ids = self.df['isic_id'].values
@@ -1263,11 +1276,11 @@ def prepare_loaders(df, fold):
     train0_dataset2018 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
     train0_dataset_others = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
     
-    train1_dataset = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train"])
-    train1_dataset2020 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    train1_dataset2019 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    train1_dataset2018 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-    train1_dataset_others = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
+    train1_dataset = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train"])
+    train1_dataset2020 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
+    train1_dataset2019 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
+    train1_dataset2018 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+    train1_dataset_others = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
    
 
     concat_dataset_train = ConcatDataset([
