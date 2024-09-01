@@ -111,9 +111,9 @@ CONFIG = {
 
 
     "scheduler": 'CosineAnnealingLR',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5328_Loss0.1645_pAUC0.1504_fold0.bin',
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva10/AUROC0.5875_Loss0.4008_pAUC0.1273_fold0.bin',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5875_Loss0.4008_pAUC0.1273_fold0.bin',
-    "checkpoint": None,
+    # "checkpoint": None,
 
   
     "learning_rate": 1e-5, # 1e-5
@@ -1240,11 +1240,11 @@ def prepare_loaders(df, fold):
     df_train = df[df.kfold != 0].reset_index(drop=True)
     df_valid = df[df.kfold == 0].reset_index(drop=True)
     
-    # train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
-    # train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    # train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    # train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-    # train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
+    train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
+    train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
+    train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
+    train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+    train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
     
 
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
@@ -1253,14 +1253,14 @@ def prepare_loaders(df, fold):
     valid_dataset2018 = ISICDataset_for_Valid_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
     valid_dataset_others = ISICDataset_for_Valid_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
 
-    # concat_dataset_train = ConcatDataset([
-    #     train_dataset2020, 
-    #     train_dataset2018,
-    #     train_dataset, 
-    #     train_dataset2019,
-    #     train_dataset_others,
+    concat_dataset_train = ConcatDataset([
+        # train_dataset2020, 
+        # train_dataset2018,
+        train_dataset, 
+        # train_dataset2019,
+        # train_dataset_others,
 
-    # ])
+    ])
 
     concat_dataset_valid = ConcatDataset([
         valid_dataset,
@@ -1271,51 +1271,51 @@ def prepare_loaders(df, fold):
     ])
 
 
-    train0_dataset = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["valid"])
-    train0_dataset2020 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2020', transforms=data_transforms["valid"])
-    train0_dataset2019 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2019', transforms=data_transforms["valid"])
-    train0_dataset2018 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
-    train0_dataset_others = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
+    # train0_dataset = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["valid"])
+    # train0_dataset2020 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2020', transforms=data_transforms["valid"])
+    # train0_dataset2019 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2019', transforms=data_transforms["valid"])
+    # train0_dataset2018 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
+    # train0_dataset_others = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
     
-    train1_dataset = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train"])
-    train1_dataset2020 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    train1_dataset2019 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    train1_dataset2018 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-    train1_dataset_others = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
+    # train1_dataset = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train"])
+    # train1_dataset2020 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
+    # train1_dataset2019 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
+    # train1_dataset2018 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
+    # train1_dataset_others = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
    
 
-    concat_dataset_train = ConcatDataset([
-        train1_dataset2020, 
-        train1_dataset2018,
-        train1_dataset, 
-        train1_dataset2019,
-        train1_dataset_others,
+    # concat_dataset_train = ConcatDataset([
+    #     train1_dataset2020, 
+    #     train1_dataset2018,
+    #     train1_dataset, 
+    #     train1_dataset2019,
+    #     train1_dataset_others,
 
-        train1_dataset2020, 
-        train1_dataset2018,
-        train1_dataset, 
-        train1_dataset2019,
-        train1_dataset_others,
+    #     train1_dataset2020, 
+    #     train1_dataset2018,
+    #     train1_dataset, 
+    #     train1_dataset2019,
+    #     train1_dataset_others,
 
-        train1_dataset2020, 
-        train1_dataset2018,
-        train1_dataset, 
-        train1_dataset2019,
-        train1_dataset_others,
+    #     train1_dataset2020, 
+    #     train1_dataset2018,
+    #     train1_dataset, 
+    #     train1_dataset2019,
+    #     train1_dataset_others,
 
-        train1_dataset2020, 
-        train1_dataset2018,
-        train1_dataset, 
-        train1_dataset2019,
-        train1_dataset_others,
+    #     train1_dataset2020, 
+    #     train1_dataset2018,
+    #     train1_dataset, 
+    #     train1_dataset2019,
+    #     train1_dataset_others,
 
-        train0_dataset2020, 
-        train0_dataset2018,
-        train0_dataset, 
-        train0_dataset2019,
-        train0_dataset_others,
+    #     train0_dataset2020, 
+    #     train0_dataset2018,
+    #     train0_dataset, 
+    #     train0_dataset2019,
+    #     train0_dataset_others,
 
-    ])
+    # ])
 
 
 
