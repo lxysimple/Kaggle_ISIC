@@ -111,9 +111,9 @@ CONFIG = {
 
 
     "scheduler": 'CosineAnnealingLR',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva10/AUROC0.5875_Loss0.4008_pAUC0.1273_fold0.bin',
-    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5703_Loss0.3960_pAUC0.1098_fold0.bin',
-    "checkpoint": None,
+    "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva10/AUROC0.5875_Loss0.4008_pAUC0.1273_fold0.bin',
+    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5703_Loss0.3960_pAUC0.1098_fold0.bin',
+    # "checkpoint": None,
 
   
     "learning_rate": 1e-5, # 1e-5
@@ -256,8 +256,8 @@ for i in range(10):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
-        # positive_list.append(df_negative) 
+        # positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
+        positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
     else:
         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
@@ -514,8 +514,8 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
 
-        start = len(self.df_positive)*10
-        self.df_negative = self.df_negative[0 : start]
+        # start = len(self.df_positive)*10
+        # self.df_negative = self.df_negative[0 : start]
 
         # 取后 9/10
         self.df_positive = self.df_positive[len(self.df_positive)//10:len(self.df_positive)]
