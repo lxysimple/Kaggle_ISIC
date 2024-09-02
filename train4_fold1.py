@@ -1337,16 +1337,16 @@ def prepare_loaders(df, fold):
 
 
 # ------------------------------------------------------------------ 模型训练
-# train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
+train_loader, valid_loader = prepare_loaders(df, CONFIG['fold'])
 
-# optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
-#                        weight_decay=CONFIG['weight_decay'])
-# scheduler = fetch_scheduler(optimizer)
+optimizer = optim.Adam(model.parameters(), lr=CONFIG['learning_rate'], 
+                       weight_decay=CONFIG['weight_decay'])
+scheduler = fetch_scheduler(optimizer)
 
 
-# model, history = run_training(model, optimizer, scheduler,
-#                               device=CONFIG['device'],
-#                               num_epochs=CONFIG['epochs'])
+model, history = run_training(model, optimizer, scheduler,
+                              device=CONFIG['device'],
+                              num_epochs=CONFIG['epochs'])
 # ================================================================== 模型训练
 
 
