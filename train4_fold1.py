@@ -256,8 +256,8 @@ for i in range(10):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        # positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
-        positive_list.append(df_negative) 
+        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
+        # positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
     else:
         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
@@ -514,8 +514,8 @@ class ISICDataset_for_Train_fromjpg(Dataset):
         self.df_positive = df[df["target"] == 1].reset_index()
         self.df_negative = df[df["target"] == 0].reset_index()
 
-        # start = len(self.df_positive)*10
-        # self.df_negative = self.df_negative[0 : start]
+        start = len(self.df_positive)*10
+        self.df_negative = self.df_negative[0 : start]
 
         # 取后 9/10
         self.df_positive = self.df_positive[len(self.df_positive)//10:len(self.df_positive)]
@@ -1265,9 +1265,9 @@ def prepare_loaders(df, fold):
     concat_dataset_valid = ConcatDataset([
         valid_dataset,
         valid_dataset2020, 
-        # valid_dataset2018,
-        # valid_dataset2019,
-        # valid_dataset_others,
+        valid_dataset2018,
+        valid_dataset2019,
+        valid_dataset_others,
     ])
 
 
@@ -1517,30 +1517,30 @@ def prepare_loaders(df, fold):
 # -------------------------------------------------------------------- 多模态1 target推理
     
 # ==================================================================== 测试BUG
-def load_model(path):
-    model = ISICModel(CONFIG['model_name'], pretrained=False)
-    checkpoint = torch.load(path)
-    print(f"load checkpoint: {path}") 
-    # 去掉前面多余的'module.'
-    new_state_dict = {}
-    for k,v in checkpoint.items():
-        new_state_dict[k[7:]] = v
-    model.load_state_dict( new_state_dict )
-    model = model.cuda() 
-    return model
+# def load_model(path):
+#     model = ISICModel(CONFIG['model_name'], pretrained=False)
+#     checkpoint = torch.load(path)
+#     print(f"load checkpoint: {path}") 
+#     # 去掉前面多余的'module.'
+#     new_state_dict = {}
+#     for k,v in checkpoint.items():
+#         new_state_dict[k[7:]] = v
+#     model.load_state_dict( new_state_dict )
+#     model = model.cuda() 
+#     return model
 
 
-model = load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5703_Loss0.3960_pAUC0.1098_fold0.bin')
+# model = load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5703_Loss0.3960_pAUC0.1098_fold0.bin')
 
 
-_, valid_loader = prepare_loaders(df, 0)
+# _, valid_loader = prepare_loaders(df, 0)
 
-_, _, epoch_val_targets, epoch_val_outputs = valid_one_epoch(
-            model, valid_loader, device=CONFIG['device'], epoch=999)
+# _, _, epoch_val_targets, epoch_val_outputs = valid_one_epoch(
+#             model, valid_loader, device=CONFIG['device'], epoch=999)
 
-# Create DataFrames with row_id for scoring
-solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
-submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
-epoch_score = score(solution_df, submission_df, 'row_id')
-print("epoch_score: {:.4f}".format(epoch_score))
+# # Create DataFrames with row_id for scoring
+# solution_df = pd.DataFrame({'target': epoch_val_targets, 'row_id': range(len(epoch_val_targets))})
+# submission_df = pd.DataFrame({'prediction': epoch_val_outputs, 'row_id': range(len(epoch_val_outputs))})
+# epoch_score = score(solution_df, submission_df, 'row_id')
+# print("epoch_score: {:.4f}".format(epoch_score))
 # -------------------------------------------------------------------- 测试BUG
