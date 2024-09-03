@@ -105,12 +105,12 @@ CONFIG = {
 
     # 164: eva、seresnext
     # 64: vit
-    "train_batch_size": 40, # 96 32
+    "train_batch_size": 85, # 96 32
     
     # 训练时164，
     # eva: 96
     # vit推理: 64
-    "valid_batch_size": 40, 
+    "valid_batch_size": 96, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -412,186 +412,6 @@ class InferenceDataset(Dataset):
             
         return {
             'image': img
-        }
-    
-class ISICDataset_for_Train_fromjpg_1(Dataset):
-    def __init__(self, path, transforms=None):
-        self.path = path
-        df = pd.read_csv(f"{path}/train-metadata.csv")
-
-        self.df_positive = df[df["target"] == 1].reset_index()
-
-        # 取后 9/10
-        self.df_positive = self.df_positive[len(self.df_positive)//10:len(self.df_positive)]
-  
-        self.df = self.df_positive
-
-        self.isic_ids = self.df['isic_id'].values
-        self.targets = self.df['target'].values
-
-        self.transforms = transforms
-
-        print(path)
-        print('just 1: ', len(self.df_positive))
-
-        
-    def __len__(self):
-        return len(self.df)
-    
-    def __getitem__(self, index):
-
-        isic_id = self.isic_ids[index]
-        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-        target = self.targets[index]
-
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
-            
-        return {
-            'image': img,
-            'target': target
-        }
-
-class ISICDataset_for_Train_fromjpg_0(Dataset):
-    def __init__(self, path, transforms=None):
-        self.path = path
-        df = pd.read_csv(f"{path}/train-metadata.csv")
-
-        self.df_negative = df[df["target"] == 0].reset_index()
-        self.df_positive = df[df["target"] == 1].reset_index()
-
-
-        # 取后 9/10
-        self.df_negative = self.df_negative[len(self.df_negative)//10:len(self.df_negative)]
-
-        start = len(self.df_positive)*10
-        self.df_negative = self.df_negative[0 : start]
-        self.df = self.df_negative
-
-        self.isic_ids = self.df['isic_id'].values
-        self.targets = self.df['target'].values
-
-        self.transforms = transforms
-
-        print(path)
-        print('just 0: ', len(self.df_negative))
-
-        
-    def __len__(self):
-        return len(self.df)
-    
-    def __getitem__(self, index):
-
-        isic_id = self.isic_ids[index]
-        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-        target = self.targets[index]
-
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
-            
-        return {
-            'image': img,
-            'target': target
-        }
-       
-class ISICDataset_for_Train_fromjpg(Dataset):
-    def __init__(self, path, transforms=None):
-        self.path = path
-        df = pd.read_csv(path)
-
-        # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
-        # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
-        # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
-
-        self.df_positive = df[df["target"] == 1].reset_index()
-        self.df_negative = df[df["target"] == 0].reset_index()
-
-        # start = len(self.df_positive)*10
-        # self.df_negative = self.df_negative[0 : start]
-
-        # 取后 9/10
-        self.df_positive = self.df_positive[len(self.df_positive)//10:len(self.df_positive)]
-        self.df_negative = self.df_negative[len(self.df_negative)//10:len(self.df_negative)]
-
-        self.df = pd.concat([self.df_positive, self.df_negative]) 
-        # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
-        # self.df = self.df_positive
-        self.isic_ids = self.df['isic_id'].values
-        self.targets = self.df['target'].values
-
-        self.transforms = transforms
-
-        print(path)
-        print(len(self.df_positive), ' ', len(self.df_negative))
-
-        
-    def __len__(self):
-        return len(self.df)
-    
-    def __getitem__(self, index):
-
-        isic_id = self.isic_ids[index]
-        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-        target = self.targets[index]
-
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
-            
-        return {
-            'image': img,
-            'target': target
-        }
-    
-class ISICDataset_for_Valid_fromjpg(Dataset):
-    def __init__(self, path, transforms=None):
-        self.path = path
-        df = pd.read_csv(f"{path}/train-metadata.csv")
-
-        # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
-        # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
-        # self.pic_2024 = h5py.File(HDF_FILE, mode="r")
-
-        self.df_positive = df[df["target"] == 1].reset_index()
-        self.df_negative = df[df["target"] == 0].reset_index()
-        # 保持一定的正负比例，不能让其失衡
-        # start = CONFIG['fold']*len(self.df_positive)*10
-        start = len(self.df_positive)*10
-        # start = 0
-        self.df_negative = self.df_negative[0 : start]
-
-        
-        # 取前 1/10
-        self.df_positive = self.df_positive[:len(self.df_positive)//10]
-        self.df_negative = self.df_negative[:len(self.df_negative)//10]
-
-
-        self.df = pd.concat([self.df_positive, self.df_negative]) 
-        # self.df = pd.concat([self.df_positive, self.df_positive, self.df_negative]) 
-        # self.df = self.df_positive
-        self.isic_ids = self.df['isic_id'].values
-        self.targets = self.df['target'].values
-
-        self.transforms = transforms
-
-        print(path)
-        print(len(self.df_positive), ' ', len(self.df_negative))
-
-        
-    def __len__(self):
-        return len(self.df)
-    
-    def __getitem__(self, index):
-
-        isic_id = self.isic_ids[index]
-        img = np.array( Image.open(f"{self.path}/train-image/image/{isic_id}.jpg") )
-        target = self.targets[index]
-
-        if self.transforms:
-            img = self.transforms(image=img)["image"]
-            
-        return {
-            'image': img,
-            'target': target
         }
 
 # ============================== Create Model ==============================
@@ -1238,22 +1058,34 @@ def prepare_loaders(df, fold):
     df_train2 = df2[df2.kfold != 0].reset_index(drop=True)
     df_valid2 = df2[df2.kfold == 0].reset_index(drop=True)
     
-    train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
-    train_dataset_others = ISICDataset(df_train2, HDF_FILE_Others, transforms=data_transforms["train"])
+    # train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
+    # train_dataset_others = ISICDataset(df_train2, HDF_FILE_Others, transforms=data_transforms["train"])
     
-
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
     valid_dataset_others = ISICDataset(df_valid2, HDF_FILE_Others, transforms=data_transforms["valid"])
 
-    concat_dataset_train = ConcatDataset([
-        train_dataset, 
-        train_dataset_others,
-    ])
-
+    # concat_dataset_train = ConcatDataset([
+    #     train_dataset, 
+    #     train_dataset_others,
+    # ])
     concat_dataset_valid = ConcatDataset([
         valid_dataset,
         valid_dataset_others,
     ])
+
+    train_dataset1 = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["valid"])
+    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["valid"])
+
+    train_dataset_others1 = ISICDataset_1(df_train2, HDF_FILE_Others, transforms=data_transforms["valid"])
+    train_dataset_others0 = ISICDataset_0(df_train2, HDF_FILE_Others, transforms=data_transforms["valid"])
+
+    concat_dataset_train = ConcatDataset([
+        train_dataset1, 
+        train_dataset0, 
+        train_dataset_others1,
+        train_dataset_others0,
+    ])
+
 
 
 
