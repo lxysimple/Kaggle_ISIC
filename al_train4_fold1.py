@@ -82,7 +82,10 @@ df_meta = df_meta.replace([np.inf, -np.inf], 0)
 # df_meta.loc['ISIC_0015670',:]
 
 # ============================== Training Configuration ==============================
+ROOT_DIR = "/root/autodl-tmp/data"
+HDF_FILE = f"{ROOT_DIR}/train-image.hdf5"
 
+HDF_FILE_Others = f"{ROOT_DIR}/train-image.hdf5"
 
 CONFIG = {
     "seed": 42,
@@ -158,8 +161,6 @@ def set_seed(seed=42):
 set_seed(CONFIG['seed'])
 
 
-ROOT_DIR = "/home/xyli/kaggle"
-HDF_FILE = f"{ROOT_DIR}/train-image.hdf5"
 
 
 # ============================== Read the Data ==============================
@@ -1242,10 +1243,10 @@ def prepare_loaders(df, fold):
     df_valid = df[df.kfold == 0].reset_index(drop=True)
     
     train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
-    train_dataset2020 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    train_dataset2019 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    train_dataset2018 = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-    train_dataset_others = ISICDataset_for_Train_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
+    train_dataset2020 = ISICDataset_for_Train_fromjpg(HDF_FILE_Others, transforms=data_transforms["train"])
+    train_dataset2019 = ISICDataset_for_Train_fromjpg(HDF_FILE_Others, transforms=data_transforms["train"])
+    train_dataset2018 = ISICDataset_for_Train_fromjpg(HDF_FILE_Others, transforms=data_transforms["train"])
+    train_dataset_others = ISICDataset_for_Train_fromjpg(HDF_FILE_Others, transforms=data_transforms["train"])
     
 
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
