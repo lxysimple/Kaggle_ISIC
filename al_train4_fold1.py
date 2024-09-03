@@ -255,7 +255,7 @@ Ratio of negative to positive cases: 1032.64:1
 """
 show_info(df)
 
-show_info(df2)
+
 # ------------------------------------- 对各折下采样
 
 print('# ------------------------------------- 对各折下采样')
@@ -302,6 +302,8 @@ Number of negative cases: 1940
 Ratio of negative to positive cases: 10.00:1
 """
 show_info(df)
+
+show_info(df2)
 # ========================================== 对各折下采样
 
 
