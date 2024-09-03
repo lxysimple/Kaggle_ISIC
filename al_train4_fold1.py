@@ -85,7 +85,7 @@ df_meta = df_meta.replace([np.inf, -np.inf], 0)
 ROOT_DIR = "/root/autodl-tmp/data"
 HDF_FILE = f"{ROOT_DIR}/train-image.hdf5"
 
-HDF_FILE_Others = f"{ROOT_DIR}/train-image.hdf5"
+HDF_FILE_Others = f"{ROOT_DIR}/image_256sq.hdf5"
 
 CONFIG = {
     "seed": 42,
@@ -170,7 +170,19 @@ set_seed(CONFIG['seed'])
 df = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
 print("        df.shape, # of positive cases, # of patients")
 print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
+
+print()
+
+df2 = pd.read_csv(f"{ROOT_DIR}/my_metadata.csv")
+print("        df2.shape, # of positive cases, # of patients")
+print("original>", df2.shape, df2.target.sum(), df2["patient_id"].unique().shape)
 # ===================================== 取比赛原csv
+
+
+
+
+
+
 
 
 
@@ -198,6 +210,10 @@ print("original>", df.shape, df.target.sum(), df["patient_id"].unique().shape)
 sgkf = StratifiedGroupKFold(n_splits=10)
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
+
+# df2本来就不多，无需下采样
+for fold, ( _, val_) in enumerate(sgkf.split(df2, df2.target, df2.patient_id)):
+      df2.loc[val_ , "kfold"] = int(fold)
 
 
 def show_info(df): 
@@ -239,7 +255,7 @@ Ratio of negative to positive cases: 1032.64:1
 """
 show_info(df)
 
-
+show_info(df2)
 # ------------------------------------- 对各折下采样
 
 print('# ------------------------------------- 对各折下采样')
@@ -506,7 +522,7 @@ class ISICDataset_for_Train_fromjpg_0(Dataset):
 class ISICDataset_for_Train_fromjpg(Dataset):
     def __init__(self, path, transforms=None):
         self.path = path
-        df = pd.read_csv(f"{path}/train-metadata.csv")
+        df = pd.read_csv(path)
 
         # df_2024 = pd.read_csv(f"{ROOT_DIR}/train-metadata.csv")
         # self.df_negative = df_2024[df_2024["target"] == 0].reset_index()
@@ -1241,83 +1257,27 @@ def fetch_scheduler(optimizer):
 def prepare_loaders(df, fold):
     df_train = df[df.kfold != 0].reset_index(drop=True)
     df_valid = df[df.kfold == 0].reset_index(drop=True)
+
+    df_train2 = df2[df2.kfold != 0].reset_index(drop=True)
+    df_valid2 = df2[df2.kfold == 0].reset_index(drop=True)
     
     train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
-    train_dataset2020 = ISICDataset_for_Train_fromjpg(HDF_FILE_Others, transforms=data_transforms["train"])
-    train_dataset2019 = ISICDataset_for_Train_fromjpg(HDF_FILE_Others, transforms=data_transforms["train"])
-    train_dataset2018 = ISICDataset_for_Train_fromjpg(HDF_FILE_Others, transforms=data_transforms["train"])
-    train_dataset_others = ISICDataset_for_Train_fromjpg(HDF_FILE_Others, transforms=data_transforms["train"])
+    train_dataset_others = ISICDataset(df_train, HDF_FILE_Others, transforms=data_transforms["train"])
     
 
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
-    valid_dataset2020 = ISICDataset_for_Valid_fromjpg('/home/xyli/kaggle/data2020', transforms=data_transforms["valid"])
-    valid_dataset2019 = ISICDataset_for_Valid_fromjpg('/home/xyli/kaggle/data2019', transforms=data_transforms["valid"])
-    valid_dataset2018 = ISICDataset_for_Valid_fromjpg('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
-    valid_dataset_others = ISICDataset_for_Valid_fromjpg('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
+    valid_dataset_others = ISICDataset(df_valid2, HDF_FILE_Others, transforms=data_transforms["valid"])
 
     concat_dataset_train = ConcatDataset([
-        train_dataset2020, 
-        train_dataset2018,
         train_dataset, 
-        train_dataset2019,
         train_dataset_others,
-
     ])
 
     concat_dataset_valid = ConcatDataset([
         valid_dataset,
-        valid_dataset2020, 
-        valid_dataset2018,
-        valid_dataset2019,
         valid_dataset_others,
     ])
 
-
-    # train0_dataset = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["valid"])
-    # train0_dataset2020 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2020', transforms=data_transforms["valid"])
-    # train0_dataset2019 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2019', transforms=data_transforms["valid"])
-    # train0_dataset2018 = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data2018', transforms=data_transforms["valid"])
-    # train0_dataset_others = ISICDataset_for_Train_fromjpg_0('/home/xyli/kaggle/data_others', transforms=data_transforms["valid"])
-    
-    # train1_dataset = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train"])
-    # train1_dataset2020 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2020', transforms=data_transforms["train"])
-    # train1_dataset2019 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2019', transforms=data_transforms["train"])
-    # train1_dataset2018 = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data2018', transforms=data_transforms["train"])
-    # train1_dataset_others = ISICDataset_for_Train_fromjpg_1('/home/xyli/kaggle/data_others', transforms=data_transforms["train"])
-   
-
-    # concat_dataset_train = ConcatDataset([
-    #     train1_dataset2020, 
-    #     train1_dataset2018,
-    #     train1_dataset, 
-    #     train1_dataset2019,
-    #     train1_dataset_others,
-
-    #     train1_dataset2020, 
-    #     train1_dataset2018,
-    #     train1_dataset, 
-    #     train1_dataset2019,
-    #     train1_dataset_others,
-
-    #     train1_dataset2020, 
-    #     train1_dataset2018,
-    #     train1_dataset, 
-    #     train1_dataset2019,
-    #     train1_dataset_others,
-
-    #     train1_dataset2020, 
-    #     train1_dataset2018,
-    #     train1_dataset, 
-    #     train1_dataset2019,
-    #     train1_dataset_others,
-
-    #     train0_dataset2020, 
-    #     train0_dataset2018,
-    #     train0_dataset, 
-    #     train0_dataset2019,
-    #     train0_dataset_others,
-
-    # ])
 
 
 
