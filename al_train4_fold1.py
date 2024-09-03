@@ -247,9 +247,9 @@ for i in range(10):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        start = df_positive.shape[0]*10 + 7000
-        positive_list.append(df_negative.iloc[:start, :]) 
-        # positive_list.append(df_negative) 
+        # start = df_positive.shape[0]*10 
+        # positive_list.append(df_negative.iloc[:start, :]) 
+        positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
     else:
         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
@@ -360,7 +360,7 @@ class ISICDataset_0(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         self.df_positive = df[df["target"] == 1].reset_index()
 
-        self.df_negative = self.df_negative[:len(self.df_positive)*10]
+        self.df_negative = self.df_negative[:len(self.df_positive)*10 + 7000]
         self.df = self.df_negative
 
         
