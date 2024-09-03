@@ -1086,11 +1086,11 @@ def prepare_loaders(df, fold):
         valid_dataset_others,
     ])
 
-    train_dataset1 = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train2"])
-    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train2"])
+    train_dataset1 = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train1"])
+    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train3"])
 
-    train_dataset_others1 = ISICDataset_1(df_train2, HDF_FILE_Others, transforms=data_transforms["train2"])
-    train_dataset_others0 = ISICDataset_0(df_train2, HDF_FILE_Others, transforms=data_transforms["train2"])
+    train_dataset_others1 = ISICDataset_1(df_train2, HDF_FILE_Others, transforms=data_transforms["train1"])
+    train_dataset_others0 = ISICDataset_0(df_train2, HDF_FILE_Others, transforms=data_transforms["train3"])
 
     concat_dataset_train = ConcatDataset([
         train_dataset1, 
