@@ -1239,7 +1239,7 @@ def prepare_loaders(df, fold):
     df_valid2 = df2[df2.kfold == 0].reset_index(drop=True)
     
     train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
-    train_dataset_others = ISICDataset(df_train, HDF_FILE_Others, transforms=data_transforms["train"])
+    train_dataset_others = ISICDataset(df_train2, HDF_FILE_Others, transforms=data_transforms["train"])
     
 
     valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
