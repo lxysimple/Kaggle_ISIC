@@ -234,31 +234,31 @@ show_info(df2)
 
 # ------------------------------------- 对各折下采样
 
-# print('# ------------------------------------- 对各折下采样')
+# print('# ------------------------------------- 对0折下采样')
 
-# tmp_sum = pd.DataFrame()
-# for i in range(10):
-#     df_fold = df[df['kfold'] == i]
-#     df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
-#     df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
-#     # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-#     # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+tmp_sum = pd.DataFrame()
+for i in range(10):
+    df_fold = df[df['kfold'] == i]
+    df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
+    df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
+    # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
+    # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
-#     if CONFIG['fold'] != i:
-#         positive_list = []
-#         for i in range(1):
-#             positive_list.append(df_positive)
-#             # continue
-#         # start = df_positive.shape[0]*10 
-#         # positive_list.append(df_negative.iloc[:start, :]) 
-#         positive_list.append(df_negative) 
-#         tmp = pd.concat(positive_list) 
-#     else:
-#         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+    if CONFIG['fold'] != i:
+        positive_list = []
+        for i in range(1):
+            positive_list.append(df_positive)
+            # continue
+        # start = df_positive.shape[0]*10 
+        # positive_list.append(df_negative.iloc[:start, :]) 
+        positive_list.append(df_negative) 
+        tmp = pd.concat(positive_list) 
+    else:
+        tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
-#     tmp_sum = pd.concat([tmp_sum, tmp]) 
+    tmp_sum = pd.concat([tmp_sum, tmp]) 
 
-# df = tmp_sum
+df = tmp_sum
  
 # """
 # Total patients: 1042
