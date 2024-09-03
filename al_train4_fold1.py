@@ -1255,8 +1255,8 @@ def fetch_scheduler(optimizer):
     return scheduler
 
 def prepare_loaders(df, fold):
-    df_train = df[df.kfold != 0].reset_index(drop=True)
-    df_valid = df[df.kfold == 0].reset_index(drop=True)
+    df_train = df[df.kfold != 0].reset_index(drop=True) 
+    df_valid = df[df.kfold == 0].reset_index(drop=True) 
 
     df_train2 = df2[df2.kfold != 0].reset_index(drop=True)
     df_valid2 = df2[df2.kfold == 0].reset_index(drop=True)
