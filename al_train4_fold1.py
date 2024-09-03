@@ -177,16 +177,17 @@ df2 = pd.read_csv(f"{ROOT_DIR}/my_metadata.csv")
 print("        df2.shape, # of positive cases, # of patients")
 print("original>", df2.shape, df2.target.sum(), df2["patient_id"].unique().shape)
 # ===================================== 取比赛原csv
+from sklearn.model_selection import StratifiedKFold
 
-sgkf = StratifiedGroupKFold(n_splits=10)
-for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+
+skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+for fold, ( _, val_) in enumerate(skf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
 
-from sklearn.model_selection import StratifiedKFold
-skf = StratifiedKFold(n_splits=10)
+skf2 = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 # df2本来就不多，无需下采样
-for fold, ( _, val_) in enumerate(skf.split(df2, df2.target)):
+for fold, ( _, val_) in enumerate(skf2.split(df2, df2.target)):
       df2.loc[val_ , "kfold"] = int(fold)
 
 
@@ -229,56 +230,57 @@ Ratio of negative to positive cases: 1032.64:1
 """
 show_info(df)
 
+show_info(df2)
 
 # ------------------------------------- 对各折下采样
 
-print('# ------------------------------------- 对各折下采样')
+# print('# ------------------------------------- 对各折下采样')
 
-tmp_sum = pd.DataFrame()
-for i in range(10):
-    df_fold = df[df['kfold'] == i]
-    df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
-    df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
-    # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-    # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+# tmp_sum = pd.DataFrame()
+# for i in range(10):
+#     df_fold = df[df['kfold'] == i]
+#     df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
+#     df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
+#     # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
+#     # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
-    if CONFIG['fold'] != i:
-        positive_list = []
-        for i in range(1):
-            positive_list.append(df_positive)
-            # continue
-        # start = df_positive.shape[0]*10 
-        # positive_list.append(df_negative.iloc[:start, :]) 
-        positive_list.append(df_negative) 
-        tmp = pd.concat(positive_list) 
-    else:
-        tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+#     if CONFIG['fold'] != i:
+#         positive_list = []
+#         for i in range(1):
+#             positive_list.append(df_positive)
+#             # continue
+#         # start = df_positive.shape[0]*10 
+#         # positive_list.append(df_negative.iloc[:start, :]) 
+#         positive_list.append(df_negative) 
+#         tmp = pd.concat(positive_list) 
+#     else:
+#         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
-    tmp_sum = pd.concat([tmp_sum, tmp]) 
+#     tmp_sum = pd.concat([tmp_sum, tmp]) 
 
-df = tmp_sum
+# df = tmp_sum
  
-"""
-Total patients: 1042
-Fold Summary (patients per fold):
-Fold 0.0: 428 patients
-Original Dataset Summary:
-Total number of samples: 2189
-Number of positive cases: 199
-Number of negative cases: 1990
-Ratio of negative to positive cases: 10.00:1
+# """
+# Total patients: 1042
+# Fold Summary (patients per fold):
+# Fold 0.0: 428 patients
+# Original Dataset Summary:
+# Total number of samples: 2189
+# Number of positive cases: 199
+# Number of negative cases: 1990
+# Ratio of negative to positive cases: 10.00:1
 
 
-Fold 1.0: 432 patients
-Original Dataset Summary:
-Total number of samples: 2134
-Number of positive cases: 194
-Number of negative cases: 1940
-Ratio of negative to positive cases: 10.00:1
-"""
-show_info(df)
+# Fold 1.0: 432 patients
+# Original Dataset Summary:
+# Total number of samples: 2134
+# Number of positive cases: 194
+# Number of negative cases: 1940
+# Ratio of negative to positive cases: 10.00:1
+# """
+# show_info(df)
 
-show_info(df2)
+
 # ========================================== 对各折下采样
 
 
