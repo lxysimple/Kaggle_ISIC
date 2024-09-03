@@ -362,7 +362,7 @@ class ISICDataset_0(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         self.df_positive = df[df["target"] == 1].reset_index()
 
-        self.df_negative = self.df_negative[:len(self.df_positive)*10 + 7000]
+        self.df_negative = self.df_negative[:len(self.df_positive)*10]
         self.df = self.df_negative
 
         
