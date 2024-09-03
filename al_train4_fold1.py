@@ -183,7 +183,10 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
 
-df2['patient_id'] = df2['patient_id'].astype(str)  
+
+from IPython import embed
+embed()
+
 # df2本来就不多，无需下采样
 for fold, ( _, val_) in enumerate(sgkf.split(df2, df2.target, df2.patient_id)):
       df2.loc[val_ , "kfold"] = int(fold)
