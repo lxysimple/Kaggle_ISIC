@@ -183,9 +183,10 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
 
-
+from sklearn.model_selection import StratifiedKFold
+skf = StratifiedKFold(n_splits=10)
 # df2本来就不多，无需下采样
-for fold, ( _, val_) in enumerate(sgkf.split(df2, df2.target)):
+for fold, ( _, val_) in enumerate(skf.split(df2, df2.target)):
       df2.loc[val_ , "kfold"] = int(fold)
 
 
