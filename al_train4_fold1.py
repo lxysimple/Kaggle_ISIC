@@ -115,8 +115,8 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva10/AUROC0.5875_Loss0.4008_pAUC0.1273_fold0.bin',
-    "checkpoint": '/root/autodl-tmp/pytorch_model.bin',
-    # "checkpoint": None,
+    # "checkpoint": '/root/autodl-tmp/pytorch_model.bin',
+    "checkpoint": None,
 
   
     "learning_rate": 1e-5, # 1e-5
@@ -596,12 +596,14 @@ class ISICDataset_for_Valid_fromjpg(Dataset):
 
 # ============================== Create Model ==============================
 
-
+pretrained_cfg = timm.models.create_model('eva02_small_patch14_336.mim_in22k_ft_in1k').default_cfg
+pretrained_cfg['file'] = '/root/autodl-tmp/pytorch_model.bin'
 
 class ISICModel(nn.Module):
     def __init__(self, model_name, num_classes=1, pretrained=False, checkpoint_path=None):
         super(ISICModel, self).__init__()
-        self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
+        self.model = timm.create_model(model_name, pretrained=pretrained, 
+                                       checkpoint_path=checkpoint_path, pretrained_cfg=pretrained_cfg)
 
         in_features = self.model.head.in_features
         self.model.head = nn.Linear(in_features, num_classes)
