@@ -287,7 +287,7 @@ Ratio of negative to positive cases: 10.00:1
 
 show_info(df)
 
-# show_info(df2)
+show_info(df2)
 # ========================================== 对各折下采样
 
 
