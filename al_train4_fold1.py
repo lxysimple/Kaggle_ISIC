@@ -115,7 +115,7 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva10/AUROC0.5875_Loss0.4008_pAUC0.1273_fold0.bin',
-    # "checkpoint": '/root/autodl-tmp/Kaggle_ISIC/AUROC0.6102_Loss0.2488_pAUC0.1293_fold0.bin',
+    # "checkpoint": '/root/autodl-tmp/Kaggle_ISIC/eva/AUROC0.8286_Loss0.1675_pAUC0.1668_fold0.bin',
     "checkpoint": None,
 
   
@@ -176,6 +176,12 @@ print()
 df2 = pd.read_csv(f"{ROOT_DIR}/my_metadata.csv")
 print("        df2.shape, # of positive cases, # of patients")
 print("original>", df2.shape, df2.target.sum(), df2["patient_id"].unique().shape)
+
+
+# df = df[['isic_id', 'target']]
+# df2 = df2[['isic_id', 'target']]
+# df = pd.concat([df, df2], axis=0, ignore_index=True)
+
 # ===================================== 取比赛原csv
 from sklearn.model_selection import StratifiedKFold
 
@@ -281,7 +287,7 @@ Ratio of negative to positive cases: 10.00:1
 
 show_info(df)
 
-show_info(df2)
+# show_info(df2)
 # ========================================== 对各折下采样
 
 
@@ -1081,10 +1087,10 @@ def prepare_loaders(df, fold):
     ])
 
     train_dataset1 = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train1"])
-    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train1"])
+    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train2"])
 
     train_dataset_others1 = ISICDataset_1(df_train2, HDF_FILE_Others, transforms=data_transforms["train1"])
-    train_dataset_others0 = ISICDataset_0(df_train2, HDF_FILE_Others, transforms=data_transforms["train1"])
+    train_dataset_others0 = ISICDataset_0(df_train2, HDF_FILE_Others, transforms=data_transforms["train2"])
 
     concat_dataset_train = ConcatDataset([
         train_dataset1, 
