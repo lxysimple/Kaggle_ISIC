@@ -247,7 +247,7 @@ for i in range(10):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        start = df_positive.shape[0]*10 # + 7000
+        start = df_positive.shape[0]*10 + 7000
         positive_list.append(df_negative.iloc[:start, :]) 
         # positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
