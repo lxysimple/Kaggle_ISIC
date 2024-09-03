@@ -115,7 +115,7 @@ CONFIG = {
 
     "scheduler": 'CosineAnnealingLR',
     # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/eva10/AUROC0.5875_Loss0.4008_pAUC0.1273_fold0.bin',
-    # "checkpoint": '/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5703_Loss0.3960_pAUC0.1098_fold0.bin',
+    "checkpoint": '/root/autodl-tmp/pytorch_model.bin',
     "checkpoint": None,
 
   
@@ -183,10 +183,7 @@ for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
 
-
-from IPython import embed
-embed()
-
+df2['patient_id'] = df2['patient_id'].astype(str)  
 # df2本来就不多，无需下采样
 for fold, ( _, val_) in enumerate(sgkf.split(df2, df2.target, df2.patient_id)):
       df2.loc[val_ , "kfold"] = int(fold)
@@ -249,8 +246,8 @@ for i in range(10):
         for i in range(1):
             positive_list.append(df_positive)
             # continue
-        # positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
-        positive_list.append(df_negative) 
+        positive_list.append(df_negative.iloc[:df_positive.shape[0]*10, :]) 
+        # positive_list.append(df_negative) 
         tmp = pd.concat(positive_list) 
     else:
         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
@@ -602,7 +599,7 @@ class ISICDataset_for_Valid_fromjpg(Dataset):
 
 
 class ISICModel(nn.Module):
-    def __init__(self, model_name, num_classes=1, pretrained=True, checkpoint_path=None):
+    def __init__(self, model_name, num_classes=1, pretrained=False, checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.model = timm.create_model(model_name, pretrained=pretrained, checkpoint_path=checkpoint_path)
 
