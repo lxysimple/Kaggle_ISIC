@@ -140,7 +140,7 @@ CONFIG = {
     "epochs": 10,
 
     
-    "fold" : 9, # df2的fold0中包含所有patient_id=null的情况，很多
+    "fold" : 0, # df2的fold0中包含所有patient_id=null的情况，很多
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -184,9 +184,9 @@ print("original>", df2.shape, df2.target.sum(), df2["patient_id"].unique().shape
 
 # ===================================== 取比赛原csv
  
-# sgkf = StratifiedGroupKFold(n_splits=10)
-# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-#       df.loc[val_ , "kfold"] = int(fold)
+sgkf = StratifiedGroupKFold(n_splits=2)
+for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+      df.loc[val_ , "kfold"] = int(fold)
 
 # df2['patient_id'] = df2['patient_id'].astype(str) 
 # sgkf2 = StratifiedGroupKFold(n_splits=10)
@@ -251,29 +251,29 @@ Ratio of negative to positive cases: 1032.64:1
 
 # print('# ------------------------------------- 对df0折下采样')
 
-# tmp_sum = pd.DataFrame()
-# for i in range(10):
-#     df_fold = df[df['kfold'] == i]
-#     df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
-#     df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
-#     # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
-#     # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+tmp_sum = pd.DataFrame()
+for i in range(10):
+    df_fold = df[df['kfold'] == i]
+    df_positive = df_fold[df_fold["target"] == 1].reset_index(drop=True) # 取出target=1的所有行
+    df_negative = df_fold[df_fold["target"] == 0].reset_index(drop=True) # 取出target=0的所有行
+    # 从2个数据集中各自以 positive:negative = 1:20 进行采样，我感觉是确保验证集中正负样本比例为1:10
+    # tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
-#     if CONFIG['fold'] != i:
-#         positive_list = []
-#         for i in range(1):
-#             positive_list.append(df_positive)
-#             # continue
-#         # start = df_positive.shape[0]*10 
-#         # positive_list.append(df_negative.iloc[:start, :]) 
-#         positive_list.append(df_negative) 
-#         tmp = pd.concat(positive_list) 
-#     else:
-#         tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
+    if CONFIG['fold'] != i:
+        positive_list = []
+        for i in range(1):
+            positive_list.append(df_positive)
+            # continue
+        # start = df_positive.shape[0]*10 
+        # positive_list.append(df_negative.iloc[:start, :]) 
+        positive_list.append(df_negative) 
+        tmp = pd.concat(positive_list) 
+    else:
+        tmp = pd.concat([df_positive, df_negative.iloc[:df_positive.shape[0]*10, :]]) 
 
-#     tmp_sum = pd.concat([tmp_sum, tmp]) 
+    tmp_sum = pd.concat([tmp_sum, tmp]) 
 
-# df = tmp_sum
+df = tmp_sum
  
 """
 Total patients: 1042
@@ -294,7 +294,7 @@ Number of negative cases: 1940
 Ratio of negative to positive cases: 10.00:1
 """
 
-# show_info(df)
+show_info(df)
 
 # show_info(df2)
 # ========================================== 对df0折下采样
@@ -1074,8 +1074,8 @@ def fetch_scheduler(optimizer):
     return scheduler
 
 def prepare_loaders(df, fold):
-    # df_train = df[df.kfold != CONFIG['fold']].reset_index(drop=True) 
-    # df_valid = df[df.kfold == CONFIG['fold']].reset_index(drop=True) 
+    df_train = df[df.kfold != CONFIG['fold']].reset_index(drop=True) 
+    df_valid = df[df.kfold == CONFIG['fold']].reset_index(drop=True) 
 
     # df_train2 = df2[df2.kfold != CONFIG['fold']].reset_index(drop=True)
     # df_valid2 = df2[df2.kfold == CONFIG['fold']].reset_index(drop=True)
@@ -1083,11 +1083,11 @@ def prepare_loaders(df, fold):
     # train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
     # train_dataset_others = ISICDataset(df_train2, HDF_FILE_Others, transforms=data_transforms["train"])
     
-    # valid_dataset = ISICDataset(df, HDF_FILE, transforms=data_transforms["valid"])
+    valid_dataset = ISICDataset(df_valid, HDF_FILE, transforms=data_transforms["valid"])
     # valid_dataset_others = ISICDataset(df_valid2, HDF_FILE_Others, transforms=data_transforms["valid"])
 
-    valid_dataset1 = ISICDataset_1(df, HDF_FILE, transforms=data_transforms["valid"])
-    valid_dataset0 = ISICDataset_0(df, HDF_FILE, transforms=data_transforms["valid"])
+    # valid_dataset1 = ISICDataset_1(df, HDF_FILE, transforms=data_transforms["valid"])
+    # valid_dataset0 = ISICDataset_0(df_valid, HDF_FILE, transforms=data_transforms["valid"])
 
 
     # concat_dataset_train = ConcatDataset([
@@ -1095,22 +1095,22 @@ def prepare_loaders(df, fold):
     #     train_dataset_others,
     # ])
     concat_dataset_valid = ConcatDataset([
-        # valid_dataset,
+        valid_dataset,
         # valid_dataset_others,
 
-        valid_dataset1,
-        valid_dataset0
+        # valid_dataset1,
+        # valid_dataset0
     ])
 
-    # train_dataset1 = ISICDataset_1(df2, HDF_FILE, transforms=data_transforms["train1"])
-    # train_dataset0 = ISICDataset_0(df2, HDF_FILE, transforms=data_transforms["train1"])
+    train_dataset1 = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train3"])
+    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train3"])
 
-    train_dataset_others1 = ISICDataset_1(df2, HDF_FILE_Others, transforms=data_transforms["train1"])
-    train_dataset_others0 = ISICDataset_0(df2, HDF_FILE_Others, transforms=data_transforms["train1"])
+    train_dataset_others1 = ISICDataset_1(df2, HDF_FILE_Others, transforms=data_transforms["train3"])
+    train_dataset_others0 = ISICDataset_0(df2, HDF_FILE_Others, transforms=data_transforms["train3"])
 
     concat_dataset_train = ConcatDataset([
-        # train_dataset1, 
-        # train_dataset0, 
+        train_dataset1, 
+        train_dataset0, 
         train_dataset_others1,
         train_dataset_others0,
     ])
