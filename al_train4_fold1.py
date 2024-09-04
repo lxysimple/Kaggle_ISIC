@@ -183,7 +183,7 @@ print("original>", df2.shape, df2.target.sum(), df2["patient_id"].unique().shape
 # df = pd.concat([df, df2], axis=0, ignore_index=True)
 
 # ===================================== 取比赛原csv
-
+ 
 sgkf = StratifiedGroupKFold(n_splits=10)
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
