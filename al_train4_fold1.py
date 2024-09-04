@@ -1083,16 +1083,23 @@ def prepare_loaders(df, fold):
     # train_dataset = ISICDataset(df_train, HDF_FILE, transforms=data_transforms["train"])
     # train_dataset_others = ISICDataset(df_train2, HDF_FILE_Others, transforms=data_transforms["train"])
     
-    valid_dataset = ISICDataset(df, HDF_FILE, transforms=data_transforms["valid"])
+    # valid_dataset = ISICDataset(df, HDF_FILE, transforms=data_transforms["valid"])
     # valid_dataset_others = ISICDataset(df_valid2, HDF_FILE_Others, transforms=data_transforms["valid"])
+
+    valid_dataset1 = ISICDataset_1(df, HDF_FILE, transforms=data_transforms["valid"])
+    valid_dataset0 = ISICDataset_0(df, HDF_FILE, transforms=data_transforms["valid"])
+
 
     # concat_dataset_train = ConcatDataset([
     #     train_dataset, 
     #     train_dataset_others,
     # ])
     concat_dataset_valid = ConcatDataset([
-        valid_dataset,
+        # valid_dataset,
         # valid_dataset_others,
+
+        valid_dataset1,
+        valid_dataset0
     ])
 
     # train_dataset1 = ISICDataset_1(df2, HDF_FILE, transforms=data_transforms["train1"])
@@ -1123,7 +1130,7 @@ def prepare_loaders(df, fold):
     # embed()
 
     valid_loader = DataLoader(concat_dataset_valid, batch_size=CONFIG['valid_batch_size'], 
-                              num_workers=16, shuffle=False, pin_memory=True)
+                              num_workers=16, shuffle=True, pin_memory=True)
     
     return train_loader, valid_loader
 # ============================== Main ==============================
