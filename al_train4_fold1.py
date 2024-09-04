@@ -140,7 +140,7 @@ CONFIG = {
     "epochs": 10,
 
     
-    "fold" : 0, # df2的fold0中包含所有patient_id=null的情况，很多
+    "fold" : 1, # df2的fold0中包含所有patient_id=null的情况，很多
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
