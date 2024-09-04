@@ -184,24 +184,16 @@ print("original>", df2.shape, df2.target.sum(), df2["patient_id"].unique().shape
 
 # ===================================== 取比赛原csv
 
-# sgkf = StratifiedGroupKFold(n_splits=10)
-# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-#       df.loc[val_ , "kfold"] = int(fold)
-
-# df2['patient_id'] = df2['patient_id'].astype(str) 
-# sgkf2 = StratifiedGroupKFold(n_splits=10)
-# for fold, ( _, val_) in enumerate(sgkf2.split(df2, df2.target, df2.patient_id)):
-#       df2.loc[val_ , "kfold"] = int(fold)
-
-
 sgkf = StratifiedGroupKFold(n_splits=10)
-for fold, ( _, val_) in enumerate(sgkf.split(df, df.patient_id, df.target)):
+for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
 df2['patient_id'] = df2['patient_id'].astype(str) 
 sgkf2 = StratifiedGroupKFold(n_splits=10)
-for fold, ( _, val_) in enumerate(sgkf2.split(df2, df2.patient_id, df2.target)):
+for fold, ( _, val_) in enumerate(sgkf2.split(df2, df2.target, df2.patient_id)):
       df2.loc[val_ , "kfold"] = int(fold)
+
+
 
 # skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 # for fold, ( _, val_) in enumerate(skf.split(df, df.target, df.patient_id)):
