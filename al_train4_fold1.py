@@ -105,12 +105,12 @@ CONFIG = {
 
     # 164: eva、seresnext
     # 64: vit
-    "train_batch_size": 85*2, # 96 32
+    "train_batch_size": 85*2*2, # 96 32
     
     # 训练时164，
     # eva: 96
     # vit推理: 64
-    "valid_batch_size": 96*2, 
+    "valid_batch_size": 96*2*2, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -140,7 +140,7 @@ CONFIG = {
     "epochs": 10,
 
     
-    "fold" : 1, # df2的fold0中包含所有patient_id=null的情况，很多
+    "fold" : 0, # df2的fold0中包含所有patient_id=null的情况，很多
     "n_fold": 2,
     "n_accumulate": 1,
     "device": torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -184,7 +184,7 @@ print("original>", df2.shape, df2.target.sum(), df2["patient_id"].unique().shape
 
 # ===================================== 取比赛原csv
  
-sgkf = StratifiedGroupKFold(n_splits=2)
+sgkf = StratifiedGroupKFold(n_splits=10)
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
@@ -1102,8 +1102,8 @@ def prepare_loaders(df, fold):
         # valid_dataset0
     ])
 
-    train_dataset1 = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train3"])
-    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train3"])
+    train_dataset1 = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train2"])
+    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train2"])
 
     train_dataset_others1 = ISICDataset_1(df2, HDF_FILE_Others, transforms=data_transforms["train2"])
     train_dataset_others0 = ISICDataset_0(df2, HDF_FILE_Others, transforms=data_transforms["train2"])
