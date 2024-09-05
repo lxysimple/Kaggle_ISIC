@@ -101,15 +101,16 @@ CONFIG = {
     "model_name": "efficientnet_b0.ra4_e3600_r224_in1k",
 
 
-    # 164: eva、seresnext
+    # eva:94*2
     # 64: vit
-    "train_batch_size": 94*2, # 96 32
+    # eff_b1:96*2+144
+    "train_batch_size": 96*2+144, # 96 32
     
     # 训练时164，
-    # eva: 96
+    # eva: 96 * 2
     # vit推理: 64
-    # 96*2*2
-    "valid_batch_size": 96*2, 
+   
+    "valid_batch_size": 96*2+144, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -436,9 +437,10 @@ class InferenceDataset(Dataset):
 # ============================== Create Model ==============================
 
 # pretrained_cfg = timm.models.create_model('eva02_small_patch14_336.mim_in22k_ft_in1k').default_cfg
-pretrained_cfg = timm.models.create_model('vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k').default_cfg
+# pretrained_cfg = timm.models.create_model('vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k').default_cfg
 
-pretrained_cfg['file'] = '/root/autodl-tmp/pytorch_model.bin'
+pretrained_cfg = timm.models.create_model('efficientnet_b0.ra4_e3600_r224_in1k').default_cfg
+pretrained_cfg['file'] = '/root/autodl-tmp/pytorch_model_effb0.bin'
 class ISICModel(nn.Module):
     def __init__(self, model_name, num_classes=1, pretrained=False, checkpoint_path=None):
         super(ISICModel, self).__init__()
