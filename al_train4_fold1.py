@@ -103,13 +103,13 @@ CONFIG = {
 
     # eva:94*2
     # 64: vit
-    # eff_b1:96*2+144
+    # 4*3080-eff_b1:96*2+144
     "train_batch_size": 96*2+144, # 96 32
     
     # 训练时164，
     # eva: 96 * 2
     # vit推理: 64
-   
+    
     "valid_batch_size": 96*2+144, 
 
 
