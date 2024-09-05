@@ -97,19 +97,26 @@ CONFIG = {
     # "img_size": 336,
     # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
     
-    "img_size": 256,
-    "model_name": "efficientnet_b0.ra4_e3600_r224_in1k",
+    # "img_size": 240,
+    # "model_name": "tf_efficientnetv2_b3.in21k_ft_in1k",
+
+    # "img_size": 256,
+    # "model_name": "edgenext_base.usi_in1k",
+
+    "img_size": 288,
+    "model_name": "convnext_tiny.in12k_ft_in1k",
 
 
-    # 4*3080-eva:       94*2
-    # 4*3080-eff_b1:    96*2+144
-    "train_batch_size": 96*2+144, # 96 32
+
+    # 2*3080-eva:       85*2
+    # 4*3080-eff_b3:    96*2+75
+    # 4*3080-ed: 96*3
+    "train_batch_size": 85*2, # 96 32
     
-    # 训练时164，
-    # eva: 96 * 2
-    # vit推理: 64
-    
-    "valid_batch_size": 96*2+144, 
+    # 4*3080-eva: 96 * 2
+    # 4*3080-vit: 48*2
+    # 2*3080-ed: 64*2+42
+    "valid_batch_size": 64*2+42, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -437,9 +444,13 @@ class InferenceDataset(Dataset):
 
 # pretrained_cfg = timm.models.create_model('eva02_small_patch14_336.mim_in22k_ft_in1k').default_cfg
 # pretrained_cfg = timm.models.create_model('vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k').default_cfg
+# pretrained_cfg = timm.models.create_model('tf_efficientnetv2_b3.in21k_ft_in1k').default_cfg
+pretrained_cfg = timm.models.create_model('edgenext_base.usi_in1k').default_cfg
 
-pretrained_cfg = timm.models.create_model('efficientnet_b0.ra4_e3600_r224_in1k').default_cfg
-pretrained_cfg['file'] = '/root/autodl-tmp/pytorch_model_effb0.bin'
+
+pretrained_cfg['file'] = '/root/autodl-tmp/pytorch_model_ed.bin'
+# pretrained_cfg['file'] = '/root/autodl-tmp/pytorch_model_effb3.bin'
+# pretrained_cfg['file'] = '/root/autodl-tmp/pytorch_model.bin'
 class ISICModel(nn.Module):
     def __init__(self, model_name, num_classes=1, pretrained=False, checkpoint_path=None):
         super(ISICModel, self).__init__()
@@ -1218,8 +1229,8 @@ model, history = run_training(model, optimizer, scheduler,
 #     return np.concatenate(outputs_list, axis=0)
 
 # models = []
-# models.append(load_model('/root/autodl-tmp/Kaggle_ISIC/eva/AUROC0.5342_Loss0.3222_pAUC0.1612_fold0.bin'))
-# models.append(load_model('/root/autodl-tmp/Kaggle_ISIC/eva/AUROC0.5319_Loss0.3800_pAUC0.1340_fold1.bin'))
+# models.append(load_model('/root/autodl-tmp/Kaggle_ISIC/ed/AUROC0.5335_Loss0.3552_pAUC0.1404_fold0.bin'))
+# models.append(load_model('/root/autodl-tmp/Kaggle_ISIC/ed/AUROC0.5450_Loss0.3673_pAUC0.1394_fold1.bin'))
 
 # df = pd.read_csv("/root/autodl-tmp/data/train-metadata.csv")
 # sgkf = StratifiedGroupKFold(n_splits=2)
@@ -1246,12 +1257,12 @@ model, history = run_training(model, optimizer, scheduler,
 
 # try:
 #     df = df[['isic_id', 'patient_id', 'target', "eva"]]
-#     df.to_csv('/root/autodl-tmp/Kaggle_ISIC/eva/eff_train.csv')
+#     df.to_csv('/root/autodl-tmp/Kaggle_ISIC/ed/ed_train.csv')
 # except:
 
 #     df.rename(columns={'target_x': 'target'}, inplace=True)
 #     df = df[['isic_id', 'patient_id', 'target', "eva"]]
-#     df.to_csv('/root/autodl-tmp/Kaggle_ISIC/eva/eff_train.csv')
+#     df.to_csv('/root/autodl-tmp/Kaggle_ISIC/ed/ed_train.csv')
 
 # ===================================================================== 进行推理
 
