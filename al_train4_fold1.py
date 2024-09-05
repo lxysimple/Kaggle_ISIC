@@ -91,11 +91,11 @@ CONFIG = {
     "seed": 42,
     
  
-    # "img_size": 256,
-    # "model_name": "vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k",
+    "img_size": 256,
+    "model_name": "vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k",
 
-    "img_size": 336,
-    "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
+    # "img_size": 336,
+    # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
     
     # "img_size": 384,
     # "model_name": "maxvit_tiny_tf_384",
@@ -105,12 +105,13 @@ CONFIG = {
 
     # 164: eva、seresnext
     # 64: vit
-    "train_batch_size": 85*2*2, # 96 32
+    "train_batch_size": 94*2, # 96 32
     
     # 训练时164，
     # eva: 96
     # vit推理: 64
-    "valid_batch_size": 96*2*2, 
+    # 96*2*2
+    "valid_batch_size": 96*2, 
 
 
     "scheduler": 'CosineAnnealingLR',
@@ -184,7 +185,7 @@ print("original>", df2.shape, df2.target.sum(), df2["patient_id"].unique().shape
 
 # ===================================== 取比赛原csv
  
-sgkf = StratifiedGroupKFold(n_splits=10)
+sgkf = StratifiedGroupKFold(n_splits=2)
 for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
       df.loc[val_ , "kfold"] = int(fold)
 
@@ -378,7 +379,7 @@ class ISICDataset_0(Dataset):
         self.df_negative = df[df["target"] == 0].reset_index()
         self.df_positive = df[df["target"] == 1].reset_index()
 
-        self.df_negative = self.df_negative[:len(self.df_positive)*10]
+        # self.df_negative = self.df_negative[:len(self.df_positive)*10]
         self.df = self.df_negative
 
         
@@ -436,18 +437,19 @@ class InferenceDataset(Dataset):
 
 # ============================== Create Model ==============================
 
-pretrained_cfg = timm.models.create_model('eva02_small_patch14_336.mim_in22k_ft_in1k').default_cfg
-pretrained_cfg['file'] = '/root/autodl-tmp/pytorch_model.bin'
+# pretrained_cfg = timm.models.create_model('eva02_small_patch14_336.mim_in22k_ft_in1k').default_cfg
+pretrained_cfg = timm.models.create_model('vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k').default_cfg
 
+pretrained_cfg['file'] = '/root/autodl-tmp/pytorch_model.bin'
 class ISICModel(nn.Module):
     def __init__(self, model_name, num_classes=1, pretrained=False, checkpoint_path=None):
         super(ISICModel, self).__init__()
         self.model = timm.create_model(model_name, pretrained=pretrained, 
                                        checkpoint_path=checkpoint_path, pretrained_cfg=pretrained_cfg)
 
-        in_features = self.model.head.in_features
-        self.model.head = nn.Linear(in_features, num_classes)
-        # self.model.reset_classifier(num_classes=num_classes)
+        # in_features = self.model.head.in_features
+        # self.model.head = nn.Linear(in_features, num_classes)
+        self.model.reset_classifier(num_classes=num_classes)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, images):
@@ -1074,8 +1076,8 @@ def fetch_scheduler(optimizer):
     return scheduler
 
 def prepare_loaders(df, fold):
-    df_train = df[df.kfold != CONFIG['fold']].reset_index(drop=True) 
-    df_valid = df[df.kfold == CONFIG['fold']].reset_index(drop=True) 
+    df_train = df[df.kfold != fold].reset_index(drop=True) 
+    df_valid = df[df.kfold == fold].reset_index(drop=True) 
 
     # df_train2 = df2[df2.kfold != CONFIG['fold']].reset_index(drop=True)
     # df_valid2 = df2[df2.kfold == CONFIG['fold']].reset_index(drop=True)
@@ -1102,11 +1104,11 @@ def prepare_loaders(df, fold):
         # valid_dataset0
     ])
 
-    train_dataset1 = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train2"])
-    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train2"])
+    train_dataset1 = ISICDataset_1(df_train, HDF_FILE, transforms=data_transforms["train1"])
+    train_dataset0 = ISICDataset_0(df_train, HDF_FILE, transforms=data_transforms["train1"])
 
-    train_dataset_others1 = ISICDataset_1(df2, HDF_FILE_Others, transforms=data_transforms["train2"])
-    train_dataset_others0 = ISICDataset_0(df2, HDF_FILE_Others, transforms=data_transforms["train2"])
+    train_dataset_others1 = ISICDataset_1(df2, HDF_FILE_Others, transforms=data_transforms["train1"])
+    train_dataset_others0 = ISICDataset_0(df2, HDF_FILE_Others, transforms=data_transforms["train1"])
 
     concat_dataset_train = ConcatDataset([
         train_dataset1, 
@@ -1130,7 +1132,8 @@ def prepare_loaders(df, fold):
     # embed()
 
     valid_loader = DataLoader(concat_dataset_valid, batch_size=CONFIG['valid_batch_size'], 
-                              num_workers=16, shuffle=True, pin_memory=True)
+                              num_workers=16, shuffle=False, pin_memory=True)
+
     
     return train_loader, valid_loader
 # ============================== Main ==============================
@@ -1150,172 +1153,6 @@ model, history = run_training(model, optimizer, scheduler,
 # ================================================================== 模型训练
 
 
-# ------------------------------------------------------------------ 多模态16 target推理
-# def load_model(path):
-#     model = ISICModel(CONFIG['model_name'], pretrained=False)
-#     checkpoint = torch.load(path)
-#     print(f"load checkpoint: {path}") 
-#     # 去掉前面多余的'module.'
-#     new_state_dict = {}
-#     for k,v in checkpoint.items():
-#         new_state_dict[k[7:]] = v
-#     model.load_state_dict( new_state_dict )
-
-#     model = model.cuda() 
-#     # model.to(CONFIG['device'])
-#     model = DataParallel(model) 
-#     return model
-
-# def run_test(model, dataloader, device):
-#     model.eval()
-    
-#     outputs_list = []
-#     isic_id_list = []
-#     bar = tqdm(enumerate(dataloader), total=len(dataloader))
-#     for step, data in bar:        
-#         images = data['image'].to(device, dtype=torch.float)
-#         meta = data['meta'].to(device, dtype=torch.float)
-        
-#         # outputs, _ = model(images)
-#         # outputs = outputs.squeeze()
-
-#         # outputs = model(images).squeeze()
-#         # outputs = model(images, meta).squeeze()
-        
-#         _, outputs = model(images, meta)
-#         outputs = outputs.squeeze()
-
-#         # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
-#         outputs_list.append(outputs.detach().cpu().numpy())
-    
-#     gc.collect()
-    
-#     return np.concatenate(outputs_list, axis=0)
-
-# models = []
-# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5332_Loss0.1692_pAUC0.1556_fold0.bin'))
-# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5341_Loss0.1807_pAUC0.1544_fold1.bin'))
-
-# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-# sgkf = StratifiedGroupKFold(n_splits=2)
-# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
-#     df.loc[val_ , "kfold"] = int(fold)
-
-
-
-# df_valids = pd.DataFrame()
-# for i in range(CONFIG['n_fold']):
-#     _, valid_loader = prepare_loaders(df, i)
-#     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
-#     df_valid = df[df.kfold == i].reset_index()
-
-#     for i in range(16):
-#         df_valid.loc[:, f'eva{i}'] = res[:,i]
-
-#     # from IPython import embed
-#     # embed()
-#     df_valids = pd.concat([df_valids, df_valid])
-
-
-
-# df_valids = df_valids[["isic_id", "patient_id"] + [f"eva{i}" for i in range(16)]] 
-
-
-# df = df[['isic_id', 'patient_id', 'target']]
-# df = df.merge(df_valids, on=["isic_id", "patient_id"])
-
-
-# try:
-#     df = df[['isic_id', 'patient_id', 'target'] + [f"eva{i}" for i in range(16)]]
-#     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train_mix16.csv')
-# except:
-
-#     df.rename(columns={'target_x': 'target'}, inplace=True)
-#     df = df[['isic_id', 'patient_id', 'target'] + [f"eva{i}" for i in range(16)]]
-#     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eva/eva_train_mix16.csv')
-
-# --------------------------------------------------------------------- 多模态16 target推理
-
-# ===================================================================== 多模态1 target推理
-# def run_test(model, dataloader, device):
-#     model.eval()
-    
-#     outputs_list = []
-#     isic_id_list = []
-#     bar = tqdm(enumerate(dataloader), total=len(dataloader))
-#     for step, data in bar:        
-#         images = data['image'].to(device, dtype=torch.float)
-#         meta = data['meta'].to(device, dtype=torch.float)
-        
-#         outputs, _ = model(images, meta)
-#         outputs = outputs.squeeze()
-
-#         # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
-#         outputs_list.append(outputs.detach().cpu().numpy())
-    
-#     gc.collect()
-    
-#     return np.concatenate(outputs_list, axis=0)
-
-# def load_model(path):
-#     model = ISICModel(CONFIG['model_name'], pretrained=False)
-#     checkpoint = torch.load(path)
-#     print(f"load checkpoint: {path}") 
-#     # 去掉前面多余的'module.'
-#     new_state_dict = {}
-#     for k,v in checkpoint.items():
-#         new_state_dict[k[7:]] = v
-#     model.load_state_dict( new_state_dict )
-
-#     model = model.cuda() 
-#     # model.to(CONFIG['device'])
-#     model = DataParallel(model) 
-#     return model
-
-# models = []
-# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5332_Loss0.1692_pAUC0.1556_fold0.bin'))
-# models.append(load_model('/home/xyli/kaggle/Kaggle_ISIC/eva/AUROC0.5341_Loss0.1807_pAUC0.1544_fold1.bin'))
-
-# df = pd.read_csv("/home/xyli/kaggle/train-metadata.csv")
-# sgkf = StratifiedGroupKFold(n_splits=2)
-# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)): 
-#       df.loc[val_ , "kfold"] = int(fold)
-
-# df_valids = pd.DataFrame()
-# for i in range(CONFIG['n_fold']):
-#     _, valid_loader = prepare_loaders(df, i) # 这里注意！
-#     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
-#     df_valid = df[df.kfold == i].reset_index()
-
-#     df_valid['eva'] = res
-
-#     # from IPython import embed
-#     # embed()
-#     # exit()
-
-#     df_valids = pd.concat([df_valids, df_valid])
-
-# # from IPython import embed
-# # embed()
-
-# df_valids = df_valids[["isic_id", "patient_id", "eva"]]
-
-
-# df = df[['isic_id', 'patient_id', 'target']]
-# df = df.merge(df_valids, on=["isic_id", "patient_id"])
-
-
-# try:
-#     df = df[['isic_id', 'patient_id', 'target', "eva"]]
-#     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
-# except:
-
-#     df.rename(columns={'target_x': 'target'}, inplace=True)
-#     df = df[['isic_id', 'patient_id', 'target', "eva"]]
-#     df.to_csv('/home/xyli/kaggle/Kaggle_ISIC/eff/eva_train_mix1.csv')
-
-# -------------------------------------------------------------------- 多模态1 target推理
-    
 # ==================================================================== 测试BUG
 # def load_model(path):
 #     model = ISICModel(CONFIG['model_name'], pretrained=False)
@@ -1330,7 +1167,7 @@ model, history = run_training(model, optimizer, scheduler,
 #     return model
 
 
-# model = load_model('/home/xyli/kaggle/Kaggle_ISIC/AUROC0.5703_Loss0.3960_pAUC0.1098_fold0.bin')
+# model = load_model('/root/autodl-tmp/Kaggle_ISIC/eva/AUROC0.5319_Loss0.3800_pAUC0.1340_fold1.bin')
 
 
 # _, valid_loader = prepare_loaders(df, 0)
@@ -1344,3 +1181,78 @@ model, history = run_training(model, optimizer, scheduler,
 # epoch_score = score(solution_df, submission_df, 'row_id')
 # print("epoch_score: {:.4f}".format(epoch_score))
 # -------------------------------------------------------------------- 测试BUG
+
+
+# ------------------------------------------------------------------ 进行推理
+# def load_model(path):
+#     model = ISICModel(CONFIG['model_name'], pretrained=False)
+#     checkpoint = torch.load(path)
+#     print(f"load checkpoint: {path}") 
+#     # 去掉前面多余的'module.'
+#     new_state_dict = {}
+#     for k,v in checkpoint.items():
+#         new_state_dict[k[7:]] = v
+#     model.load_state_dict( new_state_dict )
+
+#     model = model.cuda() 
+#     # model.to(CONFIG['device'])
+#     model = DataParallel(model) 
+#     return model
+
+# def run_test(model, dataloader, device):
+#     model.eval()
+    
+#     outputs_list = []
+#     isic_id_list = []
+#     bar = tqdm(enumerate(dataloader), total=len(dataloader))
+#     for step, data in bar:        
+    
+#         images = data['image'].to(device, dtype=torch.float)
+#         outputs = model(images)
+#         outputs = outputs.squeeze()
+
+#         # 这里要取回到内存，如果不，列表会添加GPU中变量的引用，导致变量不会销毁，最后撑爆GPU
+#         outputs_list.append(outputs.detach().cpu().numpy())
+    
+#     gc.collect()
+    
+#     return np.concatenate(outputs_list, axis=0)
+
+# models = []
+# models.append(load_model('/root/autodl-tmp/Kaggle_ISIC/eva/AUROC0.5342_Loss0.3222_pAUC0.1612_fold0.bin'))
+# models.append(load_model('/root/autodl-tmp/Kaggle_ISIC/eva/AUROC0.5319_Loss0.3800_pAUC0.1340_fold1.bin'))
+
+# df = pd.read_csv("/root/autodl-tmp/data/train-metadata.csv")
+# sgkf = StratifiedGroupKFold(n_splits=2)
+# for fold, ( _, val_) in enumerate(sgkf.split(df, df.target, df.patient_id)):
+#       df.loc[val_ , "kfold"] = int(fold)
+
+# df_valids = pd.DataFrame()
+# for i in range(CONFIG['n_fold']):
+#     _, valid_loader = prepare_loaders(df, i)
+#     res = run_test(models[i], valid_loader, device=CONFIG['device']) 
+#     df_valid = df[df.kfold == i].reset_index()
+#     df_valid['eva'] = res
+#     df_valids = pd.concat([df_valids, df_valid])
+
+# from IPython import embed
+# embed()
+
+# df_valids = df_valids[["isic_id", "patient_id", "eva"]]
+
+
+# df = df[['isic_id', 'patient_id', 'target']]
+# df = df.merge(df_valids, on=["isic_id", "patient_id"])
+
+
+# try:
+#     df = df[['isic_id', 'patient_id', 'target', "eva"]]
+#     df.to_csv('/root/autodl-tmp/Kaggle_ISIC/eva/eff_train.csv')
+# except:
+
+#     df.rename(columns={'target_x': 'target'}, inplace=True)
+#     df = df[['isic_id', 'patient_id', 'target', "eva"]]
+#     df.to_csv('/root/autodl-tmp/Kaggle_ISIC/eva/eff_train.csv')
+
+# ===================================================================== 进行推理
+
