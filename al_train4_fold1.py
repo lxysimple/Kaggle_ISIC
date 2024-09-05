@@ -91,17 +91,15 @@ CONFIG = {
     "seed": 42,
     
  
-    "img_size": 256,
-    "model_name": "vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k",
+    # "img_size": 256,
+    # "model_name": "vit_mediumd_patch16_reg4_gap_256.sbb_in12k_ft_in1k",
 
     # "img_size": 336,
     # "model_name": "eva02_small_patch14_336.mim_in22k_ft_in1k",
     
-    # "img_size": 384,
-    # "model_name": "maxvit_tiny_tf_384",
+    "img_size": 256,
+    "model_name": "efficientnet_b0.ra4_e3600_r224_in1k",
 
-    # "img_size": 240,
-    # "model_name": "tf_efficientnetv2_b3.in21k_ft_in1k",
 
     # 164: eva、seresnext
     # 64: vit
