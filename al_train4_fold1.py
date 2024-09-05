@@ -101,9 +101,8 @@ CONFIG = {
     "model_name": "efficientnet_b0.ra4_e3600_r224_in1k",
 
 
-    # eva:94*2
-    # 64: vit
-    # 4*3080-eff_b1:96*2+144
+    # 4*3080-eva:       94*2
+    # 4*3080-eff_b1:    96*2+144
     "train_batch_size": 96*2+144, # 96 32
     
     # 训练时164，
